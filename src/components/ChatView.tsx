@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUp, Square } from 'lucide-react';
+import { ArrowUp, Square, Sparkles, Coins, Calendar, Wallet } from 'lucide-react';
 import type { ChatDetail, ChatKind, ChatMessage } from '../../shared/types';
 import { ApiError, apiFetch, streamAiChat } from '../lib/api';
 import { CacheKeys, idbGet } from '../lib/idb';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
 import { useChatMutations } from '../data/chats';
+import { useFinance } from '../data/finance';
+import { formatMoney } from '../../shared/money';
 import { RichText } from './RichText';
 import { IconButton } from './ui/Button';
 import { Textarea } from './ui/Field';
@@ -27,7 +29,67 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
   const { role, user, guestData } = useAuth();
   const { show } = useToast();
   const { appendMessages } = useChatMutations();
+  const { plan } = useFinance();
   const isGuest = role === 'guest';
+
+  const suggestions: Record<ChatKind, Array<{ icon: string; label: string; prompt: string }>> = {
+    accountant: [
+      {
+        icon: '💡',
+        label: 'توزيع الميزانية حتى الراتب',
+        prompt: 'كيف أوزع ميزانيتي ومصروفي اليومي المتاح بطريقة متوازنة حتى موعد الراتب القادم؟',
+      },
+      {
+        icon: '📊',
+        label: 'تحليل أولويات الصرف',
+        prompt: 'حلل وضعي المالي ورتب لي أولويات الصرف الأساسية والكمالية وفق رصيدي الحالي.',
+      },
+      {
+        icon: '💰',
+        label: 'طريقة زيادة الادخار',
+        prompt: 'ما هي أفضل النصائح العملية لزيادة نسبة الادخار دون التضييق الشديد على نفسي؟',
+      },
+      {
+        icon: '🛡️',
+        label: 'خطة طوارئ للرصيد',
+        prompt: 'أحتاج خطة ترشيد طارئة للتعامل مع انخفاض الرصيد وتفادي أي عجز مالي.',
+      },
+    ],
+    doctor: [
+      {
+        icon: '🩺',
+        label: 'تقييم الوزن والكتلة',
+        prompt: 'هل وزني ونسبة كتلة جسمي طبيعية وما النصيحة الرياضية والغذائية المناسبة؟',
+      },
+      {
+        icon: '💊',
+        label: 'تداخلات الأدوية والأغذية',
+        prompt: 'هل توجد أطعمة أو مشروبات يجب تجنبها مع أدويتي الحالية المسجلة؟',
+      },
+      {
+        icon: '🥗',
+        label: 'خطة تغذية صحية',
+        prompt: 'اقترح لي برنامجاً غذائياً متوازناً يلائم نشاطي اليومي وملفي الصحي.',
+      },
+    ],
+    shaykh: [
+      {
+        icon: '🏷️',
+        label: 'المضافات المشبوهة (E-Codes)',
+        prompt: 'ما هي أشهر المضافات الغذائية وأرقام E التي يجب التحقق من مصدرها الحيواني؟',
+      },
+      {
+        icon: '🥩',
+        label: 'ضوابط اللحوم المستوردة',
+        prompt: 'ما هي الشروط الفقهية الواجب توفرها في اللحوم المستوردة لتكون حلالاً؟',
+      },
+      {
+        icon: '🧪',
+        label: 'حكم الجيلاتين والمنفحة',
+        prompt: 'ما حكم مادة الجيلاتين والمنفحة (rennet) المستخدمة في الأجبان والأغذية؟',
+      },
+    ],
+  };
 
   const draftKey = `baraka_draft_${chatId ?? kind}`;
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
@@ -204,6 +266,51 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
       <div className="flex-1 space-y-3 overflow-y-auto px-0.5 py-2">
         {/* Advisory Persona Profile Card */}
         <PersonaCard kind={kind} />
+
+        {/* Live Context Strip for Accountant */}
+        {kind === 'accountant' && plan ? (
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 rounded-xl border border-line/80 bg-surface2/60 px-3.5 py-2 text-xs">
+            <div className="flex items-center gap-1.5 font-bold text-fg">
+              <Wallet className="h-3.5 w-3.5 text-accent" />
+              <span>الرصيد: {formatMoney(plan.balanceMinor, plan.currency, user?.locale ?? 'ar')}</span>
+            </div>
+            <span className="text-line">•</span>
+            <div className="flex items-center gap-1.5 text-muted font-medium">
+              <Calendar className="h-3.5 w-3.5 text-muted" />
+              <span>باقٍ للراتب: {plan.daysLeft} يوماً</span>
+            </div>
+            <span className="text-line">•</span>
+            <div className="flex items-center gap-1.5 text-muted font-medium">
+              <Coins className="h-3.5 w-3.5 text-muted" />
+              <span>سقف اليوم: {formatMoney(plan.dailyBudgetMinor, plan.currency, user?.locale ?? 'ar')}</span>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Quick Suggestion Prompts when starting a chat */}
+        {messages.length <= 1 && !loading ? (
+          <div className="space-y-2 pt-1 pb-1">
+            <p className="text-xs font-semibold text-muted flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-accent" />
+              <span>استفسارات شائعة للبدء:</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {(suggestions[kind] ?? []).map((sug, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    updateText(sug.prompt);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-medium text-fg hover:border-accent hover:bg-surface2 transition-all shadow-xs cursor-pointer text-start"
+                >
+                  <span className="text-sm">{sug.icon}</span>
+                  <span>{sug.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {loading ? (
           <div className="space-y-2">

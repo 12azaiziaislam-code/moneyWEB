@@ -2,6 +2,7 @@
  * One Consultation Conversation Screen.
  */
 
+import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Trash2 } from 'lucide-react';
@@ -10,6 +11,7 @@ import { Button, IconButton } from '../components/ui/Button';
 import { Disclaimer, Skeleton } from '../components/ui/Feedback';
 import { PersonaAvatar } from '../components/characters/Personas';
 import { useChatDetail, useChatMutations } from '../data/chats';
+import { useFinance } from '../data/finance';
 import { usePageTheme } from '../lib/theme';
 import { useToast } from '../state/ToastContext';
 
@@ -20,8 +22,19 @@ export function ChatDetailPage() {
   const { show } = useToast();
   const { chat, loading } = useChatDetail(id);
   const { deleteChat } = useChatMutations();
+  const { plan, health } = useFinance();
 
   usePageTheme(chat?.kind === 'doctor' ? 'doctor' : chat?.kind === 'accountant' ? 'accountant' : 'chats');
+
+  const contextText = useMemo(() => {
+    if (chat?.kind === 'accountant' && plan) {
+      return `Balance: ${plan.balanceMinor / 100} ${plan.currency}; DaysLeft: ${plan.daysLeft}; DailyBudget: ${plan.dailyBudgetMinor / 100}; Level: ${plan.level}; TodaySpent: ${plan.spentTodayMinor / 100}`;
+    }
+    if (chat?.kind === 'doctor' && health) {
+      return `Age: ${health.age}; Weight: ${health.weightKg}kg; Height: ${health.heightCm}cm; Medications: ${health.medications?.join(', ') || 'none'}`;
+    }
+    return undefined;
+  }, [chat?.kind, health, plan]);
 
   const remove = async () => {
     if (!id || !window.confirm(t('chats.deleteConfirm'))) return;
@@ -45,7 +58,10 @@ export function ChatDetailPage() {
   return (
     <div className="flex min-h-0 flex-1 flex-col h-full">
       <header className="flex items-center gap-2.5 py-2.5 border-b border-line mb-2">
-        <IconButton label={t('common.back')} onClick={() => navigate('/chats')}>
+        <IconButton
+          label={t('common.back')}
+          onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/chats'))}
+        >
           <ChevronLeft className="flip-rtl h-5 w-5" aria-hidden />
         </IconButton>
         {chat ? <PersonaAvatar kind={chat.kind} size="sm" /> : null}
@@ -68,6 +84,7 @@ export function ChatDetailPage() {
           kind={chat.kind}
           chatId={chat.id}
           initialMessages={chat.messages}
+          contextText={contextText}
           disclaimer={disclaimer}
         />
       ) : (

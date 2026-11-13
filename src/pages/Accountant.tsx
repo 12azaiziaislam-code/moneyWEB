@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Camera,
@@ -20,7 +21,6 @@ import type { ExtractedTransaction } from '../../shared/types';
 import { formatMoney, majorToMinor } from '../../shared/money';
 import { localDateISO } from '../../shared/payday';
 import { PageHeader } from '../components/AppShell';
-import { ChatView } from '../components/ChatView';
 import { Button, IconButton } from '../components/ui/Button';
 import { Badge, Disclaimer, EmptyState, Skeleton } from '../components/ui/Feedback';
 import { Input } from '../components/ui/Field';
@@ -32,6 +32,7 @@ import { countUp } from '../lib/motion';
 import { formatCalendarDate, fromDateTimeLocal, toDateTimeLocal } from '../lib/format';
 import { prepareImage, type PreparedImage } from '../lib/image';
 import { useFinance } from '../data/finance';
+import { useChatMutations } from '../data/chats';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
 import { usePageTheme } from '../lib/theme';
@@ -39,8 +40,10 @@ import { haptic, HAPTIC } from '../lib/haptics';
 
 export function AccountantPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { show } = useToast();
   const { user } = useAuth();
+  const { createChat } = useChatMutations();
   const {
     plan,
     transactions,
@@ -61,7 +64,8 @@ export function AccountantPage() {
 
   const balanceRef = useRef<HTMLSpanElement>(null);
   const receiptRef = useRef<HTMLInputElement>(null);
-  const [sheet, setSheet] = useState<'balance' | 'manual' | 'review' | 'chat' | null>(null);
+  const [sheet, setSheet] = useState<'balance' | 'manual' | 'review' | null>(null);
+  const [openingChat, setOpeningChat] = useState(false);
   const [balanceDraft, setBalanceDraft] = useState('');
   const [items, setItems] = useState<ExtractedTransaction[]>([]);
   const [manual, setManual] = useState({
@@ -153,6 +157,69 @@ export function AccountantPage() {
     },
   };
 
+  const openAccountantChat = async () => {
+    setOpeningChat(true);
+    try {
+      const balanceStr = plan ? formatMoney(plan.balanceMinor, plan.currency, locale) : '0';
+      const dailyStr = plan ? formatMoney(plan.dailyBudgetMinor, plan.currency, locale) : '0';
+      const daysLeft = plan?.daysLeft ?? 30;
+      const modeTitle = plan ? modeDescriptions[plan.level].title : 'متوازن (15%)';
+      const isRu = locale.startsWith('ru');
+      const isEn = locale.startsWith('en');
+
+      const seedText = isRu
+        ? [
+            `💼 **Умный финансовый консультант (Бухгалтер)**`,
+            `Здравствуйте! Я ваш финансовый ассистент. Я изучил параметры вашего бюджета:`,
+            `• **Текущий баланс:** ${balanceStr}`,
+            `• **Дней до зарплаты:** ${daysLeft}`,
+            `• **Дневной лимит расходов:** ${dailyStr}`,
+            `• **Режим сбережений:** ${modeTitle}`,
+            `\nЧем я могу помочь вам сегодня? Выберите готовый вопрос ниже или напишите свой.`,
+          ].join('\n\n')
+        : isEn
+          ? [
+              `💼 **Smart Financial Advisor (Accountant)**`,
+              `Welcome! I am your personal financial assistant. I have reviewed your budget:`,
+              `• **Available Balance:** ${balanceStr}`,
+              `• **Days to Payday:** ${daysLeft}`,
+              `• **Recommended Daily Spend:** ${dailyStr}`,
+              `• **Savings Target:** ${modeTitle}`,
+              `\nHow can I help you today? Choose one of the quick suggestions below or type your question.`,
+            ].join('\n\n')
+          : [
+              `💼 **المستشار المالي الذكي (المحاسب)**`,
+              `مرحباً بك! أنا مستشارك المالي لمتابعة ميزانيتك وتنظيم مدخراتك بدقة.`,
+              `لقد اطلعت على وضعك المالي الحالي:`,
+              `• **الرصيد الفعلي في حسابك:** ${balanceStr}`,
+              `• **المتبقي حتى الراتب القادم:** ${daysLeft} ${daysLeft === 1 ? 'يوم' : daysLeft === 2 ? 'يومان' : daysLeft <= 10 ? 'أيام' : 'يوماً'}`,
+              `• **سقف المصروف اليومي الموصى به:** ${dailyStr}`,
+              `• **خطة الادخار المعتمدة:** ${modeTitle}`,
+              `\nجاهز لمساعدتك في أي استفسار أو وضع خطة إنفاق متوازنة تناسب رصيدك الحالي. يمكنك الضغط على أحد الأسئلة المقترحة أدناه أو كتابة استفسارك مباشرة.`,
+            ].join('\n\n');
+
+      const chatTitle = isRu
+        ? `استشارة الميزانية (${balanceStr})`
+        : isEn
+          ? `Budget Consultation (${balanceStr})`
+          : `استشارة الميزانية (${balanceStr})`;
+
+      const chat = await createChat({
+        kind: 'accountant',
+        title: chatTitle,
+        seedText,
+      });
+
+      if (chat) {
+        navigate(`/chats/${chat.id}`);
+      }
+    } catch {
+      show(t('errors.generic'), 'danger');
+    } finally {
+      setOpeningChat(false);
+    }
+  };
+
   return (
     <div className="flex flex-1 flex-col gap-5 pb-8">
       <PageHeader
@@ -161,14 +228,10 @@ export function AccountantPage() {
           <Button
             size="sm"
             variant="outline"
+            loading={openingChat}
+            disabled={openingChat}
             icon={<Sparkles className="h-4 w-4 text-accent" />}
-            onClick={() => {
-              if (isGuest) {
-                show(t('guest.aiRequiresAuth'), 'warning');
-                return;
-              }
-              setSheet('chat');
-            }}
+            onClick={() => void openAccountantChat()}
           >
             اسأل المحاسب AI
           </Button>
@@ -680,22 +743,6 @@ export function AccountantPage() {
               />
             </div>
           ))}
-        </Sheet>
-      ) : null}
-
-      {/* 4. Financial Consultation Sheet (Modal Portal) */}
-      {sheet === 'chat' ? (
-        <Sheet
-          open
-          title={t('chef.drawerTitle')}
-          onClose={() => setSheet(null)}
-          size="tall"
-        >
-          <ChatView
-            kind="accountant"
-            chatId={null}
-            disclaimer={<Disclaimer>{t('accountant.disclaimer')}</Disclaimer>}
-          />
         </Sheet>
       ) : null}
     </div>
