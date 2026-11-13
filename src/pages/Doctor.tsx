@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Camera,
   Image as ImageIcon,
-  Type,
   Phone,
   X,
   ShieldAlert,
@@ -126,7 +125,6 @@ export function DoctorPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [historyList, setHistoryList] = useState<DoctorResult[]>([]);
-  const [typingOpen, setTypingOpen] = useState(true);
 
   // Persistent global doctor scan state across page transitions
   const {
@@ -194,7 +192,7 @@ export function DoctorPage() {
   const analyze = async () => {
     if (!profileReady) {
       show('يرجى إكمال ملفك الصحي أولاً لمطابقة الدواء لحالتك وتفادي أي أخطار', 'warning');
-      navigate('/profile');
+      navigate('/profile?tab=me');
       return;
     }
     if (!hasContent) {
@@ -263,16 +261,10 @@ export function DoctorPage() {
     <div className="flex flex-1 flex-col gap-5 pb-8">
       {/* 1. Page Header */}
       <PageHeader
-        title={
-          <div className="flex items-center gap-3">
-            <DoctorAvatar size="md" className="shrink-0" />
-            <span>{t('nav.doctor', 'الطبيب')}</span>
-          </div>
-        }
-        subtitle={t(
-          'doctor.deskSubtitle',
-          'استشر الطبيب في ملاءمة الأدوية والأغذية والتحاليل لملفك الصحي'
-        )}
+        icon={<DoctorAvatar size="lg" />}
+        eyebrow={t('doctor2.eyebrow')}
+        title={t('home2.doctorTitle')}
+        subtitle={t('doctor2.subtitle')}
       />
 
       {/* 2. Compact Health Profile Card (Regular font numbers, tags, completion badge) */}
@@ -291,11 +283,11 @@ export function DoctorPage() {
                   </div>
                   {/* Regular font without monospace */}
                   <p className="font-sans text-xs sm:text-sm font-medium text-muted mt-0.5">
-                    {health.age} سنة · {health.weightKg} كغ · كتلة الجسم {calculatedBmi}
+                    {health.age} {t('profile3.years')} · {health.weightKg} {t('profile3.kg')} · BMI {calculatedBmi}
                   </p>
                 </div>
               </div>
-              <Button size="sm" variant="secondary" onClick={() => navigate('/profile')}>
+              <Button size="sm" variant="secondary" onClick={() => navigate('/profile?tab=me')}>
                 {t('doctorCard.edit', 'تعديل')}
               </Button>
             </div>
@@ -333,7 +325,7 @@ export function DoctorPage() {
                 </p>
               </div>
             </div>
-            <Button size="sm" variant="primary" onClick={() => navigate('/profile')} className="shrink-0 w-full sm:w-auto">
+            <Button size="sm" variant="primary" onClick={() => navigate('/profile?tab=me')} className="shrink-0 w-full sm:w-auto">
               {t('doctorCard.edit', 'إكمال الملف')}
             </Button>
           </div>
@@ -363,9 +355,20 @@ export function DoctorPage() {
       {/* 4. Single Unified Input Desk with 3 Action Buttons (Camera, Gallery, Write) */}
       {!result && (
         <div className="surface-card p-5 sm:p-6 space-y-4">
+          {/* Question first — it is the core action */}
+          <Textarea
+            ref={textareaRef}
+            label={t('doctor.inquiryLabel', 'تفاصيل الاستفسار أو اسم الدواء والمكونات')}
+            placeholder={t('doctor.inquiryPlaceholder', 'اكتب اسم الدواء، الأعراض، أو استفسارك الصحي لمطابقته مع ملفك...')}
+            value={text}
+            maxLength={4000}
+            onChange={(event) => setText(event.target.value)}
+          />
+
+          {/* Optional photo */}
           {image ? (
-            <div className="relative rounded-xl border border-line overflow-hidden bg-black/40 max-w-md mx-auto p-2">
-              <img src={image.dataUrl} alt="" className="max-h-56 w-full object-contain rounded" />
+            <div className="relative mx-auto max-w-md overflow-hidden rounded-xl border border-line bg-black/40 p-2">
+              <img src={image.dataUrl} alt="" className="max-h-56 w-full rounded object-contain" />
               <IconButton
                 label={t('common.clear')}
                 onClick={() => setImage(null)}
@@ -375,57 +378,26 @@ export function DoctorPage() {
               </IconButton>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-muted">{t('doctor2.attach', 'أرفق صورة (اختياري):')}</span>
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border border-line bg-surface2/60 hover:bg-surface2 hover:border-accent/40 text-fg transition-all cursor-pointer"
+                className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-line px-3.5 text-sm font-semibold text-fg transition-colors hover:border-tool-doctor hover:bg-tool-doctor-soft"
               >
-                <Camera className="h-5 w-5 text-accent" strokeWidth={1.8} />
-                <span className="text-xs font-bold">{t('common.camera', 'الكاميرا')}</span>
+                <Camera className="h-4 w-4 text-tool-doctor" strokeWidth={1.9} aria-hidden />
+                {t('common.camera', 'الكاميرا')}
               </button>
-
               <button
                 type="button"
                 onClick={() => galleryRef.current?.click()}
-                className="flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border border-line bg-surface2/60 hover:bg-surface2 hover:border-accent/40 text-fg transition-all cursor-pointer"
+                className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-line px-3.5 text-sm font-semibold text-fg transition-colors hover:border-tool-doctor hover:bg-tool-doctor-soft"
               >
-                <ImageIcon className="h-5 w-5 text-accent" strokeWidth={1.8} />
-                <span className="text-xs font-bold">{t('common.gallery', 'المعرض')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setTypingOpen(true);
-                  textareaRef.current?.focus();
-                }}
-                className={`flex flex-col items-center justify-center gap-2 p-3.5 rounded-xl border text-fg transition-all cursor-pointer ${
-                  typingOpen
-                    ? 'border-accent bg-accent-soft/30 text-accent font-bold'
-                    : 'border-line bg-surface2/60 hover:bg-surface2'
-                }`}
-              >
-                <Type className="h-5 w-5 text-accent" strokeWidth={1.8} />
-                <span className="text-xs font-bold">{t('common.write', 'كتابة')}</span>
+                <ImageIcon className="h-4 w-4 text-tool-doctor" strokeWidth={1.9} aria-hidden />
+                {t('common.gallery', 'المعرض')}
               </button>
             </div>
           )}
-
-          {/* Text Area */}
-          <div className="space-y-1.5 pt-1">
-            <Textarea
-              ref={textareaRef}
-              label={t('doctor.inquiryLabel', 'تفاصيل الاستفسار أو اسم الدواء والمكونات')}
-              placeholder={t(
-                'doctor.inquiryPlaceholder',
-                'اكتب اسم الدواء، الأعراض، أو استفسارك الصحي لمطابقته مع ملفك...'
-              )}
-              value={text}
-              maxLength={4000}
-              onChange={(event) => setText(event.target.value)}
-            />
-          </div>
 
           {/* Action Button: Accurate text based on input mode */}
           <div className="pt-1">

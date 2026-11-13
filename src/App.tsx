@@ -1,5 +1,6 @@
 /** App shell + routing + session gating (splash → login → onboarding → app). */
 
+import { useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './state/AuthContext';
 import { ToastProvider } from './state/ToastContext';
@@ -77,11 +78,12 @@ function Authenticated() {
 
 function Gate() {
   const { status, role, user } = useAuth();
+  const [guestIntroDone, setGuestIntroDone] = useState(guestIntroSeen);
 
   if (status === 'loading') return <Splash />;
   if (status === 'signedOut' || !role) return <LoginPage />;
   if (role === 'user' && user && user.onboardingDone === false) return <OnboardingPage />;
-  if (role === 'guest' && !guestIntroSeen()) return <OnboardingPage />;
+  if (role === 'guest' && !guestIntroDone) return <OnboardingPage onGuestDone={() => setGuestIntroDone(true)} />;
   return <Authenticated />;
 }
 

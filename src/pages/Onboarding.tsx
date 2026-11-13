@@ -37,14 +37,13 @@ export function guestIntroSeen(): boolean {
   }
 }
 
-export function OnboardingPage() {
+export function OnboardingPage({ onGuestDone }: { onGuestDone?: () => void } = {}) {
   const { t } = useTranslation();
   const { role, patchUser, fillDemoData, themeMode, setThemeMode } = useAuth();
   const { show } = useToast();
   const [step, setStep] = useState(0);
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [forceReady, setForceReady] = useState(false);
   usePageTheme('halal');
 
   const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark());
@@ -110,13 +109,12 @@ export function OnboardingPage() {
       }
       haptic(HAPTIC.success);
       if (withDemo) show(t('guest.demoApplied'), 'success');
-      setForceReady(true);
+      onGuestDone?.();
     } finally {
       setBusy(false);
     }
   };
 
-  if (forceReady) return null;
   const isSlides = step < 3;
 
   return (

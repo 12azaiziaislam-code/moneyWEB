@@ -96,6 +96,24 @@
   --info-soft: rgba(37, 99, 235, 0.12);
 
   --overlay: rgba(15, 18, 25, 0.60);
+
+  /* Secondary accent hairline + decorative pattern */
+  --accent-2: #C8963E;
+  --pattern-ink: #9A7432;
+  --pattern-opacity: 0.05;
+  --dur-slower: 700ms;
+
+  /* Tool identities — each desk owns one hue (used for icons, chips, hero glows) */
+  --tool-halal: #0F7A5C;
+  --tool-halal-soft: rgba(15, 122, 92, 0.10);
+  --tool-doctor: #0E7490;
+  --tool-doctor-soft: rgba(14, 116, 144, 0.10);
+  --tool-money: #B7791F;
+  --tool-money-soft: rgba(183, 121, 31, 0.12);
+
+  /* Hero surface (home greeting, page heroes) */
+  --hero-a: rgba(154, 116, 50, 0.10);
+  --hero-b: rgba(15, 122, 92, 0.06);
 }
 
 /* ==========================================================================
@@ -137,6 +155,20 @@
   --info-soft: rgba(96, 165, 250, 0.14);
 
   --overlay: rgba(0, 0, 0, 0.78);
+
+  --accent-2: #E5C07B;
+  --pattern-ink: #E5C07B;
+  --pattern-opacity: 0.035;
+
+  --tool-halal: #34D399;
+  --tool-halal-soft: rgba(52, 211, 153, 0.12);
+  --tool-doctor: #38BDF8;
+  --tool-doctor-soft: rgba(56, 189, 248, 0.12);
+  --tool-money: #F5B94A;
+  --tool-money-soft: rgba(245, 185, 74, 0.13);
+
+  --hero-a: rgba(229, 192, 123, 0.10);
+  --hero-b: rgba(52, 211, 153, 0.05);
 }
 
 /* ==========================================================================

@@ -19,6 +19,7 @@ import {
   Clock,
   Sparkles,
   ChevronDown,
+  Scale,
 } from 'lucide-react';
 import type { HalalResult, Madhhab, Verdict } from '../../shared/types';
 import { quickScreenText } from '../../shared/halalRules';
@@ -28,6 +29,8 @@ import { VerdictCard } from '../components/VerdictCard';
 import { Button, IconButton } from '../components/ui/Button';
 import { Disclaimer, StatusBadge } from '../components/ui/Feedback';
 import { Textarea } from '../components/ui/Field';
+import { Sheet } from '../components/ui/Sheet';
+import { cn } from '../components/ui';
 import { prepareImage } from '../lib/image';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
@@ -260,27 +263,20 @@ export function HalalPage() {
     <div className="flex flex-1 flex-col gap-5 pb-8">
       {/* 1. Header with Clickable Madhab Quick Switcher */}
       <PageHeader
-        title={
-          <div className="flex items-center gap-3">
-            <SheikhAvatar size="md" className="shrink-0" />
-            <span>{t('nav.halal', 'الحلال')}</span>
-          </div>
-        }
-        subtitle={t(
-          'halal.deskSubtitle',
-          'صوّر قائمة المكوّنات ليراجع المساعد حكمها وفق مذهبك الفقهي'
-        )}
+        icon={<SheikhAvatar size="lg" />}
+        eyebrow={t('halal2.eyebrow')}
+        title={t('home2.halalTitle')}
+        subtitle={t('halal2.subtitle')}
         action={
           <button
             type="button"
             onClick={() => setShowMadhabModal(true)}
-            className="group flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-fg hover:border-accent hover:bg-accent-soft/30 transition-all cursor-pointer shadow-xs"
+            className="group inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-fg shadow-xs transition-colors hover:border-tool-halal"
           >
-            <span className="text-muted">{t('profile.madhhab', 'المذهب')}:</span>
-            <span className="text-accent font-bold">
-              {t(`profile.madhhabs.${currentMadhhab}`)}
-            </span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted group-hover:text-accent transition-colors" />
+            <Scale className="h-4 w-4 text-tool-halal" aria-hidden />
+            <span className="text-muted">{t('profile3.madhhabTitle')}:</span>
+            <span className="font-bold">{t(`profile.madhhabs.${currentMadhhab}`)}</span>
+            <ChevronDown className="h-4 w-4 text-muted transition-colors group-hover:text-fg" aria-hidden />
           </button>
         }
       />
@@ -322,57 +318,69 @@ export function HalalPage() {
                 </Button>
               </div>
             ) : (
-              /* Compact Scan Action Card */
-              <div className="flex flex-col items-center justify-center text-center gap-4 py-2">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent border border-accent/20 shadow-xs">
-                  <ScanLine className="h-6 w-6" strokeWidth={1.8} />
+              /* Scan desk: three equal ways in */
+              <div className="space-y-5">
+                <div>
+                  <h2 className="font-display text-lg font-bold text-fg">{t('halal2.deskTitle')}</h2>
+                  <p className="mt-1 text-sm text-muted">{t('halal2.deskHint')}</p>
                 </div>
 
-                {/* Main Action Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-sm">
-                  <Button
-                    size="md"
-                    variant="primary"
-                    onClick={() => {
-                      if (isGuest) {
-                        show(t('guest.aiRequiresAuth'), 'warning');
-                        return;
-                      }
-                      cameraRef.current?.click();
-                    }}
-                    icon={<Camera className="h-4 w-4" />}
-                  >
-                    {t('home.cta', 'تصوير المكوّنات')}
-                  </Button>
-                  <Button
-                    size="md"
-                    variant="secondary"
-                    onClick={() => {
-                      if (isGuest) {
-                        show(t('guest.aiRequiresAuth'), 'warning');
-                        return;
-                      }
-                      galleryRef.current?.click();
-                    }}
-                    icon={<ImageIcon className="h-4 w-4 text-muted" />}
-                  >
-                    {t('common.gallery', 'رفع من المعرض')}
-                  </Button>
+                <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+                  {[
+                    {
+                      id: 'camera',
+                      Icon: Camera,
+                      label: t('halal2.camera'),
+                      primary: true,
+                      onClick: () => (isGuest ? show(t('guest.aiRequiresAuth'), 'warning') : cameraRef.current?.click()),
+                    },
+                    {
+                      id: 'gallery',
+                      Icon: ImageIcon,
+                      label: t('halal2.gallery'),
+                      primary: false,
+                      onClick: () => (isGuest ? show(t('guest.aiRequiresAuth'), 'warning') : galleryRef.current?.click()),
+                    },
+                    {
+                      id: 'type',
+                      Icon: Type,
+                      label: t('halal2.type'),
+                      primary: false,
+                      onClick: () => setTyping((prev) => !prev),
+                    },
+                  ].map(({ id, Icon, label, primary, onClick }) => {
+                    const active = id === 'type' && typing;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={onClick}
+                        aria-pressed={id === 'type' ? typing : undefined}
+                        className={cn(
+                          'flex min-h-[104px] flex-col items-center justify-center gap-2.5 rounded-xl border px-2 py-4 text-sm font-bold transition-all',
+                          primary
+                            ? 'border-transparent bg-tool-halal text-white shadow-e2 hover:brightness-110 dark:text-[#04261b]'
+                            : active
+                              ? 'border-tool-halal bg-tool-halal-soft text-fg'
+                              : 'border-line bg-surface2/50 text-fg hover:border-fg/20 hover:bg-surface2',
+                        )}
+                      >
+                        <Icon className={cn('h-6 w-6', !primary && 'text-tool-halal')} strokeWidth={1.8} aria-hidden />
+                        <span className="text-center leading-tight">{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                {/* Text Input Toggle */}
-                <button
-                  type="button"
-                  onClick={() => setTyping((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-accent pt-0.5 cursor-pointer transition-colors"
-                >
-                  <Type className="h-3.5 w-3.5" />
-                  <span>{typing ? t('common.close', 'إغلاق حقل الكتابة') : t('halal.typeIngredients', 'كتابة المكوّنات يدوياً')}</span>
-                </button>
+                {isGuest ? (
+                  <p className="rounded-lg bg-surface2/60 px-3.5 py-2.5 text-xs leading-relaxed text-muted">
+                    {t('halal2.guestNote')}
+                  </p>
+                ) : null}
 
-                {/* Inline Text Area Expansion without Jumping */}
+                {/* Inline text entry */}
                 {typing && (
-                  <div className="w-full max-w-md mt-2 pt-3 border-t border-line/60 space-y-3 text-start">
+                  <div className="space-y-3 border-t border-line pt-4 text-start">
                     <Textarea
                       label={t('halal.placeholder', 'اكتب المكوّنات أو الرموز هنا...')}
                       value={text}
@@ -435,6 +443,23 @@ export function HalalPage() {
             className="hidden"
             onChange={(event) => void pickFile(event.target.files?.[0])}
           />
+
+          {/* How it works — three short steps */}
+          {historyList.length === 0 ? (
+            <ol className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {[1, 2, 3].map((n) => (
+                <li key={n} className="flex items-start gap-3 rounded-xl border border-line bg-surface/60 p-4">
+                  <span className="num flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-tool-halal-soft text-sm font-bold text-tool-halal">
+                    {n}
+                  </span>
+                  <span>
+                    <span className="block text-sm font-bold text-fg">{t(`halal2.step${n}Title`)}</span>
+                    <span className="mt-0.5 block text-xs leading-relaxed text-muted">{t(`halal2.step${n}Body`)}</span>
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : null}
 
           {/* ===================================================================
               3. PREVIOUS CHECKS SECTION (Real stored checks only)
@@ -653,45 +678,33 @@ export function HalalPage() {
       {/* =====================================================================
           6. QUICK MADHHAB SELECTION MODAL
           ===================================================================== */}
-      {showMadhabModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="surface-card w-full max-w-sm p-5 space-y-4 border border-line shadow-e3">
-            <div className="flex items-center justify-between pb-2 border-b border-line">
-              <h3 className="font-display text-base font-bold text-fg">
-                {t('halal.changeMadhab', 'تغيير المذهب الفقهي')}
-              </h3>
-              <IconButton label={t('common.close')} onClick={() => setShowMadhabModal(false)}>
-                <X className="h-4 w-4" />
-              </IconButton>
-            </div>
-
-            <p className="text-xs text-muted leading-relaxed">
-              {t(
-                'halal.madhabExplanation',
-                'يؤثر اختيار المذهب في ترجيح حكم المستحلبات الحيوانية، والذبح، وأحكام الأطعمة البحرية وغيرها.'
-              )}
-            </p>
-
-            <div className="space-y-2">
-              {MADHHABS.map((madh) => (
-                <button
-                  key={madh}
-                  type="button"
-                  onClick={() => void handleMadhhabChange(madh)}
-                  className={`w-full flex items-center justify-between p-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
-                    currentMadhhab === madh
-                      ? 'border-accent bg-accent-soft/40 text-accent font-bold'
-                      : 'border-line bg-surface hover:bg-surface2 text-fg'
-                  }`}
-                >
-                  <span>{t(`profile.madhhabs.${madh}`)}</span>
-                  {currentMadhhab === madh && <CheckCircle2 className="h-4 w-4 text-accent" />}
-                </button>
-              ))}
-            </div>
-          </div>
+      <Sheet open={showMadhabModal} title={t('profile3.madhhabTitle')} onClose={() => setShowMadhabModal(false)}>
+        <p className="mb-4 text-sm leading-relaxed text-muted">{t('profile3.madhhabDesc')}</p>
+        <div role="radiogroup" aria-label={t('profile3.madhhabTitle')} className="space-y-2">
+          {MADHHABS.map((madh) => {
+            const selected = currentMadhhab === madh;
+            return (
+              <button
+                key={madh}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => void handleMadhhabChange(madh)}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-lg border p-3.5 text-start transition-colors',
+                  selected ? 'border-tool-halal bg-tool-halal-soft' : 'border-line hover:bg-surface2/60',
+                )}
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-bold text-fg">{t(`profile.madhhabs.${madh}`)}</span>
+                  <span className="mt-0.5 block text-xs text-muted">{t(`profile3.madhhabDescs.${madh}`)}</span>
+                </span>
+                {selected ? <CheckCircle2 className="h-5 w-5 shrink-0 text-tool-halal" aria-hidden /> : null}
+              </button>
+            );
+          })}
         </div>
-      )}
+      </Sheet>
     </div>
   );
 }

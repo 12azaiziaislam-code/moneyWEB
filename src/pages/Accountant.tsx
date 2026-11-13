@@ -287,13 +287,10 @@ export function AccountantPage() {
     <div className="flex flex-1 flex-col gap-5 pb-8">
       {/* 1. Page Header */}
       <PageHeader
-        title={
-          <div className="flex items-center gap-3">
-            <AccountantAvatar size="md" className="shrink-0" />
-            <span>{t('accountant.title', 'المحاسب')}</span>
-          </div>
-        }
-        subtitle={t('accountant.deskSubtitle', 'ميزانية شخصية واقعية لدورة الراتب ومتابعة المصاريف اليومية')}
+        icon={<AccountantAvatar size="lg" />}
+        eyebrow={t('money2.eyebrow')}
+        title={t('home2.moneyTitle')}
+        subtitle={t('money2.subtitle')}
       />
 
       {loading && !plan ? (
@@ -307,7 +304,8 @@ export function AccountantPage() {
           STATE 1: UNCONFIGURED (غير مهيّأ)
           ===================================================================== */}
       {!loading && !isConfigured && (
-        <div className="surface-card p-6 sm:p-8 text-center space-y-4">
+        <div className="hero-surface relative overflow-hidden rounded-2xl border border-line p-6 text-center sm:p-10">
+          <div className="relative z-[1] space-y-5">
           <div className="mx-auto flex items-center justify-center">
             <AccountantAvatar size="xl" className="drop-shadow-md" />
           </div>
@@ -338,6 +336,17 @@ export function AccountantPage() {
             >
               {t('accountant.startSetup', 'إعداد الميزانية في دقيقة')}
             </Button>
+          </div>
+
+          <ul className="mx-auto grid max-w-2xl grid-cols-1 gap-2.5 pt-3 text-start sm:grid-cols-3">
+            {[1, 2, 3].map((n) => (
+              <li key={n} className="rounded-xl border border-line bg-surface/70 p-3.5">
+                <span className="num flex h-6 w-6 items-center justify-center rounded-full bg-tool-money-soft text-xs font-bold text-tool-money">{n}</span>
+                <span className="mt-2 block text-sm font-bold text-fg">{t(`money2.f${n}Title`)}</span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-muted">{t(`money2.f${n}Body`)}</span>
+              </li>
+            ))}
+          </ul>
           </div>
         </div>
       )}

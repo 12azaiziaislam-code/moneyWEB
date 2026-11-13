@@ -107,29 +107,32 @@ export function ChatsPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-5 pb-8">
-      <PageHeader title={t('chats.title', 'المحادثات')} />
+      <PageHeader title={t('chats2.title')} subtitle={t('chats2.subtitle')} />
 
-      {/* Search Input */}
-      <Input
-        label={t('chats.search', 'ابحث في محادثاتك')}
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        suffix={<Search className="h-4 w-4 text-muted" />}
-      />
-
-      {/* Filter Tabs Matching Bottom Navigation Items */}
-      <Segmented
-        ariaLabel={t('chats.title', 'المحادثات')}
-        value={filter}
-        onChange={(value) => setFilter(value as 'all' | ChatKind)}
-        options={[
-          { value: 'all', label: t('common.all', 'الكل') },
-          { value: 'shaykh', label: t('nav.halal', 'الحلال') },
-          { value: 'doctor', label: t('nav.doctor', 'الطبيب') },
-          { value: 'accountant', label: t('nav.accountant', 'المحاسب') },
-        ]}
-      />
+      {/* Search + filter toolbar */}
+      <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        <div className="md:flex-1">
+          <Input
+            label={t('chats.search', 'ابحث في محادثاتك')}
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            suffix={<Search className="h-4 w-4 text-muted" />}
+          />
+        </div>
+        <Segmented
+          className="md:w-[26rem]"
+          ariaLabel={t('chats2.title')}
+          value={filter}
+          onChange={(value) => setFilter(value as 'all' | ChatKind)}
+          options={[
+            { value: 'all', label: t('common.all', 'الكل') },
+            { value: 'shaykh', label: t('nav.halal', 'الحلال') },
+            { value: 'doctor', label: t('nav.doctor', 'الطبيب') },
+            { value: 'accountant', label: t('nav.accountant', 'المحاسب') },
+          ]}
+        />
+      </div>
 
       {/* Loading Skeleton */}
       {loading ? (

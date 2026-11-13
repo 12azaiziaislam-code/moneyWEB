@@ -1,42 +1,44 @@
 /**
- * Baraka v2 — Profile, Financial Setup & Advanced Customization Suite
- * Comprehensive preferences desk:
- * - Top sticky section sub-navigation: الصحة (Health), المال (Finance), التفضيلات (Preferences), الخطر (Danger zone).
- * - Identity Hero with stepped completion metric (0-100%).
- * - Health profile management with tag-based conditions & medications, regular font numbers.
- * - Financial profile management, searchable 8-currency selector, fiqh madhhab selection.
- * - AI Engine control: Ultra-fast built-in (Gemini 2.5 Flash Lite) vs BYOK private key.
- * - Appearance: System/Dark/Light theme, 4 Harmonized Palettes, Interface Language.
- * - Reduced motion & storage maintenance.
- * - Danger zone: JSON export, cache purge, sign out, account termination.
+ * Baraka — Account & Settings
+ *
+ * Four focused tabs instead of one endless scroll:
+ *   me    : identity, completion checklist, health + finance summaries
+ *   prefs : school of fiqh (halal checks) + account currency (budget)
+ *   app   : appearance, language, motion, AI engine
+ *   data  : export, cache, legal, sign-out, delete
+ *
+ * Deep-linkable with `/profile?tab=prefs`.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  ChevronRight,
-  Coins,
+  Check,
+  ChevronLeft,
   Cpu,
+  Database,
   Download,
   FileText,
   Heart,
   Key,
   LogOut,
+  Palette,
   RefreshCw,
   Scale,
+  Settings2,
   Shield,
+  Trash2,
+  UserRound,
   Wallet,
-  Search,
-  CheckCircle2,
+  type LucideIcon,
 } from 'lucide-react';
 import { LOCALE_LABEL, SUPPORTED_CURRENCIES, SUPPORTED_LOCALES } from '../../shared/constants';
 import type { AiMode, Locale, Madhhab } from '../../shared/types';
-import { PageHeader } from '../components/AppShell';
+import { PageHeader, UserAvatar } from '../components/AppShell';
 import { HealthForm } from '../components/HealthForm';
 import { FinanceForm } from '../components/FinanceForm';
 import { Button } from '../components/ui/Button';
-import { StatusBadge, Progress } from '../components/ui/Feedback';
 import { Sheet } from '../components/ui/Sheet';
 import { Switch, ThemeSelector } from '../components/ui/Controls';
 import { Input } from '../components/ui/Field';
@@ -44,34 +46,181 @@ import { cn } from '../components/ui';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
 import { useFinance } from '../data/finance';
-import { ACCENTS, ACCENT_SWATCH, usePageTheme } from '../lib/theme';
+import { ACCENTS, ACCENT_SWATCH, systemPrefersDark } from '../lib/theme';
 import { changeLocale } from '../i18n';
 import { CacheKeys, idbGet, idbSet } from '../lib/idb';
 import { apiFetch } from '../lib/api';
 import { haptic, HAPTIC } from '../lib/haptics';
+import { useProfileCompletion } from '../lib/profileCompletion';
 
-const CURRENCY_CONFIG: Record<string, { label: string; symbol: string; flag: string }> = {
-  RUB: { label: 'روبل روسي', symbol: '₽', flag: '🇷🇺' },
-  SAR: { label: 'ريال سعودي', symbol: 'ر.س', flag: '🇸🇦' },
-  AED: { label: 'درهم إماراتي', symbol: 'د.إ', flag: '🇦🇪' },
-  USD: { label: 'دولار أمريكي', symbol: '$', flag: '🇺🇸' },
-  EUR: { label: 'يورو أوروبي', symbol: '€', flag: '🇪🇺' },
-  KZT: { label: 'تينغ كازاخستاني', symbol: '₸', flag: '🇰🇿' },
-  TRY: { label: 'ليرة تركية', symbol: '₺', flag: '🇹🇷' },
-  GBP: { label: 'جنيه إسترليني', symbol: '£', flag: '🇬🇧' },
-};
-
-const MADHHAB_CONFIG: { id: Madhhab; label: string; desc: string }[] = [
-  { id: 'none', label: 'عام / مذهب الجمهور', desc: 'الاعتماد على القواعد المجمع عليها والأحوط شرعاً' },
-  { id: 'hanafi', label: 'المذهب الحنفي', desc: 'تدقيق خاص في مشتقات الحيوانات والذبائح والمأكولات البحرية' },
-  { id: 'shafii', label: 'المذهب الشافعي', desc: 'اشتراط التذكية الشرعية الصارمة وطهارة الأعيان' },
-  { id: 'maliki', label: 'المذهب المالكي', desc: 'ضوابط الاستحالة وتوسيع المأكولات البحرية والمصالح' },
-  { id: 'hanbali', label: 'المذهب الحنبلي', desc: 'التحري والورع والالتزام بالنصوص والآثار' },
+type Tab = 'me' | 'prefs' | 'app' | 'data';
+const TABS: { id: Tab; key: string; Icon: LucideIcon }[] = [
+  { id: 'me', key: 'profile3.tabMe', Icon: UserRound },
+  { id: 'prefs', key: 'profile3.tabPrefs', Icon: Scale },
+  { id: 'app', key: 'profile3.tabApp', Icon: Settings2 },
+  { id: 'data', key: 'profile3.tabData', Icon: Database },
 ];
 
+const CURRENCY_META: Record<string, { symbol: string; flag: string }> = {
+  RUB: { symbol: '₽', flag: '🇷🇺' },
+  SAR: { symbol: 'ر.س', flag: '🇸🇦' },
+  AED: { symbol: 'د.إ', flag: '🇦🇪' },
+  USD: { symbol: '$', flag: '🇺🇸' },
+  EUR: { symbol: '€', flag: '🇪🇺' },
+  KZT: { symbol: '₸', flag: '🇰🇿' },
+  TRY: { symbol: '₺', flag: '🇹🇷' },
+  GBP: { symbol: '£', flag: '🇬🇧' },
+};
+
+const MADHHABS: Madhhab[] = ['none', 'hanafi', 'shafii', 'maliki', 'hanbali'];
+
+/* -------------------------------------------------------------------------- */
+/* Building blocks                                                             */
+/* -------------------------------------------------------------------------- */
+function Panel({
+  icon: Icon,
+  title,
+  desc,
+  action,
+  children,
+  className,
+}: {
+  icon?: LucideIcon;
+  title: string;
+  desc?: string;
+  action?: ReactNode;
+  children?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={cn('rounded-xl border border-line bg-surface p-5 shadow-e1 sm:p-6', className)}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-start gap-3">
+          {Icon ? (
+            <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent">
+              <Icon className="h-[18px] w-[18px]" aria-hidden />
+            </span>
+          ) : null}
+          <div className="min-w-0">
+            <h2 className="font-display text-base font-bold text-fg">{title}</h2>
+            {desc ? <p className="mt-0.5 text-sm leading-relaxed text-muted">{desc}</p> : null}
+          </div>
+        </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
+      </div>
+      {children ? <div className="mt-5">{children}</div> : null}
+    </section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="rounded-lg bg-surface2/70 px-3.5 py-3">
+      <dt className="text-xs text-muted">{label}</dt>
+      <dd className="num mt-1 truncate text-sm font-bold text-fg">{value}</dd>
+    </div>
+  );
+}
+
+function Row({
+  icon: Icon,
+  title,
+  desc,
+  end,
+  onClick,
+  to,
+  tone = 'default',
+  disabled,
+}: {
+  icon: LucideIcon;
+  title: string;
+  desc?: string;
+  end?: ReactNode;
+  onClick?: () => void;
+  to?: string;
+  tone?: 'default' | 'danger';
+  disabled?: boolean;
+}) {
+  const body = (
+    <>
+      <span
+        className={cn(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+          tone === 'danger' ? 'bg-danger-soft text-danger' : 'bg-surface2 text-muted',
+        )}
+      >
+        <Icon className="h-[18px] w-[18px]" aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className={cn('block text-sm font-bold', tone === 'danger' ? 'text-danger' : 'text-fg')}>{title}</span>
+        {desc ? <span className="mt-0.5 block text-xs text-muted">{desc}</span> : null}
+      </span>
+      {end ?? <ChevronLeft className="h-4 w-4 shrink-0 text-muted-soft ltr:rotate-180" aria-hidden />}
+    </>
+  );
+  const cls = cn(
+    'flex w-full items-center gap-3 px-4 py-3.5 text-start transition-colors sm:px-5',
+    disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-surface2/70',
+  );
+  return to ? (
+    <Link to={to} className={cls}>
+      {body}
+    </Link>
+  ) : (
+    <button type="button" onClick={onClick} disabled={disabled} className={cls}>
+      {body}
+    </button>
+  );
+}
+
+function RadioTile({
+  selected,
+  onClick,
+  title,
+  desc,
+  leading,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  title: string;
+  desc?: string;
+  leading?: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={onClick}
+      className={cn(
+        'flex w-full items-center gap-3 rounded-lg border p-3.5 text-start transition-all',
+        selected ? 'border-accent bg-accent-soft' : 'border-line bg-surface hover:border-fg/20 hover:bg-surface2/60',
+      )}
+    >
+      {leading}
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-bold text-fg">{title}</span>
+        {desc ? <span className="mt-0.5 block text-xs leading-relaxed text-muted">{desc}</span> : null}
+      </span>
+      <span
+        className={cn(
+          'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+          selected ? 'border-accent bg-accent text-accent-fg' : 'border-line',
+        )}
+      >
+        {selected ? <Check className="h-3 w-3" strokeWidth={3.5} aria-hidden /> : null}
+      </span>
+    </button>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Page                                                                        */
+/* -------------------------------------------------------------------------- */
 export function ProfilePage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { show } = useToast();
   const {
     role,
@@ -86,22 +235,16 @@ export function ProfilePage() {
     updateGuestSettings,
     patchUser,
   } = useAuth();
-  const { health, finance, plan } = useFinance();
+  const { health, finance } = useFinance();
+  const completion = useProfileCompletion();
 
-  const [sheet, setSheet] = useState<'health' | 'money' | 'danger' | null>(null);
+  const [tab, setTab] = useState<Tab>('me');
+  const [sheet, setSheet] = useState<'health' | 'money' | 'delete' | null>(null);
   const [deleteInput, setDeleteInput] = useState('');
   const [busy, setBusy] = useState(false);
-  const [currencySearch, setCurrencySearch] = useState('');
-
-  // Advanced Customizations State
-  const activeCurrency = (role === 'guest' ? finance.currency : user?.currency) || 'RUB';
-  const activeMadhhab: Madhhab = user?.madhhab ?? 'none';
-  const activeAiMode: AiMode = user?.aiMode ?? 'builtin';
-
-  const [showAiCustom, setShowAiCustom] = useState(false);
   const [ownKey, setOwnKey] = useState({ baseUrl: '', apiKey: '', model: '' });
   const [savingKey, setSavingKey] = useState(false);
-
+  const [aiMode, setAiMode] = useState<AiMode>(user?.aiMode ?? 'builtin');
   const [reducedMotion, setReducedMotion] = useState(() => {
     try {
       return localStorage.getItem('baraka.reducedMotion') === '1';
@@ -110,113 +253,90 @@ export function ProfilePage() {
     }
   });
 
-  usePageTheme('profile', accent);
-
   const isGuest = role === 'guest';
-  const name = isGuest ? t('guest.title') : (user?.displayName ?? user?.email ?? '—');
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark());
+  const activeCurrency = user?.currency || finance.currency || 'RUB';
+  const activeMadhhab: Madhhab = user?.madhhab ?? 'none';
+  const name = isGuest ? t('guest.title') : user?.displayName || user?.email || '—';
 
-  // Load stored BYOK configuration if present
+  // Deep link: /profile?tab=prefs
   useEffect(() => {
-    void (async () => {
-      const stored = await idbGet<{ baseUrl: string; apiKey: string; model: string }>(CacheKeys.ownKey);
+    if (!location.pathname.startsWith('/profile')) return;
+    const requested = new URLSearchParams(location.search).get('tab') as Tab | null;
+    if (requested && TABS.some((item) => item.id === requested)) setTab(requested);
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    void idbGet<{ baseUrl: string; apiKey: string; model: string }>(CacheKeys.ownKey).then((stored) => {
       if (stored) setOwnKey(stored);
-    })();
+    });
   }, []);
 
-  // Filter currencies based on search query
-  const filteredCurrencies = useMemo(() => {
-    const q = currencySearch.trim().toLowerCase();
-    if (!q) return SUPPORTED_CURRENCIES;
-    return SUPPORTED_CURRENCIES.filter((curr) => {
-      const conf = CURRENCY_CONFIG[curr];
-      return (
-        curr.toLowerCase().includes(q) ||
-        (conf && conf.label.toLowerCase().includes(q)) ||
-        (conf && conf.symbol.toLowerCase().includes(q))
-      );
-    });
-  }, [currencySearch]);
+  useEffect(() => {
+    if (user?.aiMode) setAiMode(user.aiMode);
+  }, [user?.aiMode]);
 
-  // Profile Completeness Checklist
-  const steps = useMemo(() => {
-    return [
-      { id: 'age', label: 'العمر والوزن', done: Boolean(health.age && health.weightKg) },
-      { id: 'healthConditions', label: 'الحالات الصحية', done: Boolean(health.conditions?.length || health.medications?.length) },
-      { id: 'currency', label: 'عملة الحساب', done: Boolean(user?.currency || finance.currency) },
-      { id: 'income', label: 'الدخل الشهري', done: Boolean(finance.incomes?.length) },
-      { id: 'madhhab', label: 'المذهب الفقهي', done: Boolean(user?.madhhab && user.madhhab !== 'none') },
-    ];
-  }, [finance.currency, finance.incomes, health.age, health.conditions, health.medications, health.weightKg, user?.currency, user?.madhhab]);
+  const healthItems = useMemo(
+    () => [...(health.conditions ?? []), ...(health.medications ?? []), ...(health.allergies ?? [])],
+    [health.allergies, health.conditions, health.medications],
+  );
 
-  const completedSteps = steps.filter((s) => s.done).length;
-  const completeness = Math.round((completedSteps / steps.length) * 100);
+  const saved = () => {
+    haptic(HAPTIC.tap);
+    show(t('profile3.saved'), 'info');
+  };
+  const failed = () => show(t('errors.generic'), 'danger');
 
-  const saveLocale = async (newLocale: Locale) => {
+  const saveLocale = async (next: Locale) => {
     try {
-      await changeLocale(newLocale);
-      if (!isGuest) {
-        await patchUser({ locale: newLocale });
-      }
-      haptic(HAPTIC.tap);
-      show(t('common.saved', 'تم تحديث اللغة'), 'info');
+      await changeLocale(next);
+      if (isGuest) await updateGuestSettings({ locale: next });
+      else await patchUser({ locale: next });
+      saved();
     } catch {
-      show(t('errors.generic'), 'danger');
+      failed();
     }
   };
 
-  const handleCurrencyChange = async (newCurrency: string) => {
+  const saveCurrency = async (currency: string) => {
     try {
-      if (isGuest) {
-        await updateGuestSettings({ currency: newCurrency });
-      } else {
-        await patchUser({ currency: newCurrency });
-      }
-      haptic(HAPTIC.tap);
-      show(`تم اعتماد عملة ${newCurrency}`, 'info');
+      if (isGuest) await updateGuestSettings({ currency });
+      else await patchUser({ currency });
+      saved();
     } catch {
-      show(t('errors.generic'), 'danger');
+      failed();
     }
   };
 
-  const handleMadhhabChange = async (madhhab: Madhhab) => {
+  const saveMadhhab = async (madhhab: Madhhab) => {
     try {
-      if (isGuest) {
-        await updateGuestSettings({ madhhab });
-      } else {
-        await patchUser({ madhhab });
-      }
-      haptic(HAPTIC.tap);
-      show(t('common.saved', 'تم تحديث المذهب الفقهي'), 'info');
+      if (isGuest) await updateGuestSettings({ madhhab });
+      else await patchUser({ madhhab });
+      saved();
     } catch {
-      show(t('errors.generic'), 'danger');
+      failed();
     }
   };
 
-  const handleAiModeToggle = async (mode: AiMode) => {
+  const saveAiMode = async (mode: AiMode) => {
+    setAiMode(mode);
     try {
-      if (!isGuest) {
-        await patchUser({ aiMode: mode });
-      }
-      if (mode === 'own') setShowAiCustom(true);
+      if (!isGuest) await patchUser({ aiMode: mode });
       haptic(HAPTIC.tap);
-      show(mode === 'builtin' ? 'تم تفعيل الذكاء المدمج فائق السرعة' : 'تم تفعيل وضع المفتاح الخاص', 'info');
     } catch {
-      show(t('errors.generic'), 'danger');
+      failed();
     }
   };
 
-  const saveOwnKeyConfig = async () => {
+  const saveOwnKey = async () => {
     setSavingKey(true);
     try {
       await idbSet(CacheKeys.ownKey, ownKey);
-      if (!isGuest) {
-        await patchUser({ aiMode: 'own' });
-      }
+      if (!isGuest) await patchUser({ aiMode: 'own' });
       haptic(HAPTIC.tap);
-      show('تم حفظ مفتاح الذكاء الاصطناعي محلياً على هذا الجهاز بنجاح', 'info');
-      setShowAiCustom(false);
+      show(t('profile3.keySaved'), 'info');
     } catch {
-      show(t('errors.generic'), 'danger');
+      failed();
     } finally {
       setSavingKey(false);
     }
@@ -226,12 +346,11 @@ export function ProfilePage() {
     setReducedMotion(enabled);
     try {
       localStorage.setItem('baraka.reducedMotion', enabled ? '1' : '0');
-      document.documentElement.classList.toggle('reduce-motion', enabled);
     } catch {
-      // ignore
+      /* private mode */
     }
+    document.documentElement.classList.toggle('reduce-motion', enabled);
     haptic(HAPTIC.tap);
-    show(enabled ? 'تم تفعيل تقليل الحركة' : 'تم تفعيل الحركة السلسة', 'info');
   };
 
   const clearAppCache = async () => {
@@ -239,14 +358,13 @@ export function ProfilePage() {
     try {
       if ('caches' in window) {
         const keys = await window.caches.keys();
-        await Promise.all(keys.map((k) => window.caches.delete(k)));
+        await Promise.all(keys.map((key) => window.caches.delete(key)));
       }
-      haptic(HAPTIC.tap);
-      show('تم تفريغ الذاكرة المؤقتة وتنظيف التخزين', 'info');
     } catch {
-      show('تم تنظيف الذاكرة بنجاح', 'info');
+      /* ignore */
     } finally {
       setBusy(false);
+      show(t('profile3.cacheDone'), 'info');
     }
   };
 
@@ -266,564 +384,412 @@ export function ProfilePage() {
       anchor.click();
       URL.revokeObjectURL(url);
       haptic(HAPTIC.tap);
-      show('تم تنزيل ملف بياناتك بنجاح', 'info');
     } catch {
-      show(t('errors.generic'), 'danger');
+      failed();
     } finally {
       setBusy(false);
     }
   };
 
-  return (
-    <div className="flex flex-1 flex-col gap-5 pb-12">
-      <PageHeader
-        title={t('nav.profile', 'حسابي')}
-        subtitle="إدارة الملف الصحي والمالي وضبط التفضيلات ومحرك الذكاء"
-      />
+  const selectTab = (next: Tab) => {
+    setTab(next);
+    haptic(HAPTIC.tap);
+    if (location.search) navigate('/profile', { replace: true });
+  };
 
-      {/* ===================================================================
-          STICKY SUB-NAVIGATION TABS
-          =================================================================== */}
-      <div className="sticky top-0 z-20 -mx-4 px-4 py-2 bg-bg/90 backdrop-blur-md border-b border-line flex items-center gap-2 overflow-x-auto">
-        <a
-          href="#health"
-          className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-surface border border-line hover:border-accent hover:text-accent text-fg transition-colors whitespace-nowrap shadow-xs"
-        >
-          {t('onboarding.healthTitle', 'الصحة')}
-        </a>
-        <a
-          href="#finance"
-          className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-surface border border-line hover:border-accent hover:text-accent text-fg transition-colors whitespace-nowrap shadow-xs"
-        >
-          {t('onboarding.financeTitle', 'المال')}
-        </a>
-        <a
-          href="#preferences"
-          className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-surface border border-line hover:border-accent hover:text-accent text-fg transition-colors whitespace-nowrap shadow-xs"
-        >
-          {t('profile.preferences', 'التفضيلات')}
-        </a>
-        <a
-          href="#danger"
-          className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-surface border border-line hover:border-danger hover:text-danger text-muted transition-colors whitespace-nowrap shadow-xs"
-        >
-          {t('profile.dangerZone', 'الخطر')}
-        </a>
-      </div>
+  /* ------------------------------ Tab bodies ------------------------------ */
+  const meTab = (
+    <div className="space-y-5">
+      {/* Identity + completion */}
+      <section className="hero-surface relative overflow-hidden rounded-xl border border-line p-5 sm:p-6">
+        <div className="relative z-[1] flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <UserAvatar size={56} />
+            <div className="min-w-0">
+              <p className="truncate font-display text-lg font-bold text-fg">{name}</p>
+              <p className="truncate text-sm text-muted">{isGuest ? t('guest.localOnly') : user?.email}</p>
+            </div>
+          </div>
+          <div className="w-full sm:w-56">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-muted">{t('profile3.completion')}</span>
+              <span className="num font-bold text-fg">{completion.percent}%</span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface2">
+              <div
+                className={cn('h-full rounded-full transition-all', completion.percent === 100 ? 'bg-ok' : 'bg-accent')}
+                style={{ width: `${Math.max(4, completion.percent)}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted">
+              {t('profile3.stepsLeft', { done: completion.done, total: completion.total })}
+            </p>
+          </div>
+        </div>
 
-      {/* ===================================================================
-          1. IDENTITY & PROFILE COMPLETION HERO CARD
-          =================================================================== */}
-      <div className="surface-card p-5 space-y-4">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-accent text-accent-fg font-display text-lg font-bold shadow-xs">
-            {user && 'photoURL' in user && user.photoURL ? (
-              <img src={String(user.photoURL)} alt="" className="h-full w-full object-cover" />
+        {completion.percent < 100 ? (
+          <div className="relative z-[1] mt-5 flex flex-wrap gap-2 border-t border-line pt-4">
+            {completion.steps.map((step) => (
+              <button
+                key={step.id}
+                type="button"
+                disabled={step.done}
+                onClick={() => (step.target === 'prefs' ? selectTab('prefs') : setSheet(step.target))}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors',
+                  step.done
+                    ? 'border-transparent bg-ok-soft text-ok'
+                    : 'border-line bg-surface text-fg hover:border-accent hover:text-accent',
+                )}
+              >
+                {step.done ? <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /> : <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
+                {t(step.labelKey)}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <Panel
+          icon={Heart}
+          title={t('profile3.healthTitle')}
+          desc={t('profile3.healthDesc')}
+          action={
+            <Button size="sm" variant="secondary" onClick={() => setSheet('health')}>
+              {t('profile3.edit')}
+            </Button>
+          }
+        >
+          <dl className="grid grid-cols-3 gap-2">
+            <Stat label={t('profile3.age')} value={health.age ? `${health.age} ${t('profile3.years')}` : '—'} />
+            <Stat label={t('profile3.weight')} value={health.weightKg ? `${health.weightKg} ${t('profile3.kg')}` : '—'} />
+            <Stat label={t('profile3.height')} value={health.heightCm ? `${health.heightCm} ${t('profile3.cm')}` : '—'} />
+          </dl>
+          <div className="mt-3">
+            <p className="text-xs text-muted">{t('profile3.conditions')}</p>
+            {healthItems.length ? (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {healthItems.map((item) => (
+                  <span key={item} className="rounded-full bg-surface2 px-2.5 py-1 text-xs font-semibold text-fg">
+                    <bdi dir="auto">{item}</bdi>
+                  </span>
+                ))}
+              </div>
             ) : (
-              name.slice(0, 1).toUpperCase()
+              <p className="mt-1 text-sm text-muted-soft">{t('profile3.noneRecorded')}</p>
             )}
           </div>
-          <div className="min-w-0 flex-1 space-y-0.5">
-            <p className="truncate font-display text-base font-bold text-fg">{name}</p>
-            <p className="truncate text-xs text-muted">
-              {isGuest ? t('guest.localOnly') : user?.email}
-            </p>
-            <div className="pt-1 flex items-center gap-2">
-              <StatusBadge tone={completeness >= 80 ? 'ok' : 'warn'}>
-                {completeness}% مكتمل
-              </StatusBadge>
-              {plan ? <StatusBadge tone="neutral">{t(`accountant.level.${plan.level}`)}</StatusBadge> : null}
-            </div>
-          </div>
-        </div>
+        </Panel>
 
-        {/* Completion Progress Bar */}
-        <div className="space-y-1.5 pt-1">
-          <div className="flex justify-between text-xs text-muted">
-            <span>اكتمال الملف الصحي والمالي</span>
-            <span className="font-sans font-bold text-fg">{completedSteps} من {steps.length} خطوات</span>
-          </div>
-          <Progress value={completeness} tone={completeness >= 80 ? 'ok' : 'accent'} />
-        </div>
-      </div>
-
-      {/* ===================================================================
-          SECTION 1: HEALTH (#health)
-          =================================================================== */}
-      <section id="health" className="space-y-3 scroll-mt-14">
-        <div className="surface-card p-5 space-y-3.5">
-          <div className="flex items-center justify-between border-b border-line/60 pb-3">
-            <div className="flex items-center gap-2.5">
-              <Heart className="h-5 w-5 text-accent" />
-              <div>
-                <h3 className="font-display text-sm font-bold text-fg">{t('profile2.health', 'الملف الصحي')}</h3>
-                <p className="text-xs text-muted">العمر، الوزن، الطول، الأمراض المزمنة، والأدوية الحالية</p>
-              </div>
-            </div>
-            <Button size="sm" variant="secondary" onClick={() => setSheet('health')}>
-              {t('common.edit', 'تعديل')}
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-            <div className="p-2.5 rounded-xl border border-line bg-surface2/40">
-              <span className="text-muted block text-[11px]">العمر</span>
-              <span className="font-sans font-bold text-fg">{health.age ? `${health.age} سنة` : '—'}</span>
-            </div>
-            <div className="p-2.5 rounded-xl border border-line bg-surface2/40">
-              <span className="text-muted block text-[11px]">الوزن والطول</span>
-              <span className="font-sans font-bold text-fg">
-                {health.weightKg ? `${health.weightKg} كغ` : '—'} / {health.heightCm ? `${health.heightCm} سم` : '—'}
-              </span>
-            </div>
-            <div className="p-2.5 rounded-xl border border-line bg-surface2/40 col-span-2">
-              <span className="text-muted block text-[11px]">الأمراض المزمنة والأدوية</span>
-              <span className="font-sans font-bold text-fg truncate block">
-                {[...(health.conditions ?? []), ...(health.medications ?? [])].join('، ') || 'لا توجد أدوية أو حالات مسجلة'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===================================================================
-          SECTION 2: FINANCE (#finance)
-          =================================================================== */}
-      <section id="finance" className="space-y-4 scroll-mt-14">
-        {/* Financial Profile Card */}
-        <div className="surface-card p-5 space-y-3.5">
-          <div className="flex items-center justify-between border-b border-line/60 pb-3">
-            <div className="flex items-center gap-2.5">
-              <Wallet className="h-5 w-5 text-accent" />
-              <div>
-                <h3 className="font-display text-sm font-bold text-fg">{t('profile2.money', 'الملف المالي')}</h3>
-                <p className="text-xs text-muted">مصادر الدخل، يوم الراتب، والالتزامات الثابتة</p>
-              </div>
-            </div>
+        <Panel
+          icon={Wallet}
+          title={t('profile3.moneyTitle')}
+          desc={t('profile3.moneyDesc')}
+          action={
             <Button size="sm" variant="secondary" onClick={() => setSheet('money')}>
-              {t('common.edit', 'تعديل')}
+              {t('profile3.edit')}
             </Button>
-          </div>
+          }
+        >
+          <dl className="grid grid-cols-3 gap-2">
+            <Stat label={t('profile3.incomes')} value={finance.incomes?.length ?? 0} />
+            <Stat label={t('profile3.fixed')} value={finance.fixedExpenses?.length ?? 0} />
+            <Stat label={t('profile3.style')} value={t(`accountant.level.${finance.level}`)} />
+          </dl>
+        </Panel>
+      </div>
+    </div>
+  );
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-            <div className="p-2.5 rounded-xl border border-line bg-surface2/40">
-              <span className="text-muted block text-[11px]">مصادر الدخل المسجلة</span>
-              <span className="font-sans font-bold text-fg">{finance.incomes?.length ?? 0} مصادر</span>
-            </div>
-            <div className="p-2.5 rounded-xl border border-line bg-surface2/40">
-              <span className="text-muted block text-[11px]">الالتزامات الثابتة</span>
-              <span className="font-sans font-bold text-fg">{finance.fixedExpenses?.length ?? 0} التزامات</span>
-            </div>
-            <div className="p-2.5 rounded-xl border border-line bg-surface2/40 col-span-2 sm:col-span-1">
-              <span className="text-muted block text-[11px]">نمط الميزانية</span>
-              <span className="font-sans font-bold text-fg capitalize">{t(`accountant.level.${finance.level}`)}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Searchable Multi-Currency Selector */}
-        <div className="surface-card p-5 space-y-3.5">
-          <div className="flex items-center justify-between border-b border-line/60 pb-3">
-            <div className="flex items-center gap-2.5">
-              <Coins className="h-5 w-5 text-accent" />
-              <div>
-                <h3 className="font-display text-sm font-bold text-fg">عملة الحساب والمحاسب</h3>
-                <p className="text-xs text-muted">العملة الأساسية لحساب الميزانية وسقف الصرف اليومي</p>
-              </div>
-            </div>
-            <StatusBadge tone="ok">{activeCurrency}</StatusBadge>
-          </div>
-
-          {/* Search Field */}
-          <div className="w-full">
-            <Input
-              label="بحث عن عملة..."
-              value={currencySearch}
-              onChange={(e) => setCurrencySearch(e.target.value)}
-              suffix={<Search className="h-4 w-4 text-muted" />}
+  const prefsTab = (
+    <div className="space-y-5">
+      <Panel icon={Scale} title={t('profile3.madhhabTitle')} desc={t('profile3.madhhabDesc')}>
+        <div role="radiogroup" aria-label={t('profile3.madhhabTitle')} className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {MADHHABS.map((id) => (
+            <RadioTile
+              key={id}
+              selected={activeMadhhab === id}
+              onClick={() => void saveMadhhab(id)}
+              title={t(`profile.madhhabs.${id}`)}
+              desc={t(`profile3.madhhabDescs.${id}`)}
             />
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {filteredCurrencies.map((curr) => {
-              const active = activeCurrency === curr;
-              const details = CURRENCY_CONFIG[curr] ?? { label: curr, symbol: curr, flag: '🌐' };
-              return (
-                <button
-                  key={curr}
-                  type="button"
-                  onClick={() => void handleCurrencyChange(curr)}
-                  className={cn(
-                    'flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer text-start',
-                    active
-                      ? 'border-accent bg-accent-soft/50 shadow-xs ring-1 ring-accent'
-                      : 'border-line bg-surface2 hover:bg-surface2/80',
-                  )}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-base">{details.flag}</span>
-                    <div className="min-w-0">
-                      <span className="font-bold text-xs text-fg block truncate">{curr}</span>
-                      <span className="text-[10px] text-muted block truncate">{details.label}</span>
-                    </div>
-                  </div>
-                  <span className="font-sans text-xs font-bold text-accent shrink-0 ms-1">
-                    {details.symbol}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          ))}
         </div>
+      </Panel>
 
-        {/* Islamic Jurisprudence & Madhhab Selection */}
-        <div className="surface-card p-5 space-y-3.5">
-          <div className="flex items-center gap-2.5 border-b border-line/60 pb-3">
-            <Scale className="h-5 w-5 text-accent" />
-            <div>
-              <h3 className="font-display text-sm font-bold text-fg">المذهب الفقهي المعتمد في الفحص</h3>
-              <p className="text-xs text-muted">
-                يُراعي مساعد الحلال ضوابط مذهبك الفقهي في أحكام الذبائح والمنفحة والجيلاتين
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {MADHHAB_CONFIG.map(({ id, label, desc }) => {
-              const active = activeMadhhab === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => void handleMadhhabChange(id)}
-                  className={cn(
-                    'flex flex-col items-start p-3 rounded-xl border text-start transition-all cursor-pointer',
-                    active
-                      ? 'border-accent bg-accent-soft/40 shadow-xs ring-1 ring-accent'
-                      : 'border-line bg-surface2 hover:bg-surface2/80',
-                  )}
-                >
-                  <div className="flex items-center justify-between w-full mb-1">
-                    <span className="font-display text-xs font-bold text-fg">{label}</span>
-                    {active ? (
-                      <CheckCircle2 className="h-4 w-4 text-accent" />
-                    ) : null}
-                  </div>
-                  <p className="text-[11px] text-muted leading-relaxed">{desc}</p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ===================================================================
-          SECTION 3: PREFERENCES (#preferences)
-          =================================================================== */}
-      <section id="preferences" className="space-y-4 scroll-mt-14">
-        {/* AI Engine & Privacy */}
-        <div className="surface-card p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-line/60 pb-3">
-            <div className="flex items-center gap-2.5">
-              <Cpu className="h-5 w-5 text-accent" />
-              <div>
-                <h3 className="font-display text-sm font-bold text-fg">محرك الذكاء الاصطناعي والخصوصية</h3>
-                <p className="text-xs text-muted">التحكم في خادم الاستجابة ومستوى أمان البيانات</p>
-              </div>
-            </div>
-            <StatusBadge tone={activeAiMode === 'builtin' ? 'ok' : 'accent'}>
-              {activeAiMode === 'builtin' ? 'سحابي فائق السرعة' : 'مفتاح خاص (BYOK)'}
-            </StatusBadge>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              onClick={() => void handleAiModeToggle('builtin')}
-              className={cn(
-                'flex flex-col items-start p-3.5 rounded-xl border text-start transition-all cursor-pointer',
-                activeAiMode === 'builtin'
-                  ? 'border-accent bg-accent-soft/40 shadow-xs ring-1 ring-accent'
-                  : 'border-line bg-surface2 hover:bg-surface2/80',
-              )}
-            >
-              <span className="font-display text-xs font-bold text-fg block mb-1">
-                الذكاء المدمج السحابي (Gemini 2.5 Flash Lite)
-              </span>
-              <p className="text-[11px] text-muted leading-relaxed">
-                محرك سحابي مجاني عالي السرعة (استجابة فورية) مهيأ للأحكام الشرعية والمحاسبية.
-              </p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => void handleAiModeToggle('own')}
-              className={cn(
-                'flex flex-col items-start p-3.5 rounded-xl border text-start transition-all cursor-pointer',
-                activeAiMode === 'own'
-                  ? 'border-accent bg-accent-soft/40 shadow-xs ring-1 ring-accent'
-                  : 'border-line bg-surface2 hover:bg-surface2/80',
-              )}
-            >
-              <span className="font-display text-xs font-bold text-fg block mb-1">
-                استخدام مفتاحي الخاص (BYOK)
-              </span>
-              <p className="text-[11px] text-muted leading-relaxed">
-                ربط مفتاحك الخاص (OpenAI / Anthropic / OpenRouter / Ollama) مع حفظ المفتاح محلياً على جهازك فقط.
-              </p>
-            </button>
-          </div>
-
-          {/* BYOK Configuration Form */}
-          {(activeAiMode === 'own' || showAiCustom) && (
-            <div className="rounded-xl border border-line bg-surface2/60 p-4 space-y-3 pt-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-fg">
-                <Key className="h-4 w-4 text-accent" />
-                <span>إعدادات المفتاح الخاص (محفوظ محلياً فقط)</span>
-              </div>
-
-              <Input
-                label="عنوان المزود (Base URL)"
-                placeholder="https://api.openai.com/v1"
-                value={ownKey.baseUrl}
-                onChange={(e) => setOwnKey({ ...ownKey, baseUrl: e.target.value })}
-              />
-              <Input
-                label="مفتاح API الخاص بك (API Key)"
-                type="password"
-                placeholder="sk-..."
-                value={ownKey.apiKey}
-                onChange={(e) => setOwnKey({ ...ownKey, apiKey: e.target.value })}
-              />
-              <Input
-                label="اسم النموذج (Model Name)"
-                placeholder="gpt-4o-mini أو claude-3-5-haiku"
-                value={ownKey.model}
-                onChange={(e) => setOwnKey({ ...ownKey, model: e.target.value })}
-              />
-
-              <Button
-                variant="primary"
-                size="md"
-                fullWidth
-                loading={savingKey}
-                onClick={() => void saveOwnKeyConfig()}
+      <Panel
+        icon={Wallet}
+        title={t('profile3.currencyTitle')}
+        desc={t('profile3.currencyDesc')}
+        action={<span className="num rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">{activeCurrency}</span>}
+      >
+        <div role="radiogroup" aria-label={t('profile3.currencyTitle')} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {SUPPORTED_CURRENCIES.map((code) => {
+            const meta = CURRENCY_META[code] ?? { symbol: code, flag: '🌐' };
+            const active = activeCurrency === code;
+            return (
+              <button
+                key={code}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => void saveCurrency(code)}
+                className={cn(
+                  'flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-start transition-all',
+                  active ? 'border-accent bg-accent-soft' : 'border-line hover:border-fg/20 hover:bg-surface2/60',
+                )}
               >
-                حفظ المفتاح محلياً على هذا الجهاز
-              </Button>
-            </div>
-          )}
+                <span className="text-lg leading-none" aria-hidden>
+                  {meta.flag}
+                </span>
+                <span className="num flex-1 text-sm font-bold text-fg">{code}</span>
+                <span className="text-xs font-semibold text-muted">{meta.symbol}</span>
+              </button>
+            );
+          })}
         </div>
+      </Panel>
+    </div>
+  );
 
-        {/* Appearance & Theme Palettes */}
-        <div className="surface-card p-5 space-y-4">
-          <p className="font-display text-sm font-bold text-fg">{t('profile2.appearance', 'المظهر والألوان')}</p>
-
-          {/* Theme Selector */}
-          <div className="space-y-1.5">
-            <span className="text-xs font-bold text-muted block">{t('profile.theme', 'المظهر')}</span>
+  const appTab = (
+    <div className="space-y-5">
+      <Panel icon={Palette} title={t('profile3.appearanceTitle')}>
+        <div className="space-y-6">
+          <div>
+            <p className="mb-2 text-sm font-semibold text-fg">{t('profile.theme')}</p>
             <ThemeSelector
               value={themeMode}
               onChange={(mode) => {
                 setThemeMode(mode);
                 if (!isGuest) void patchUser({ theme: mode });
               }}
-              labels={{
-                system: t('theme.system'),
-                light: t('theme.light'),
-                dark: t('theme.dark'),
-              }}
+              labels={{ system: t('theme.system'), light: t('theme.light'), dark: t('theme.dark') }}
             />
           </div>
 
-          {/* 4 Harmonized Accent Palettes */}
-          <div className="space-y-1.5 pt-1">
-            <span className="text-xs font-bold text-muted block">{t('profile2.accent', 'اللون المميز')}</span>
-            <div className="grid grid-cols-4 gap-2.5">
+          <div>
+            <p className="mb-2 text-sm font-semibold text-fg">{t('profile3.accent')}</p>
+            <div className="flex flex-wrap gap-3">
               {ACCENTS.map((item) => {
                 const active = accent === item;
-                const swatch = isGuest
-                  ? ACCENT_SWATCH[item].dark
-                  : ACCENT_SWATCH[item][themeMode === 'light' ? 'light' : 'dark'];
                 return (
                   <button
                     key={item}
                     type="button"
                     aria-label={item}
+                    aria-pressed={active}
+                    title={item}
                     onClick={() => setAccent(item)}
                     className={cn(
-                      'flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl border transition-all cursor-pointer',
-                      active
-                        ? 'border-accent bg-accent-soft shadow-xs'
-                        : 'border-line bg-surface2 hover:bg-surface2/80',
+                      'flex h-11 w-11 items-center justify-center rounded-full transition-all',
+                      active ? 'ring-2 ring-fg ring-offset-2 ring-offset-surface' : 'hover:scale-105',
                     )}
+                    style={{ background: ACCENT_SWATCH[item][isDark ? 'dark' : 'light'] }}
                   >
-                    <span
-                      className="h-6 w-6 rounded-full border border-black/10 shadow-xs"
-                      style={{ background: swatch }}
-                    />
-                    <span className="text-[11px] font-bold text-fg capitalize">{item}</span>
+                    {active ? <Check className="h-4 w-4 text-white mix-blend-difference" strokeWidth={3} aria-hidden /> : null}
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Interface Language */}
-          <div className="space-y-1.5 pt-1">
-            <span className="text-xs font-bold text-muted block">{t('profile.language', 'اللغة')}</span>
+          <div>
+            <p className="mb-2 text-sm font-semibold text-fg">{t('profile3.language')}</p>
             <div className="grid grid-cols-3 gap-2">
-              {SUPPORTED_LOCALES.map((loc: Locale) => (
-                <button
-                  key={loc}
-                  type="button"
-                  onClick={() => void saveLocale(loc)}
-                  className={cn(
-                    'min-h-[40px] rounded-xl text-xs sm:text-sm font-bold border transition-all cursor-pointer',
-                    i18n.language === loc
-                      ? 'border-accent bg-accent text-accent-fg shadow-xs'
-                      : 'border-line bg-surface2 text-muted hover:text-fg',
-                  )}
-                >
-                  {LOCALE_LABEL[loc]}
-                </button>
-              ))}
+              {SUPPORTED_LOCALES.map((loc: Locale) => {
+                const active = i18n.language === loc;
+                return (
+                  <button
+                    key={loc}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => void saveLocale(loc)}
+                    className={cn(
+                      'min-h-[44px] rounded-lg border text-sm font-bold transition-all',
+                      active ? 'border-accent bg-accent text-accent-fg' : 'border-line text-muted hover:text-fg',
+                    )}
+                  >
+                    {LOCALE_LABEL[loc]}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Reduced Motion Toggle */}
-          <div className="pt-2 border-t border-line/60">
+          <div className="border-t border-line pt-4">
             <Switch
-              label="تقليل الحركة وسلاسة الأداء"
-              description="إلغاء المؤثرات الحركية المعقدة لسرعة فائقة وتوفير البطارية"
+              label={t('profile3.motion')}
+              description={t('profile3.motionHint')}
               checked={reducedMotion}
               onChange={toggleReducedMotion}
             />
           </div>
         </div>
-      </section>
+      </Panel>
 
-      {/* ===================================================================
-          SECTION 4: DANGER ZONE (#danger)
-          =================================================================== */}
-      <section id="danger" className="space-y-4 scroll-mt-14">
-        <div className="surface-card overflow-hidden divide-y divide-line/60">
-          <button
-            type="button"
-            onClick={() => void clearAppCache()}
-            className="flex w-full min-h-[52px] items-center justify-between px-4 sm:px-5 hover:bg-surface2 transition-colors text-sm font-bold text-fg cursor-pointer text-start"
-          >
-            <div className="flex items-center gap-3">
-              <RefreshCw className="h-4 w-4 text-muted" />
-              <div>
-                <span>تفريغ الذاكرة المؤقتة (Cache)</span>
-                <span className="text-[11px] text-muted block font-normal">
-                  تسريع المتصفح وتنظيف الصور والبيانات المؤقتة
-                </span>
-              </div>
-            </div>
-            <span className="text-xs text-muted">تنظيف</span>
-          </button>
+      <Panel icon={Cpu} title={t('profile3.aiTitle')} desc={t('profile3.aiDesc')}>
+        <div role="radiogroup" aria-label={t('profile3.aiTitle')} className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          <RadioTile
+            selected={aiMode === 'builtin'}
+            onClick={() => void saveAiMode('builtin')}
+            title={t('profile3.aiBuiltin')}
+            desc={t('profile3.aiBuiltinDesc')}
+          />
+          <RadioTile
+            selected={aiMode === 'own'}
+            onClick={() => void saveAiMode('own')}
+            title={t('profile3.aiOwn')}
+            desc={t('profile3.aiOwnDesc')}
+          />
+        </div>
 
-          <button
-            type="button"
+        {aiMode === 'own' ? (
+          <div className="mt-4 space-y-3 rounded-lg border border-line bg-surface2/50 p-4">
+            <p className="flex items-center gap-2 text-xs text-muted">
+              <Key className="h-4 w-4 text-accent" aria-hidden />
+              {t('profile.ownHint')}
+            </p>
+            <Input
+              label={t('profile.baseUrl')}
+              placeholder="https://api.openai.com/v1"
+              value={ownKey.baseUrl}
+              onChange={(event) => setOwnKey({ ...ownKey, baseUrl: event.target.value })}
+            />
+            <Input
+              label={t('profile.apiKey')}
+              type="password"
+              placeholder="sk-..."
+              value={ownKey.apiKey}
+              onChange={(event) => setOwnKey({ ...ownKey, apiKey: event.target.value })}
+            />
+            <Input
+              label={t('profile.model')}
+              placeholder="gpt-4o-mini"
+              value={ownKey.model}
+              onChange={(event) => setOwnKey({ ...ownKey, model: event.target.value })}
+            />
+            <Button fullWidth loading={savingKey} onClick={() => void saveOwnKey()}>
+              {t('profile3.saveKey')}
+            </Button>
+          </div>
+        ) : null}
+      </Panel>
+    </div>
+  );
+
+  const dataTab = (
+    <div className="space-y-5">
+      <div>
+        <p className="mb-2 px-1 text-xs font-semibold text-muted">{t('profile3.dataTitle')}</p>
+        <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-e1">
+          <Row
+            icon={Download}
+            title={t('profile3.export')}
+            desc={isGuest ? t('profile3.guestLocked') : t('profile3.exportDesc')}
             onClick={() => void exportData()}
-            className="flex w-full min-h-[52px] items-center justify-between px-4 sm:px-5 hover:bg-surface2 transition-colors text-sm font-bold text-fg cursor-pointer text-start"
-          >
-            <div className="flex items-center gap-3">
-              <Download className="h-4 w-4 text-muted" />
-              <div>
-                <span>{t('profile.export', 'تصدير البيانات')}</span>
-                <span className="text-[11px] text-muted block font-normal">
-                  تنزيل نسخة احتياطية من محادثاتك وسجلاتك
-                </span>
-              </div>
-            </div>
-            <span className="text-xs text-muted">JSON</span>
-          </button>
-
-          <Link
-            to="/legal/privacy"
-            className="flex min-h-[52px] items-center justify-between px-4 sm:px-5 hover:bg-surface2 transition-colors text-sm font-bold text-fg"
-          >
-            <div className="flex items-center gap-3">
-              <Shield className="h-4 w-4 text-muted" />
-              <span>{t('profile.privacy', 'سياسة الخصوصية')}</span>
-            </div>
-            <ChevronRight className="flip-rtl h-4 w-4 text-muted" aria-hidden />
-          </Link>
-
-          <Link
-            to="/legal/terms"
-            className="flex min-h-[52px] items-center justify-between px-4 sm:px-5 hover:bg-surface2 transition-colors text-sm font-bold text-fg"
-          >
-            <div className="flex items-center gap-3">
-              <FileText className="h-4 w-4 text-muted" />
-              <span>{t('profile.terms', 'شروط الاستخدام')}</span>
-            </div>
-            <ChevronRight className="flip-rtl h-4 w-4 text-muted" aria-hidden />
-          </Link>
+            disabled={busy || isGuest}
+          />
+          <Row
+            icon={RefreshCw}
+            title={t('profile3.cache')}
+            desc={t('profile3.cacheDesc')}
+            onClick={() => void clearAppCache()}
+            disabled={busy}
+          />
         </div>
+      </div>
 
-        {/* Sign Out Button */}
-        <div className="surface-card p-4">
-          <Button
-            variant="secondary"
-            fullWidth
-            size="lg"
-            icon={<LogOut className="h-4 w-4" />}
+      <div>
+        <p className="mb-2 px-1 text-xs font-semibold text-muted">{t('profile3.legalTitle')}</p>
+        <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-e1">
+          <Row icon={Shield} title={t('profile.privacy')} to="/legal/privacy" />
+          <Row icon={FileText} title={t('profile.terms')} to="/legal/terms" />
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 px-1 text-xs font-semibold text-muted">{t('profile3.sessionTitle')}</p>
+        <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface shadow-e1">
+          <Row
+            icon={LogOut}
+            title={isGuest ? t('guest.exitTitle') : t('auth.signOut')}
+            desc={isGuest ? t('guest.exitBody') : undefined}
             onClick={() => void (isGuest ? exitGuest() : signOut())}
-          >
-            {isGuest ? t('guest.exitTitle', 'الخروج من وضع الضيف') : t('auth.signOut', 'تسجيل الخروج')}
-          </Button>
+          />
+          {!isGuest ? (
+            <Row
+              icon={Trash2}
+              tone="danger"
+              title={t('profile.deleteAccount')}
+              desc={t('profile3.irreversible')}
+              onClick={() => {
+                setDeleteInput('');
+                setSheet('delete');
+              }}
+            />
+          ) : null}
         </div>
+      </div>
+    </div>
+  );
 
-        {/* Account Deletion Trigger */}
-        <div className="text-center pt-1">
-          <button
-            type="button"
-            onClick={() => {
-              setDeleteInput('');
-              setSheet('danger');
-            }}
-            className="text-xs font-semibold text-danger/80 hover:text-danger hover:underline cursor-pointer transition-colors"
-          >
-            {t('profile.deleteAccount', 'حذف الحساب نهائياً')}
-          </button>
+  const body = { me: meTab, prefs: prefsTab, app: appTab, data: dataTab }[tab];
+
+  return (
+    <div className="flex flex-1 flex-col">
+      <PageHeader title={t('nav.profile')} subtitle={t('profile3.subtitle')} />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[13rem_minmax(0,1fr)] lg:gap-8">
+        {/* Tab list — horizontal on mobile, vertical on desktop */}
+        <nav aria-label={t('nav.profile')} className="-mx-4 px-4 sm:mx-0 sm:px-0 lg:sticky lg:top-0 lg:self-start">
+          <div role="tablist" className="flex gap-1.5 overflow-x-auto no-scrollbar lg:flex-col">
+            {TABS.map(({ id, key, Icon }) => {
+              const active = tab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => selectTab(id)}
+                  className={cn(
+                    'flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors lg:rounded-md lg:px-3 lg:py-2.5',
+                    active
+                      ? 'bg-fg text-bg lg:bg-surface2 lg:text-fg'
+                      : 'bg-surface2/60 text-muted hover:text-fg lg:bg-transparent lg:hover:bg-surface2/60',
+                  )}
+                >
+                  <Icon className={cn('h-4 w-4', active && 'lg:text-accent')} aria-hidden />
+                  {t(key)}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        <div key={tab} className="min-w-0 animate-rise">
+          {body}
         </div>
-      </section>
+      </div>
 
-      {/* ===================================================================
-          SHEETS
-          =================================================================== */}
-      <Sheet open={sheet === 'health'} title={t('profile2.health')} onClose={() => setSheet(null)} size="tall">
+      {/* Sheets */}
+      <Sheet open={sheet === 'health'} title={t('profile3.healthTitle')} onClose={() => setSheet(null)} size="tall">
         <HealthForm initial={health} onSaved={() => setSheet(null)} />
       </Sheet>
 
-      <Sheet open={sheet === 'money'} title={t('profile2.money')} onClose={() => setSheet(null)} size="tall">
+      <Sheet open={sheet === 'money'} title={t('profile3.moneyTitle')} onClose={() => setSheet(null)} size="tall">
         <FinanceForm initial={finance} onSaved={() => setSheet(null)} />
       </Sheet>
 
-      {/* Delete Confirmation Sheet */}
-      <Sheet open={sheet === 'danger'} title={t('profile.deleteAccount')} onClose={() => setSheet(null)}>
+      <Sheet open={sheet === 'delete'} title={t('profile.deleteAccount')} onClose={() => setSheet(null)}>
         <div className="space-y-4">
-          <div className="rounded-xl border border-danger/30 bg-danger-soft/50 p-4 text-danger space-y-1">
-            <p className="font-bold text-sm">تأكيد لا رجعة فيه</p>
-            <p className="text-xs leading-relaxed text-fg">{t('profile.deleteWarning')}</p>
+          <div className="rounded-lg border border-danger/30 bg-danger-soft p-4">
+            <p className="text-sm font-bold text-danger">{t('profile3.irreversible')}</p>
+            <p className="mt-1 text-sm leading-relaxed text-fg">{t('profile.deleteWarning')}</p>
           </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-muted block">
-              لتأكيد الحذف، اكتب كلمة <span className="text-danger font-extrabold font-sans">حذف</span> أدناه:
-            </label>
-            <Input
-              label="تأكيد الحذف"
-              value={deleteInput}
-              onChange={(e) => setDeleteInput(e.target.value)}
-              placeholder="اكتب: حذف"
-            />
-          </div>
-
+          <Input label={t('profile3.deleteType')} value={deleteInput} onChange={(event) => setDeleteInput(event.target.value)} />
           <Button
             variant="danger"
             fullWidth
@@ -834,15 +800,15 @@ export function ProfilePage() {
               setBusy(true);
               try {
                 await deleteAccount();
-                navigate('/login');
+                navigate('/');
               } catch {
-                show(t('errors.generic'), 'danger');
+                failed();
               } finally {
                 setBusy(false);
               }
             }}
           >
-            {t('profile.deleteConfirm', 'تأكيد حذف الحساب')}
+            {t('profile.deleteConfirm')}
           </Button>
         </div>
       </Sheet>

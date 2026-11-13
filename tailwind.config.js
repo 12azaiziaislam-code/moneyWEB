@@ -1,3 +1,9 @@
+/**
+ * Theme colors are CSS variables. Wrapping them in color-mix with <alpha-value>
+ * makes Tailwind opacity modifiers (bg-surface/80, border-line/60, …) work.
+ */
+const v = (name) => `color-mix(in srgb, var(--${name}) calc(<alpha-value> * 100%), transparent)`;
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
@@ -5,47 +11,57 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: 'var(--bg)',
-        bg2: 'var(--bg-2)',
-        surface: 'var(--surface)',
-        surface2: 'var(--surface-2)',
-        surfaceElevated: 'var(--surface-elevated)',
-        line: 'var(--border)',
-        lineSubtle: 'var(--border-subtle)',
-        fg: 'var(--fg)',
-        muted: 'var(--muted)',
-        mutedSoft: 'var(--muted-soft)',
+        bg: v('bg'),
+        bg2: v('bg-2'),
+        surface: v('surface'),
+        surface2: v('surface-2'),
+        surfaceElevated: v('surface-elevated'),
+        line: v('border'),
+        lineSubtle: v('border-subtle'),
+        fg: v('fg'),
+        muted: v('muted'),
+        mutedSoft: v('muted-soft'),
+        'muted-soft': v('muted-soft'),
         accent: {
-          DEFAULT: 'var(--accent)',
-          fg: 'var(--accent-fg)',
-          soft: 'var(--accent-soft)',
-          hover: 'var(--accent-hover)',
+          DEFAULT: v('accent'),
+          fg: v('accent-fg'),
+          soft: v('accent-soft'),
+          hover: v('accent-hover'),
         },
         ok: {
-          DEFAULT: 'var(--ok)',
-          fg: 'var(--ok-fg)',
-          soft: 'var(--ok-soft)',
+          DEFAULT: v('ok'),
+          fg: v('ok-fg'),
+          soft: v('ok-soft'),
         },
         warn: {
-          DEFAULT: 'var(--warn)',
-          fg: 'var(--warn-fg)',
-          soft: 'var(--warn-soft)',
+          DEFAULT: v('warn'),
+          fg: v('warn-fg'),
+          soft: v('warn-soft'),
         },
         danger: {
-          DEFAULT: 'var(--danger)',
-          fg: 'var(--danger-fg)',
-          soft: 'var(--danger-soft)',
+          DEFAULT: v('danger'),
+          fg: v('danger-fg'),
+          soft: v('danger-soft'),
         },
         info: {
-          DEFAULT: 'var(--info)',
-          fg: 'var(--info-fg)',
-          soft: 'var(--info-soft)',
+          DEFAULT: v('info'),
+          fg: v('info-fg'),
+          soft: v('info-soft'),
+        },
+        border: v('border'),
+        tool: {
+          halal: v('tool-halal'),
+          'halal-soft': v('tool-halal-soft'),
+          doctor: v('tool-doctor'),
+          'doctor-soft': v('tool-doctor-soft'),
+          money: v('tool-money'),
+          'money-soft': v('tool-money-soft'),
         },
         // Backwards compatibility aliases for existing templates
-        okSoft: 'var(--ok-soft)',
-        warnSoft: 'var(--warn-soft)',
-        dangerSoft: 'var(--danger-soft)',
-        infoSoft: 'var(--info-soft)',
+        okSoft: v('ok-soft'),
+        warnSoft: v('warn-soft'),
+        dangerSoft: v('danger-soft'),
+        infoSoft: v('info-soft'),
       },
       fontFamily: {
         display: 'var(--font-display)',
@@ -62,7 +78,9 @@ export default {
         '2xl': 'var(--radius-2xl)',
         full: 'var(--radius-full)',
       },
+      backdropBlur: { xs: '2px' },
       boxShadow: {
+        xs: '0 1px 2px rgba(0, 0, 0, 0.06)',
         e1: 'var(--shadow-1)',
         e2: 'var(--shadow-2)',
         e3: 'var(--shadow-3)',
@@ -83,7 +101,7 @@ export default {
         out: 'var(--ease-out)',
         spring: 'var(--ease-spring)',
       },
-      transitionDuration: { fast: '130ms', mid: '220ms', slow: '350ms' },
+      transitionDuration: { fast: '130ms', mid: '220ms', slow: '350ms', slower: '700ms' },
       keyframes: {
         pop: {
           '0%': { transform: 'scale(.9)', opacity: '0' },
