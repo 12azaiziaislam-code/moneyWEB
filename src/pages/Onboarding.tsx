@@ -5,7 +5,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, ArrowLeft, Check, ShieldCheck, Lock, Database } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, ShieldCheck, Lock, Database, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
 import { Button } from '../components/ui/Button';
@@ -15,7 +15,7 @@ import { IslamicPattern } from '../components/ui/IslamicPattern';
 import { Sheikh } from '../components/characters/Sheikh';
 import { DoctorChar } from '../components/characters/DoctorChar';
 import { AccountantChar } from '../components/characters/AccountantChar';
-import { usePageTheme } from '../lib/theme';
+import { usePageTheme, systemPrefersDark } from '../lib/theme';
 import { haptic, HAPTIC } from '../lib/haptics';
 
 const GUEST_INTRO_KEY = 'baraka.guestIntro';
@@ -30,13 +30,20 @@ export function guestIntroSeen(): boolean {
 
 export function OnboardingPage() {
   const { t, i18n } = useTranslation();
-  const { role, patchUser, fillDemoData } = useAuth();
+  const { role, patchUser, fillDemoData, themeMode, setThemeMode } = useAuth();
   const { show } = useToast();
   const [step, setStep] = useState(0);
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [forceReady, setForceReady] = useState(false);
   usePageTheme('halal');
+
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark());
+  const toggleTheme = () => {
+    const next = isDark ? 'light' : 'dark';
+    setThemeMode(next);
+    haptic(HAPTIC.tap);
+  };
 
   const isGuest = role === 'guest';
   const total = 4;
@@ -147,13 +154,29 @@ export function OnboardingPage() {
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => (isGuest ? void finishGuest(false) : next())}
-            className="text-xs font-semibold text-muted hover:text-fg transition-colors px-2.5 py-1 rounded hover:bg-surface2"
-          >
-            {t('onboarding2.skip')}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
+              title={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-line bg-surface text-muted hover:text-fg hover:bg-surface2 shadow-sm transition-colors"
+            >
+              {isDark ? (
+                <Sun className="h-3.5 w-3.5 text-[#D4AF37]" aria-hidden="true" />
+              ) : (
+                <Moon className="h-3.5 w-3.5 text-[#45392B]" aria-hidden="true" />
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => (isGuest ? void finishGuest(false) : next())}
+              className="text-xs font-semibold text-muted hover:text-fg transition-colors px-2.5 py-1 rounded hover:bg-surface2"
+            >
+              {t('onboarding2.skip')}
+            </button>
+          </div>
         </div>
 
         {/* Content Arena */}

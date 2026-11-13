@@ -6,7 +6,9 @@ import {
   Globe,
   Lock,
   Mail,
+  Moon,
   ShieldCheck,
+  Sun,
   User as UserIcon,
   Wallet,
 } from 'lucide-react';
@@ -16,7 +18,7 @@ import { Input } from '../components/ui/Field';
 import { cn } from '../components/ui';
 import { LOCALE_LABEL, SUPPORTED_LOCALES } from '../../shared/constants';
 import { changeLocale, type Locale } from '../i18n';
-import { usePageTheme } from '../lib/theme';
+import { usePageTheme, systemPrefersDark } from '../lib/theme';
 import { haptic, HAPTIC } from '../lib/haptics';
 import { Logo } from '../components/characters/Logo';
 import { IslamicPattern } from '../components/ui';
@@ -42,7 +44,16 @@ export function LoginPage() {
     error: authError,
     configured,
     guestEnabled,
+    themeMode,
+    setThemeMode,
   } = useAuth();
+
+  const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark());
+  const toggleTheme = () => {
+    const next = isDark ? 'light' : 'dark';
+    setThemeMode(next);
+    haptic(HAPTIC.tap);
+  };
 
   const [tab, setTab] = useState<'signin' | 'register'>('signin');
   const [loginInput, setLoginInput] = useState('');
@@ -152,25 +163,41 @@ export function LoginPage() {
             </div>
           </div>
 
-          {/* Clean Segmented Language Switcher */}
-          <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-1 shadow-sm">
-            <Globe className="ms-1.5 me-0.5 h-3.5 w-3.5 text-muted" aria-hidden="true" />
-            {SUPPORTED_LOCALES.map((locale: Locale) => (
-              <button
-                key={locale}
-                type="button"
-                onClick={() => void changeLocale(locale)}
-                aria-pressed={i18n.language === locale}
-                className={cn(
-                  'rounded px-2.5 py-1 text-xs font-semibold transition-colors duration-fast',
-                  i18n.language === locale
-                    ? 'bg-surface2 text-fg font-bold border border-line shadow-sm'
-                    : 'text-muted hover:text-fg hover:bg-surface2',
-                )}
-              >
-                {LOCALE_LABEL[locale]}
-              </button>
-            ))}
+          {/* Controls: Theme Toggle & Clean Segmented Language Switcher */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
+              title={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-line bg-surface text-muted hover:text-fg hover:bg-surface2 shadow-sm transition-colors"
+            >
+              {isDark ? (
+                <Sun className="h-4 w-4 text-[#D4AF37]" aria-hidden="true" />
+              ) : (
+                <Moon className="h-4 w-4 text-[#45392B]" aria-hidden="true" />
+              )}
+            </button>
+
+            <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-1 shadow-sm">
+              <Globe className="ms-1.5 me-0.5 h-3.5 w-3.5 text-muted" aria-hidden="true" />
+              {SUPPORTED_LOCALES.map((locale: Locale) => (
+                <button
+                  key={locale}
+                  type="button"
+                  onClick={() => void changeLocale(locale)}
+                  aria-pressed={i18n.language === locale}
+                  className={cn(
+                    'rounded px-2.5 py-1 text-xs font-semibold transition-colors duration-fast',
+                    i18n.language === locale
+                      ? 'bg-surface2 text-fg font-bold border border-line shadow-sm'
+                      : 'text-muted hover:text-fg hover:bg-surface2',
+                  )}
+                >
+                  {LOCALE_LABEL[locale]}
+                </button>
+              ))}
+            </div>
           </div>
         </header>
 
