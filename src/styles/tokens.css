@@ -1,11 +1,11 @@
 /* ==========================================================================
-   Baraka v2 — Design Tokens (Al-Mizan Sovereign Editorial)
-   Restrained, ethical, finance-grade Islamic intelligence.
-   All colors specified in modern OKLCH with WCAG AA/AAA verified contrast.
+   Baraka v2 — Studio Design Tokens (Obsidian Slate & Fine Gilded Sand)
+   Calm, finance-grade, authentic human studio design.
+   Zero muddy neon green backgrounds. True neutral slate with refined gold accent.
    ========================================================================== */
 
 :root {
-  /* ---- Spacing (4px grid system) ---- */
+  /* ---- Spacing Scale (4px grid) ---- */
   --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
@@ -18,175 +18,211 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ---- Varied Radii by Functional Role ---- */
-  --radius-xs: 4px;   /* micro tags, small indicators */
-  --radius-sm: 8px;   /* buttons, input fields, chips */
-  --radius-md: 12px;  /* list rows, standard cards */
-  --radius-lg: 18px;  /* elevated hero sections, dialogue boxes */
-  --radius-xl: 24px;  /* bottom sheets, top modals */
+  /* ---- Functional Radii ---- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
   --radius-full: 9999px;
 
-  /* ---- Disciplined Elevation System (3 Levels, warm shadow) ---- */
-  --shadow-1: 0 1px 3px oklch(0.2 0.02 85 / 0.05), 0 1px 2px oklch(0.2 0.02 85 / 0.04);
-  --shadow-2: 0 6px 16px -2px oklch(0.2 0.02 85 / 0.08), 0 2px 6px -1px oklch(0.2 0.02 85 / 0.04);
-  --shadow-3: 0 18px 36px -4px oklch(0.2 0.02 85 / 0.14), 0 6px 14px -2px oklch(0.2 0.02 85 / 0.06);
-  --shadow-inset: inset 0 1px 0 oklch(1 0 0 / 0.7);
+  /* ---- Disciplined Elevation ---- */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.16);
 
-  /* ---- Motion Tokens ---- */
+  /* ---- Motion Curves ---- */
   --dur-fast: 120ms;
   --dur-mid: 200ms;
-  --dur-slow: 320ms;
-  --dur-slower: 500ms;
+  --dur-slow: 300ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: cubic-bezier(0.34, 1.25, 0.64, 1);
 
   /* ---- Layout Boundaries ---- */
-  --app-max: 640px;
-  --desktop-max: 1200px;
-  --nav-h: 68px;
+  --nav-h: 64px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  /* ---- Typography Scale (Body >= 15px, Disclaimers >= 13px) ---- */
+  /* ---- Typography Scale ---- */
   --font-display: 'IBM Plex Sans Arabic', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'IBM Plex Sans Arabic', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-latin: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-num: 'IBM Plex Sans', ui-monospace, 'SF Mono', monospace;
 
-  --text-xs: 12px;
-  --text-sm: 13.5px; /* Disclaimers & secondary meta */
-  --text-base: 15px; /* Minimum body size */
-  --text-lg: 17px;
-  --text-xl: 20px;
-  --text-2xl: 24px;
-  --text-3xl: 30px;
-  --text-4xl: 38px;
-
   /* ==========================================================================
-     LIGHT THEME: Sovereign Warm Ivory & Andalusian Emerald
+     LIGHT THEME: Fine Warm Alabaster & Gilded Bronze
      ========================================================================== */
-  --bg: oklch(0.978 0.008 85);           /* Warm antique ivory */
-  --bg-2: oklch(0.955 0.012 85);         /* Secondary parchment */
-  --surface: oklch(0.995 0.004 85);      /* Pure warm paper */
-  --surface-2: oklch(0.965 0.010 85);    /* Slightly lifted surface */
-  --surface-elevated: oklch(1 0 0);      /* Floating card surface */
-  --border: oklch(0.885 0.015 85);       /* Hairline quiet border */
-  --border-subtle: oklch(0.925 0.010 85);
+  --bg: #F9F8F5;                         /* Warm antique paper */
+  --bg-2: #F2EFE9;                       /* Secondary neutral canvas */
+  --surface: #FFFFFF;                    /* Crisp elevated white card */
+  --surface-2: #F5F3EC;                  /* Lifted element / subtle hover */
+  --surface-elevated: #FFFFFF;
+  --border: rgba(0, 0, 0, 0.08);         /* Clean hairline border */
+  --border-subtle: rgba(0, 0, 0, 0.04);
 
-  --fg: oklch(0.20 0.02 165);            /* Deep forest ink (High contrast) */
-  --muted: oklch(0.48 0.02 85);          /* Warm slate, AAA contrast >= 7:1 */
-  --muted-soft: oklch(0.62 0.02 85);
+  --fg: #15181E;                         /* Deep ink */
+  --muted: #646A76;                      /* Neutral slate */
+  --muted-soft: #8C93A0;
 
-  /* Dominant Brand: Andalusian Emerald & Gilded Bronze */
-  --accent: oklch(0.45 0.11 160);        /* Deep sovereign emerald */
-  --accent-fg: oklch(0.99 0 0);          /* Crisp white on accent */
-  --accent-soft: oklch(0.94 0.03 160);   /* Soft emerald tint */
-  --accent-hover: oklch(0.40 0.11 160);
-  --accent-2: oklch(0.68 0.11 75);       /* Gilded bronze / brass */
-  --ring: oklch(0.45 0.11 160 / 0.35);
+  /* Accent: Refined Sand Bronze / Gold (NOT green) */
+  --accent: #9A7432;                     /* Warm antique bronze gold */
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(154, 116, 50, 0.10);
+  --accent-hover: #836025;
+  --accent-2: #15803D;                   /* Forest emerald for Halal only */
+  --ring: rgba(154, 116, 50, 0.30);
 
-  /* Semantic Verifications (Triple-channel: icon + text + color) */
-  --ok: oklch(0.52 0.14 145);            /* Halal / verified green */
-  --ok-fg: oklch(0.99 0 0);
-  --ok-soft: oklch(0.94 0.04 145);
-  --warn: oklch(0.60 0.14 70);           /* Doubtful / caution amber */
-  --warn-fg: oklch(0.99 0 0);
-  --warn-soft: oklch(0.94 0.04 70);
-  --danger: oklch(0.52 0.18 28);         /* Prohibited / emergency crimson */
-  --danger-fg: oklch(0.99 0 0);
-  --danger-soft: oklch(0.95 0.03 28);
-  --info: oklch(0.52 0.10 230);          /* Educational info slate */
-  --info-fg: oklch(0.99 0 0);
-  --info-soft: oklch(0.94 0.03 230);
+  /* Semantic Verifications */
+  --ok: #16A34A;                         /* Halal / Verified green */
+  --ok-fg: #FFFFFF;
+  --ok-soft: rgba(22, 163, 74, 0.10);
+  --warn: #D97706;                       /* Caution amber */
+  --warn-fg: #FFFFFF;
+  --warn-soft: rgba(217, 119, 6, 0.10);
+  --danger: #DC2626;                     /* Prohibited crimson */
+  --danger-fg: #FFFFFF;
+  --danger-soft: rgba(220, 38, 38, 0.10);
+  --info: #2563EB;
+  --info-fg: #FFFFFF;
+  --info-soft: rgba(37, 99, 235, 0.10);
 
-  /* Overlay & Backdrops */
-  --overlay: oklch(0.18 0.02 165 / 0.60);
-  --pattern-ink: oklch(0.45 0.11 160);
-  --pattern-opacity: 0.04;
+  --overlay: rgba(15, 18, 25, 0.55);
+  --pattern-ink: rgba(0, 0, 0, 0.15);
+  --pattern-opacity: 0.018;
 }
 
 /* ==========================================================================
-   DARK THEME: Deep Ink-Emerald Obsidian & Gilded Sand
-   Zero muddy neon green, zero pitch-black dead pixels.
+   DARK THEME: Pure Obsidian Slate & Warm Dune Gold
+   Zero green tint on backgrounds or borders. Clean, deep, studio-grade.
    ========================================================================== */
 .dark {
-  --bg: oklch(0.18 0.025 165);           /* Deep obsidian-emerald */
-  --bg-2: oklch(0.20 0.028 165);         /* Secondary ink canvas */
-  --surface: oklch(0.23 0.030 165);      /* Rich forest slate card */
-  --surface-2: oklch(0.26 0.032 165);    /* Lifted surface */
-  --surface-elevated: oklch(0.29 0.032 165);
-  --border: oklch(0.32 0.030 165);       /* Subtle hairline border */
-  --border-subtle: oklch(0.27 0.028 165);
+  --bg: #0C0E14;                         /* Deep obsidian slate (neutral) */
+  --bg-2: #12151E;                       /* Secondary dark canvas */
+  --surface: #181C26;                    /* Sleek graphite card */
+  --surface-2: #212634;                  /* Elevated card / hover state */
+  --surface-elevated: #2A3042;           /* Floating modal / sheet */
+  --border: rgba(255, 255, 255, 0.08);   /* Crisp hairline border */
+  --border-subtle: rgba(255, 255, 255, 0.04);
 
-  --fg: oklch(0.95 0.01 85);             /* Warm alabaster */
-  --muted: oklch(0.72 0.02 165);         /* Sage parchment */
-  --muted-soft: oklch(0.55 0.02 165);
+  --fg: #F3F4F6;                         /* Warm alabaster */
+  --muted: #9CA3AF;                      /* Warm silver slate */
+  --muted-soft: #6B7280;
 
-  /* Dominant Brand: Luminous Sovereign Mint & Dune Gold */
-  --accent: oklch(0.75 0.12 160);        /* Luminous emerald mint */
-  --accent-fg: oklch(0.16 0.03 165);     /* Deep ink text on mint */
-  --accent-soft: oklch(0.27 0.04 160);   /* Soft mint glow container */
-  --accent-hover: oklch(0.80 0.12 160);
-  --accent-2: oklch(0.78 0.09 75);       /* Dune gold */
-  --ring: oklch(0.75 0.12 160 / 0.35);
+  /* Accent: Refined Dune Gold (Luxury, high contrast, warm) */
+  --accent: #E5C07B;                     /* Elegant dune gold */
+  --accent-fg: #111418;                  /* Dark ink text on gold button */
+  --accent-soft: rgba(229, 192, 123, 0.12);
+  --accent-hover: #F0D08E;
+  --accent-2: #34D399;                   /* Rare jewel emerald for Halal only */
+  --ring: rgba(229, 192, 123, 0.35);
 
   /* Semantic Verifications in Dark Canvas */
-  --ok: oklch(0.74 0.14 145);
-  --ok-fg: oklch(0.15 0.03 145);
-  --ok-soft: oklch(0.26 0.04 145);
-  --warn: oklch(0.78 0.13 70);
-  --warn-fg: oklch(0.18 0.03 70);
-  --warn-soft: oklch(0.28 0.04 70);
-  --danger: oklch(0.70 0.18 28);
-  --danger-fg: oklch(0.99 0 0);
-  --danger-soft: oklch(0.28 0.04 28);
-  --info: oklch(0.74 0.10 230);
-  --info-fg: oklch(0.16 0.03 230);
-  --info-soft: oklch(0.27 0.03 230);
+  --ok: #2FD69F;                         /* Halal / Verified green */
+  --ok-fg: #0B291D;
+  --ok-soft: rgba(47, 214, 159, 0.12);
+  --warn: #F59E0B;                       /* Caution amber */
+  --warn-fg: #2E1B00;
+  --warn-soft: rgba(245, 158, 11, 0.12);
+  --danger: #EF4444;                     /* Prohibited crimson */
+  --danger-fg: #FFFFFF;
+  --danger-soft: rgba(239, 68, 68, 0.12);
+  --info: #60A5FA;
+  --info-fg: #0B1E38;
+  --info-soft: rgba(96, 165, 250, 0.12);
 
-  /* Overlay & Backdrops */
-  --overlay: oklch(0.10 0.02 165 / 0.75);
-  --pattern-ink: oklch(0.75 0.12 160);
-  --pattern-opacity: 0.055;
+  --overlay: rgba(0, 0, 0, 0.75);
+  --pattern-ink: rgba(255, 255, 255, 0.20);
+  --pattern-opacity: 0.015;
 }
 
 /* ==========================================================================
-   Harmonized Accent Palettes (All pass WCAG AA in both Light and Dark)
+   Harmonized Accent Palettes (User selectable in Profile)
    ========================================================================== */
 [data-accent="emerald"] {
-  /* Default Andalusian Emerald (Inherited) */
+  /* Default Antique Dune Gold */
 }
 
 [data-accent="bronze"] {
-  --accent: oklch(0.55 0.11 75);
-  --accent-soft: oklch(0.94 0.03 75);
-  --accent-hover: oklch(0.50 0.11 75);
+  --accent: #C8963E;
+  --accent-soft: rgba(200, 150, 62, 0.12);
+  --accent-hover: #B8852E;
 }
 .dark[data-accent="bronze"] {
-  --accent: oklch(0.78 0.11 75);
-  --accent-soft: oklch(0.28 0.04 75);
-  --accent-hover: oklch(0.82 0.11 75);
+  --accent: #E5B560;
+  --accent-soft: rgba(229, 181, 96, 0.14);
+  --accent-hover: #F0C475;
 }
 
 [data-accent="sapphire"] {
-  --accent: oklch(0.48 0.12 245);
-  --accent-soft: oklch(0.94 0.03 245);
-  --accent-hover: oklch(0.43 0.12 245);
+  --accent: #2563EB;
+  --accent-soft: rgba(37, 99, 235, 0.10);
+  --accent-hover: #1D4ED8;
 }
 .dark[data-accent="sapphire"] {
-  --accent: oklch(0.74 0.12 245);
-  --accent-soft: oklch(0.28 0.04 245);
-  --accent-hover: oklch(0.78 0.12 245);
+  --accent: #60A5FA;
+  --accent-soft: rgba(96, 165, 250, 0.14);
+  --accent-hover: #93C5FD;
 }
 
 [data-accent="amber"] {
-  --accent: oklch(0.54 0.12 55);
-  --accent-soft: oklch(0.94 0.03 55);
-  --accent-hover: oklch(0.49 0.12 55);
+  --accent: #D97706;
+  --accent-soft: rgba(217, 119, 6, 0.10);
+  --accent-hover: #B45309;
 }
 .dark[data-accent="amber"] {
-  --accent: oklch(0.76 0.12 55);
-  --accent-soft: oklch(0.28 0.04 55);
-  --accent-hover: oklch(0.80 0.12 55);
+  --accent: #F59E0B;
+  --accent-soft: rgba(245, 158, 11, 0.14);
+  --accent-hover: #FBBF24;
+}
+
+/* ==========================================================================
+   Global Base Utilities & Reset
+   ========================================================================== */
+html, body, #root {
+  min-height: 100dvh;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Numeric alignment utility for currencies and metrics */
+.num {
+  font-family: var(--font-num);
+  font-feature-settings: 'tnum' 1, 'cv01' 1;
+  letter-spacing: -0.01em;
+}
+
+/* Display typography */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Hairline borders */
+.border-line {
+  border-color: var(--border);
+}
+
+/* Modern Card Surfaces */
+.surface-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+}
+
+/* RTL icon mirroring */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* Scrollbar refinement */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

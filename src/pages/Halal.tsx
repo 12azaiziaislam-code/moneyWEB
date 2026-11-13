@@ -36,7 +36,7 @@ export function HalalPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { show } = useToast();
-  const { role, signIn } = useAuth();
+  const { role } = useAuth();
   const { createChat } = useChatMutations();
   usePageTheme('halal');
 
@@ -149,113 +149,121 @@ export function HalalPage() {
     <div className="flex flex-1 flex-col gap-5 pb-8">
       <PageHeader title={t('home.salam')} subtitle={t('home.salamSub')} />
 
-      {/* Guest Mode Advisory Banner */}
-      {isGuest ? (
-        <div className="rounded-xl border border-warn/30 bg-warn-soft/40 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
-          <div className="space-y-0.5">
-            <p className="text-xs sm:text-sm font-bold text-fg">{t('guest.aiRequiresAuth')}</p>
-            <p className="text-xs text-muted leading-relaxed">{t('guest.localOnly')}</p>
-          </div>
-          <Button size="sm" variant="gold" onClick={() => void signIn()} className="shrink-0 w-full sm:w-auto">
-            {t('guest.signInPrompt')}
-          </Button>
-        </div>
-      ) : null}
-
       {/* 1. HERO SCAN STATION (Only shown when not reviewing a live result) */}
       {!result && !busy ? (
         <div className="space-y-4">
           <div className="relative rounded-2xl border border-line bg-surface p-5 sm:p-7 shadow-e2 overflow-hidden">
-            {/* Viewfinder Target / Camera Frame */}
-            <div className="relative rounded-xl border border-line/60 bg-surface2/50 p-6 flex flex-col items-center justify-center text-center gap-4 transition-all">
-              {/* Corner brackets */}
-              <div className="absolute top-3 start-3 h-4 w-4 border-t-2 border-s-2 border-accent" />
-              <div className="absolute top-3 end-3 h-4 w-4 border-t-2 border-e-2 border-accent" />
-              <div className="absolute bottom-3 start-3 h-4 w-4 border-b-2 border-s-2 border-accent" />
-              <div className="absolute bottom-3 end-3 h-4 w-4 border-b-2 border-e-2 border-accent" />
+            {image ? (
+              /* Image Uploaded: Show in Framed Viewfinder with Corner Brackets */
+              <div className="space-y-4">
+                <div className="relative rounded-xl border border-line/80 bg-black/30 p-4 flex items-center justify-center overflow-hidden">
+                  {/* Viewfinder corner brackets */}
+                  <div className="absolute top-2 start-2 h-4 w-4 border-t-2 border-s-2 border-accent" />
+                  <div className="absolute top-2 end-2 h-4 w-4 border-t-2 border-e-2 border-accent" />
+                  <div className="absolute bottom-2 start-2 h-4 w-4 border-b-2 border-s-2 border-accent" />
+                  <div className="absolute bottom-2 end-2 h-4 w-4 border-b-2 border-e-2 border-accent" />
 
-              {image ? (
-                <div className="relative w-full max-w-sm rounded-lg overflow-hidden border border-line bg-black/40">
-                  <img src={image.dataUrl} alt="" className="max-h-64 w-full object-contain mx-auto" />
+                  <img src={image.dataUrl} alt="" className="max-h-72 w-full object-contain mx-auto rounded" />
                   <IconButton
                     label={t('common.clear')}
                     onClick={() => setImage(null)}
-                    className="absolute end-2 top-2 bg-black/70 text-white hover:bg-black"
+                    className="absolute end-3 top-3 bg-black/70 text-white hover:bg-black"
                   >
                     <X className="h-4 w-4" aria-hidden />
                   </IconButton>
                 </div>
-              ) : (
-                <div className="py-4 space-y-2">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-accent-fg shadow-e1">
-                    <ScanLine className="h-8 w-8" strokeWidth={1.8} />
-                  </div>
-                  <h2 className="font-display text-lg sm:text-xl font-bold text-fg pt-1">
-                    {t('landing.cap1Title')}
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted max-w-[38ch] mx-auto leading-relaxed">
-                    {t('landing.cap1Desc')}
-                  </p>
-                </div>
-              )}
 
-              {/* Action Buttons: Camera & Gallery */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md pt-2">
-                <Button
-                  size="lg"
-                  variant="primary"
-                  onClick={() => cameraRef.current?.click()}
-                  icon={<Camera className="h-5 w-5" />}
-                >
-                  {t('home.cta')}
-                </Button>
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  onClick={() => galleryRef.current?.click()}
-                  icon={<ImageIcon className="h-5 w-5 text-muted" />}
-                >
-                  {t('common.gallery')}
-                </Button>
-              </div>
-
-              {/* Text Input Toggle */}
-              <button
-                type="button"
-                onClick={() => setTyping((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-fg pt-2 cursor-pointer transition-colors"
-              >
-                <Type className="h-3.5 w-3.5" />
-                <span>{typing ? t('common.close') : t('home.orText')}</span>
-              </button>
-            </div>
-
-            {/* Optional Text Entry Section */}
-            {typing ? (
-              <div className="mt-4 pt-4 border-t border-line/60 space-y-3">
-                <Textarea
-                  label={t('halal.placeholder')}
-                  value={text}
-                  maxLength={4000}
-                  onChange={(event) => setText(event.target.value)}
-                />
-              </div>
-            ) : null}
-
-            {/* Execute Scan Button (When Image or Text is Ready) */}
-            {(image || (typing && text.trim().length >= 3)) ? (
-              <div className="mt-4 pt-3 border-t border-line/60">
                 <Button
                   fullWidth
                   size="lg"
                   variant="primary"
                   loading={busy}
                   onClick={() => void scan()}
+                  icon={<ScanLine className="h-5 w-5" />}
                 >
                   {t('halal.scan')}
                 </Button>
               </div>
-            ) : null}
+            ) : (
+              /* No Image: Welcoming Action Hub */
+              <div className="flex flex-col items-center justify-center text-center gap-4 py-2">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-accent border border-accent/20">
+                  <ScanLine className="h-7 w-7" strokeWidth={1.8} />
+                </div>
+                <div className="space-y-1">
+                  <h2 className="font-display text-lg sm:text-xl font-bold text-fg">
+                    {t('landing.cap1Title')}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-muted max-w-[42ch] mx-auto leading-relaxed">
+                    {t('landing.cap1Desc')}
+                  </p>
+                </div>
+
+                {/* Primary Action Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md pt-2">
+                  <Button
+                    size="lg"
+                    variant="primary"
+                    onClick={() => {
+                      if (isGuest) {
+                        show(t('guest.aiRequiresAuth'), 'warning');
+                        return;
+                      }
+                      cameraRef.current?.click();
+                    }}
+                    icon={<Camera className="h-5 w-5" />}
+                  >
+                    {t('home.cta')}
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    onClick={() => {
+                      if (isGuest) {
+                        show(t('guest.aiRequiresAuth'), 'warning');
+                        return;
+                      }
+                      galleryRef.current?.click();
+                    }}
+                    icon={<ImageIcon className="h-5 w-5 text-muted" />}
+                  >
+                    {t('common.gallery')}
+                  </Button>
+                </div>
+
+                {/* Text Input Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setTyping((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-fg pt-1 cursor-pointer transition-colors"
+                >
+                  <Type className="h-3.5 w-3.5" />
+                  <span>{typing ? t('common.close') : t('home.orText')}</span>
+                </button>
+
+                {/* Optional Text Entry Section */}
+                {typing ? (
+                  <div className="w-full max-w-md mt-2 pt-3 border-t border-line/60 space-y-3 text-start">
+                    <Textarea
+                      label={t('halal.placeholder')}
+                      value={text}
+                      maxLength={4000}
+                      onChange={(event) => setText(event.target.value)}
+                    />
+                    <Button
+                      fullWidth
+                      size="lg"
+                      variant="primary"
+                      loading={busy}
+                      disabled={text.trim().length < 3}
+                      onClick={() => void scan()}
+                    >
+                      {t('halal.scan')}
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
 
           {/* Hidden File Inputs */}

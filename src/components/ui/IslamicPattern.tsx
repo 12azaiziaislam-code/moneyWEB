@@ -3,9 +3,9 @@ import { cn } from './cn';
 import { prefersReducedMotion } from '../../lib/motion';
 
 /**
- * Baraka v2 — Sovereign Islamic Geometric Tessellation (Girih Star Rosette).
- * Crisp vector line art at low opacity with subtle organic grain.
- * High performance: pure CSS/SVG, GPU-composited, zero blurry blobs, <1% CPU.
+ * Baraka v2 — Fine Architectural Watermark
+ * Ultra-subtle, monochromatic geometric rosette with delicate noise grain.
+ * Opacity <= 2% to ensure it never competes with foreground content.
  */
 export function IslamicPattern({ className }: { className?: string }) {
   const [active, setActive] = useState(true);
@@ -30,7 +30,7 @@ export function IslamicPattern({ className }: { className?: string }) {
       aria-hidden="true"
     >
       {/* 1. Subtle Paper Grain Texture (SVG Noise Filter) */}
-      <svg className="absolute inset-0 h-full w-full opacity-[0.025] dark:opacity-[0.035] mix-blend-overlay">
+      <svg className="absolute inset-0 h-full w-full opacity-[0.02] dark:opacity-[0.03] mix-blend-overlay">
         <filter id="baraka-grain">
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" />
           <feColorMatrix type="saturate" values="0" />
@@ -38,7 +38,7 @@ export function IslamicPattern({ className }: { className?: string }) {
         <rect width="100%" height="100%" filter="url(#baraka-grain)" />
       </svg>
 
-      {/* 2. Crisp 8-Pointed Star Girih Tessellation */}
+      {/* 2. Delicate 8-Pointed Star Rosette (Monochromatic, low opacity) */}
       <svg
         className={cn(
           'absolute inset-0 h-full w-full transition-opacity duration-slower',
@@ -49,42 +49,27 @@ export function IslamicPattern({ className }: { className?: string }) {
         <defs>
           <pattern
             id="baraka-girih-lattice"
-            width="96"
-            height="96"
+            width="144"
+            height="144"
             patternUnits="userSpaceOnUse"
           >
-            {/* Structural construction lines (0.5px hairline) */}
-            <path
-              d="M0 0 L96 96 M96 0 L0 96 M48 0 L48 96 M0 48 L96 48"
-              stroke="var(--pattern-ink)"
-              strokeWidth="0.5"
-              strokeDasharray="2 4"
-              fill="none"
-              opacity="0.3"
-            />
-
-            {/* Central 8-pointed star rosette (Khatam) */}
-            <g fill="none" stroke="var(--pattern-ink)" strokeWidth="0.85">
-              <rect x="30" y="30" width="36" height="36" rx="1.5" />
-              <rect x="30" y="30" width="36" height="36" rx="1.5" transform="rotate(45 48 48)" />
-              <circle cx="48" cy="48" r="12" strokeWidth="0.5" strokeDasharray="2 2" opacity="0.6" />
-              <circle cx="48" cy="48" r="2.5" fill="var(--pattern-ink)" opacity="0.5" />
+            {/* Subtle central star rosette */}
+            <g fill="none" stroke="var(--pattern-ink)" strokeWidth="0.75">
+              <rect x="44" y="44" width="56" height="56" rx="2" />
+              <rect x="44" y="44" width="56" height="56" rx="2" transform="rotate(45 72 72)" />
+              <circle cx="72" cy="72" r="18" strokeWidth="0.5" strokeDasharray="3 3" opacity="0.5" />
             </g>
 
-            {/* Interlocking corner rosettes for seamless tiling */}
-            <g fill="none" stroke="var(--pattern-ink)" strokeWidth="0.85">
-              {/* Top-Left */}
-              <rect x="-18" y="-18" width="36" height="36" rx="1.5" />
-              <rect x="-18" y="-18" width="36" height="36" rx="1.5" transform="rotate(45 0 0)" />
-              {/* Top-Right */}
-              <rect x="78" y="-18" width="36" height="36" rx="1.5" />
-              <rect x="78" y="-18" width="36" height="36" rx="1.5" transform="rotate(45 96 0)" />
-              {/* Bottom-Right */}
-              <rect x="78" y="78" width="36" height="36" rx="1.5" />
-              <rect x="78" y="78" width="36" height="36" rx="1.5" transform="rotate(45 96 96)" />
-              {/* Bottom-Left */}
-              <rect x="-18" y="78" width="36" height="36" rx="1.5" />
-              <rect x="-18" y="78" width="36" height="36" rx="1.5" transform="rotate(45 0 96)" />
+            {/* Corner rosettes */}
+            <g fill="none" stroke="var(--pattern-ink)" strokeWidth="0.75" opacity="0.6">
+              <rect x="-28" y="-28" width="56" height="56" rx="2" />
+              <rect x="-28" y="-28" width="56" height="56" rx="2" transform="rotate(45 0 0)" />
+              <rect x="116" y="-28" width="56" height="56" rx="2" />
+              <rect x="116" y="-28" width="56" height="56" rx="2" transform="rotate(45 144 0)" />
+              <rect x="116" y="116" width="56" height="56" rx="2" />
+              <rect x="116" y="116" width="56" height="56" rx="2" transform="rotate(45 144 144)" />
+              <rect x="-28" y="116" width="56" height="56" rx="2" />
+              <rect x="-28" y="116" width="56" height="56" rx="2" transform="rotate(45 0 144)" />
             </g>
           </pattern>
         </defs>
@@ -96,9 +81,6 @@ export function IslamicPattern({ className }: { className?: string }) {
           opacity="var(--pattern-opacity)"
         />
       </svg>
-
-      {/* 3. Subtle hairline horizon separator */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-60" />
     </div>
   );
 }

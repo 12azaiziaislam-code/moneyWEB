@@ -139,21 +139,24 @@ export function AppShell({ children }: { children: ReactNode }) {
                     end={end}
                     className={({ isActive }) =>
                       cn(
-                        'flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-bold transition-all duration-fast cursor-pointer',
+                        'relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-bold transition-all duration-fast cursor-pointer',
                         isActive
-                          ? 'bg-accent text-accent-fg shadow-e1'
-                          : 'text-muted hover:text-fg hover:bg-surface2',
+                          ? 'bg-surface2 text-fg border border-line shadow-sm'
+                          : 'text-muted hover:text-fg hover:bg-surface2/60',
                       )
                     }
                   >
                     {({ isActive }) => (
                       <>
                         <Icon
-                          className={cn('h-5 w-5 shrink-0 transition-transform', isActive && 'scale-105')}
-                          strokeWidth={isActive ? 2.4 : 1.8}
+                          className={cn('h-5 w-5 shrink-0 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
+                          strokeWidth={isActive ? 2.2 : 1.75}
                           aria-hidden
                         />
-                        <span className="truncate">{t(`nav.${key}`)}</span>
+                        <span className="truncate flex-1">{t(`nav.${key}`)}</span>
+                        {isActive ? (
+                          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+                        ) : null}
                       </>
                     )}
                   </NavLink>
@@ -200,8 +203,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         ) : null}
 
-        {/* Page View Wrapper */}
-        <main className="flex-1 flex flex-col w-full max-w-3xl mx-auto px-4 sm:px-6 pt-3 pb-[calc(var(--nav-h)+2rem+var(--safe-bottom))] lg:pb-8 safe-x">
+        {/* Page View Wrapper (Spacious on desktop) */}
+        <main className="flex-1 flex flex-col w-full max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-[calc(var(--nav-h)+2rem+var(--safe-bottom))] lg:pb-12 safe-x">
           {children}
         </main>
       </div>
@@ -222,18 +225,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                 end={end}
                 className={({ isActive }) =>
                   cn(
-                    'flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-lg px-1.5 py-1 text-[11px] font-bold transition-all duration-fast cursor-pointer',
+                    'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-[10.5px] font-bold transition-all duration-fast cursor-pointer',
                     isActive
-                      ? 'bg-accent text-accent-fg shadow-sm'
-                      : 'text-muted hover:text-fg hover:bg-surface2',
+                      ? 'bg-surface2 text-fg border border-line/60 shadow-xs'
+                      : 'text-muted hover:text-fg hover:bg-surface2/50',
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
                     <Icon
-                      className={cn('h-5 w-5 transition-transform', isActive && 'scale-105')}
-                      strokeWidth={isActive ? 2.4 : 1.75}
+                      className={cn('h-5 w-5 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
+                      strokeWidth={isActive ? 2.2 : 1.75}
                       aria-hidden
                     />
                     <span className="truncate">{t(`nav.${key}`)}</span>

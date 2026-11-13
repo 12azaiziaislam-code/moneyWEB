@@ -18,19 +18,19 @@ const sizes: Record<Size, string> = {
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-accent text-accent-fg border border-accent shadow-e1 hover:opacity-95 active:opacity-90',
+    'bg-accent text-accent-fg border border-accent/40 shadow-1 hover:brightness-105 active:brightness-95',
   secondary:
-    'bg-surface text-fg border border-line shadow-e1 hover:bg-surface2 hover:border-line/80 active:bg-surface2',
+    'bg-surface2 text-fg border border-line shadow-1 hover:bg-surface2/80 active:bg-surface2',
   outline:
-    'bg-transparent text-fg border border-line hover:bg-surface2 hover:border-fg/30 active:bg-surface2',
+    'bg-transparent text-fg border border-line hover:bg-surface2 hover:border-fg/20 active:bg-surface2',
   soft:
     'bg-accent-soft text-accent border border-transparent hover:brightness-95 active:brightness-90',
   ghost:
     'bg-transparent text-muted hover:text-fg hover:bg-surface2 active:bg-surface2',
   danger:
-    'bg-danger text-danger-fg border border-danger shadow-e1 hover:opacity-95 active:opacity-90',
+    'bg-danger text-danger-fg border border-danger shadow-1 hover:opacity-95 active:opacity-90',
   gold:
-    'bg-[var(--accent-2)] text-[oklch(0.18_0.02_165)] border border-[var(--accent-2)] shadow-e1 hover:opacity-95 active:opacity-90',
+    'bg-accent text-accent-fg border border-accent/40 shadow-1 hover:brightness-105 active:brightness-95',
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

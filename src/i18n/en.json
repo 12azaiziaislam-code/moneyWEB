@@ -191,7 +191,7 @@
     "disclaimer": "Information only — not a diagnosis or a prescription. See a doctor."
   },
   "accountant": {
-    "title": "Accountant AI",
+    "title": "Personal Budget",
     "balance": "Current balance",
     "setBalance": "Enter balance",
     "editBalance": "Edit balance",
@@ -525,7 +525,7 @@
   },
   "theme": {
     "system": "System default",
-    "light": "Warm Ivory Light",
-    "dark": "Obsidian Emerald Dark"
+    "light": "Light mode",
+    "dark": "Dark mode"
   }
 }

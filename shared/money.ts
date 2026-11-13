@@ -137,9 +137,19 @@ export function formatMoney(
 ): string {
   const exp = currencyExponent(currency);
   const value = minor / 10 ** exp;
-  const digits = options.showZeroDecimals ? 0 : exp;
+  const isRub = currency.toUpperCase() === 'RUB';
+  const hasFrac = Math.abs(minor % (10 ** exp)) > 0;
+  const digits = hasFrac ? exp : options.showZeroDecimals ? exp : 0;
   try {
-    return new Intl.NumberFormat(locale, {
+    if (isRub) {
+      const formattedNum = new Intl.NumberFormat('ru-RU', {
+        maximumFractionDigits: digits,
+        minimumFractionDigits: digits,
+        notation: options.compact ? 'compact' : 'standard',
+      }).format(value);
+      return `${formattedNum} ₽`;
+    }
+    return new Intl.NumberFormat(locale === 'ar' ? 'ar-u-nu-latn' : locale, {
       style: 'currency',
       currency: currency.toUpperCase(),
       minimumFractionDigits: digits,
@@ -147,7 +157,7 @@ export function formatMoney(
       notation: options.compact ? 'compact' : 'standard',
     }).format(value);
   } catch {
-    return `${minorToDecimalString(minor, currency)} ${currency}`;
+    return `${minorToDecimalString(minor, currency)} ${isRub ? '₽' : currency}`;
   }
 }
 

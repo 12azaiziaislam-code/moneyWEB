@@ -13,9 +13,9 @@ import { bloom, shake, stamp, prefersReducedMotion } from '../lib/motion';
 import { haptic, HAPTIC } from '../lib/haptics';
 
 const STYLES: Record<Verdict, { ring: string; icon: typeof ShieldCheck; tone: 'ok' | 'danger' | 'warn' }> = {
-  halal: { ring: 'bg-risk-green text-risk-greenFg', icon: ShieldCheck, tone: 'ok' },
-  haram: { ring: 'bg-risk-red text-risk-redFg', icon: ShieldAlert, tone: 'danger' },
-  mashbooh: { ring: 'bg-risk-yellow text-risk-yellowFg', icon: ShieldQuestion, tone: 'warn' },
+  halal: { ring: 'bg-ok text-ok-fg', icon: ShieldCheck, tone: 'ok' },
+  haram: { ring: 'bg-danger text-danger-fg', icon: ShieldAlert, tone: 'danger' },
+  mashbooh: { ring: 'bg-warn text-warn-fg', icon: ShieldQuestion, tone: 'warn' },
 };
 
 export function VerdictCard({

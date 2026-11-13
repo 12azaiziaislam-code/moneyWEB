@@ -8,9 +8,9 @@ export type RingTone = 'accent' | 'ok' | 'warn' | 'danger' | 'info';
 
 const toneVar: Record<RingTone, string> = {
   accent: 'var(--accent)',
-  ok: 'var(--risk-green)',
-  warn: 'var(--risk-yellow)',
-  danger: 'var(--risk-red)',
+  ok: 'var(--ok)',
+  warn: 'var(--warn)',
+  danger: 'var(--danger)',
   info: 'var(--info)',
 };
 
@@ -57,7 +57,7 @@ export function ProgressRing({
       aria-label={`${label}: ${Math.round(clamped)}%`}
     >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" aria-hidden="true">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--surface-2)" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border)" strokeWidth={stroke} />
         <circle
           ref={circleRef}
           cx={size / 2}

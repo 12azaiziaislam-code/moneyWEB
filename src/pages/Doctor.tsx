@@ -26,7 +26,7 @@ export function DoctorPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { show } = useToast();
-  const { role, signIn } = useAuth();
+  const { role } = useAuth();
   const { health } = useFinance();
   const { createChat } = useChatMutations();
   usePageTheme('doctor');
@@ -158,18 +158,6 @@ export function DoctorPage() {
             <Phone className="h-4 w-4" aria-hidden />
             <span>{t('doctor.call112')}</span>
           </a>
-        </div>
-      ) : null}
-
-      {/* Guest Mode Banner */}
-      {role === 'guest' ? (
-        <div className="rounded-xl border border-warn/30 bg-warn-soft/40 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
-          <p className="text-xs sm:text-sm text-fg leading-relaxed">
-            {t('guest.aiRequiresAuth')}
-          </p>
-          <Button size="sm" variant="gold" onClick={() => void signIn()} className="shrink-0 w-full sm:w-auto">
-            {t('guest.signInPrompt')}
-          </Button>
         </div>
       ) : null}
 

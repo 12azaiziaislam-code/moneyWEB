@@ -216,6 +216,7 @@ export function AccountantPage() {
                 <Button
                   size="sm"
                   variant="outline"
+                  className="shrink-0 whitespace-nowrap"
                   onClick={() => {
                     setBalanceDraft(String(Math.round(plan.balanceMinor / 100)));
                     setSheet('balance');
@@ -227,7 +228,7 @@ export function AccountantPage() {
 
               {/* Status Indicator */}
               <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between">
-                <span className="text-xs text-muted">حالة الميزانية الحالية:</span>
+                <span className="text-xs text-muted">حالة الميزانية:</span>
                 <Badge tone={plan.danger === 'red' ? 'danger' : plan.danger === 'orange' ? 'warn' : 'ok'}>
                   {t(`accountant.danger.${plan.danger}`)}
                 </Badge>
@@ -235,17 +236,15 @@ export function AccountantPage() {
 
               {/* Red Warning Banner */}
               {plan.danger === 'red' ? (
-                <div className="mt-4 space-y-2 rounded-xl bg-danger-soft/60 border border-danger/30 p-3.5 text-danger">
-                  <div className="flex items-center gap-2 font-display text-sm font-bold">
-                    <AlertTriangle className="h-4 w-4 shrink-0" />
-                    <span>{t('accountant.redTitle')}</span>
-                  </div>
-                  <p className="text-xs leading-relaxed text-fg">
+                <div className="mt-3 rounded-xl bg-danger-soft/50 border border-danger/25 p-3 text-xs leading-relaxed text-danger flex items-start gap-2.5">
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-danger" />
+                  <div className="text-fg leading-relaxed">
+                    <strong className="text-danger font-bold block mb-0.5">{t('accountant.redTitle')}</strong>
                     {t('accountant.redBody', {
                       date: formatCalendarDate(plan.projectedRunOutDate ?? plan.cycleEnd, locale),
                       days: plan.daysWithoutMoney || plan.daysLeft,
                     })}
-                  </p>
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -378,7 +377,13 @@ export function AccountantPage() {
                   {t('accountant.transactions')}
                 </p>
                 <span className="text-xs text-muted font-semibold">
-                  {transactions.length} عملية مسجلة
+                  {transactions.length === 1
+                    ? 'معاملة واحدة'
+                    : transactions.length === 2
+                      ? 'معاملتان'
+                      : transactions.length >= 3 && transactions.length <= 10
+                        ? `${transactions.length} عمليات مسجلة`
+                        : `${transactions.length} عملية مسجلة`}
                 </span>
               </div>
 
@@ -417,7 +422,8 @@ export function AccountantPage() {
                       </div>
 
                       <div className="flex items-center gap-2.5 shrink-0">
-                        <span
+                        <bdi
+                          dir="ltr"
                           className={cn(
                             'num whitespace-nowrap text-sm font-extrabold',
                             tx.kind === 'income' ? 'text-ok' : 'text-fg',
@@ -425,11 +431,11 @@ export function AccountantPage() {
                         >
                           {tx.kind === 'income' ? '+' : '−'}
                           {formatMoney(tx.amountMinor, currency, locale)}
-                        </span>
+                        </bdi>
                         <IconButton
                           label={t('common.delete')}
                           onClick={() => void deleteTransaction(tx.id)}
-                          className="text-muted hover:text-danger hover:bg-danger-soft/40"
+                          className="text-muted hover:text-danger hover:bg-danger-soft/40 opacity-40 group-hover:opacity-100 transition-opacity"
                         >
                           <Trash2 className="h-4 w-4" aria-hidden />
                         </IconButton>
