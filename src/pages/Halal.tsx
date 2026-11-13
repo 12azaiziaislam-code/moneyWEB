@@ -1,9 +1,11 @@
-/** Halal home: the Sheikh, one big scan button, a calm scan state and the verdict. */
+/**
+ * Halal Verification Desk: Camera, Gallery upload, Text entry, and Verdict Card.
+ */
 
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Camera, Image as ImageIcon, Type, X } from 'lucide-react';
+import { Camera, Image as ImageIcon, Type, X, RefreshCw } from 'lucide-react';
 import type { HalalResult } from '../../shared/types';
 import { PageHeader } from '../components/AppShell';
 import { VerdictCard } from '../components/VerdictCard';
@@ -124,43 +126,58 @@ export function HalalPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-3 pb-4">
+    <div className="flex flex-1 flex-col gap-4 pb-6">
       <PageHeader title={t('home.salam')} subtitle={t('home.salamSub')} />
 
       {!result && !busy ? (
-        <div className="surface-card relative overflow-hidden px-4 pb-5 pt-3">
-          <div className="pointer-events-none absolute -end-4 -top-4" aria-hidden="true">
-            <Sheikh size={96} />
+        <div className="surface-card p-5 sm:p-6 space-y-5">
+          <div className="flex items-center gap-4">
+            <Sheikh size={64} className="shrink-0 text-accent" />
+            <div className="min-w-0 flex-1">
+              <h2 className="text-display text-base sm:text-lg font-bold text-fg">
+                {t('landing.cap1Title')}
+              </h2>
+              <p className="text-xs sm:text-sm text-muted leading-relaxed">
+                {t('landing.cap1Desc')}
+              </p>
+            </div>
           </div>
 
-          <div className="relative mt-8 flex flex-col items-center gap-3">
-            <button
-              type="button"
-              onClick={() => cameraRef.current?.click()}
-              className="relative flex h-32 w-32 items-center justify-center rounded-full bg-accent text-accent-fg shadow-e3 transition-transform duration-200 active:scale-95"
-              aria-label={t('home.cta')}
-            >
-              <span className="absolute inset-0 animate-pulse-ring rounded-full bg-accent opacity-30" aria-hidden="true" />
-              <Camera className="h-10 w-10" strokeWidth={2} aria-hidden />
-            </button>
-            <p className="text-[13px] font-bold">{t('home.cta')}</p>
+          <div className="border-t border-line/60 pt-4 flex flex-col items-center gap-4">
+            {/* Action Triggers */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+              <button
+                type="button"
+                onClick={() => cameraRef.current?.click()}
+                className="flex items-center justify-center gap-2.5 rounded-md border border-line bg-surface2 px-4 py-3.5 text-sm font-semibold text-fg hover:border-accent/40 transition-colors"
+              >
+                <Camera className="h-5 w-5 text-accent" strokeWidth={1.8} aria-hidden />
+                <span>{t('home.cta')}</span>
+              </button>
 
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Chip onClick={() => galleryRef.current?.click()}>
-                <ImageIcon className="me-1 inline h-3.5 w-3.5" aria-hidden /> {t('common.gallery')}
-              </Chip>
+              <button
+                type="button"
+                onClick={() => galleryRef.current?.click()}
+                className="flex items-center justify-center gap-2.5 rounded-md border border-line bg-surface2 px-4 py-3.5 text-sm font-semibold text-fg hover:border-accent/40 transition-colors"
+              >
+                <ImageIcon className="h-5 w-5 text-muted" strokeWidth={1.8} aria-hidden />
+                <span>{t('common.gallery')}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center justify-center w-full">
               <Chip active={typing} onClick={() => setTyping((value) => !value)}>
                 <Type className="me-1 inline h-3.5 w-3.5" aria-hidden /> {t('home.orText')}
               </Chip>
             </div>
 
             {image ? (
-              <div className="relative w-full">
-                <img src={image.dataUrl} alt="" className="max-h-40 w-full rounded-md object-cover" />
+              <div className="relative w-full rounded-md border border-line overflow-hidden bg-surface2">
+                <img src={image.dataUrl} alt="" className="max-h-56 w-full object-contain" />
                 <IconButton
                   label={t('common.clear')}
                   onClick={() => setImage(null)}
-                  className="absolute end-1 top-1 bg-black/50 text-white"
+                  className="absolute end-2 top-2 bg-black/60 text-white hover:bg-black/80"
                 >
                   <X className="h-4 w-4" aria-hidden />
                 </IconButton>
@@ -176,6 +193,12 @@ export function HalalPage() {
                   onChange={(event) => setText(event.target.value)}
                 />
               </div>
+            ) : null}
+
+            {image || typing ? (
+              <Button fullWidth size="lg" loading={busy} onClick={() => void scan()} className="h-11 mt-1">
+                {t('halal.scan')}
+              </Button>
             ) : null}
           </div>
 
@@ -197,36 +220,31 @@ export function HalalPage() {
         </div>
       ) : null}
 
-      {image || typing ? (
-        <Button fullWidth size="lg" loading={busy} onClick={() => void scan()}>
-          {busy ? t('halal.scanning') : t('halal.scan')}
-        </Button>
-      ) : null}
-
       {busy ? (
-        <div className="surface-card space-y-3 p-3">
-          <div className="relative overflow-hidden rounded-md bg-surface2">
-            {image ? <img src={image.dataUrl} alt="" className="max-h-52 w-full object-cover opacity-80" /> : null}
-            <div className="absolute inset-x-0 top-0 h-14 animate-float bg-gradient-to-b from-transparent via-[var(--accent)]/35 to-transparent" />
+        <div className="surface-card space-y-4 p-6 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg border border-line bg-surface2 text-accent">
+            <RefreshCw className="h-6 w-6 animate-spin" />
           </div>
-          <p className="text-center text-[13px] font-semibold text-accent">{t(`home.phrases.p${phrase + 1}`)}</p>
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-4 w-full" />
+          <p className="text-sm font-semibold text-accent">{t(`home.phrases.p${phrase + 1}`)}</p>
+          <div className="space-y-2 pt-2">
+            <Skeleton className="h-4 w-3/4 mx-auto" />
+            <Skeleton className="h-4 w-1/2 mx-auto" />
+          </div>
         </div>
       ) : null}
 
       {result ? (
-        <>
+        <div className="space-y-4">
           <VerdictCard
             result={result}
             imageUrl={image?.dataUrl ?? null}
             onDiscuss={() => void discuss()}
             discussing={discussing}
           />
-          <Button variant="secondary" fullWidth onClick={reset}>
+          <Button variant="secondary" fullWidth onClick={reset} className="h-11">
             {t('halal.newScan')}
           </Button>
-        </>
+        </div>
       ) : null}
 
       <Disclaimer>{t('halal.disclaimer')}</Disclaimer>

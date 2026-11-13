@@ -1,4 +1,6 @@
-/** Animated splash: the brand mark + a calm pulse (respects reduced motion). */
+/**
+ * Splash Screen: Clean, serene brand mark presentation.
+ */
 
 import { useTranslation } from 'react-i18next';
 import { Logo } from './characters/Logo';
@@ -6,16 +8,13 @@ import { Logo } from './characters/Logo';
 export function Splash({ label }: { label?: string }) {
   const { t } = useTranslation();
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-bg" data-theme="halal">
-      <div className="relative">
-        <span className="absolute inset-0 animate-pulse-ring rounded-2xl bg-accent opacity-20" aria-hidden="true" />
-        <div className="animate-pop">
-          <Logo size={84} animated />
-        </div>
+    <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-bg text-fg" data-theme="halal">
+      <div className="p-3 rounded-xl border border-line bg-surface shadow-sm">
+        <Logo size={64} />
       </div>
-      <div className="text-center">
-        <p className="text-display text-xl font-extrabold tracking-tight text-fg">{t('app.name')}</p>
-        <p className="mt-1 text-[12px] text-muted">{label ?? t('app.tagline')}</p>
+      <div className="text-center space-y-1">
+        <p className="text-display text-2xl font-bold tracking-tight text-fg">{t('app.name')}</p>
+        <p className="text-xs text-muted">{label ?? t('app.tagline')}</p>
       </div>
     </div>
   );

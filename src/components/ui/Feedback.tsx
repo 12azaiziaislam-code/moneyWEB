@@ -40,7 +40,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide',
+        'inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-semibold tracking-normal border border-transparent',
         badgeTones[tone],
         className,
       )}
@@ -70,10 +70,10 @@ export function Chip({
       onClick={onClick}
       aria-pressed={ariaPressed ?? active}
       className={cn(
-        'min-h-[38px] shrink-0 rounded-full border px-3.5 text-sm font-semibold transition-all duration-mid active:scale-95',
+        'min-h-[36px] shrink-0 rounded-md border border-line px-3.5 text-xs sm:text-sm font-semibold transition-colors duration-fast active:scale-95',
         active
-          ? 'border-transparent bg-accent text-accent-fg shadow-e1'
-          : 'border-line bg-surface text-muted hover:text-fg',
+          ? 'border-accent bg-accent text-accent-fg shadow-sm'
+          : 'bg-surface text-muted hover:text-fg hover:bg-surface2',
         className,
       )}
     >

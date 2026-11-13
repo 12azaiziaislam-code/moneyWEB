@@ -1,4 +1,6 @@
-/** First-run: three character slides, then consent (users) or a demo start (guests). */
+/**
+ * First-run walkthrough: Three architectural capability overviews, followed by data consent.
+ */
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,9 +40,9 @@ export function OnboardingPage() {
   const isGuest = role === 'guest';
   const total = 4;
   const slides = [
-    { art: <Sheikh size={150} />, title: t('onboarding2.slide1Title'), body: t('onboarding2.slide1Body') },
-    { art: <DoctorChar size={150} />, title: t('onboarding2.slide2Title'), body: t('onboarding2.slide2Body') },
-    { art: <AccountantChar size={150} mood="happy" />, title: t('onboarding2.slide3Title'), body: t('onboarding2.slide3Body') },
+    { art: <Sheikh size={120} />, title: t('onboarding2.slide1Title'), body: t('onboarding2.slide1Body') },
+    { art: <DoctorChar size={120} />, title: t('onboarding2.slide2Title'), body: t('onboarding2.slide2Body') },
+    { art: <AccountantChar size={120} mood="happy" />, title: t('onboarding2.slide3Title'), body: t('onboarding2.slide3Body') },
   ];
 
   const next = () => {
@@ -81,39 +83,47 @@ export function OnboardingPage() {
   const isSlides = step < 3;
 
   return (
-    <div className="mx-auto flex min-h-[100dvh] w-full max-w-app flex-col bg-bg px-4 pb-[calc(1.25rem+var(--safe-bottom))] pt-[calc(1rem+var(--safe-top))]">
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1.5" aria-hidden="true">
+    <div className="mx-auto flex min-h-[100dvh] w-full max-w-lg flex-col bg-bg px-4 pb-[calc(1.5rem+var(--safe-bottom))] pt-[calc(1.5rem+var(--safe-top))] text-fg">
+      {/* Top Header with Progress Bars */}
+      <div className="flex items-center justify-between pb-4">
+        <div className="flex gap-2" aria-hidden="true">
           {Array.from({ length: total }).map((_, index) => (
             <span
               key={index}
-              className={cn('h-1.5 rounded-full transition-all duration-300', index === step ? 'w-6 bg-accent' : 'w-1.5 bg-line')}
+              className={cn(
+                'h-1 rounded transition-all duration-fast',
+                index === step ? 'w-8 bg-accent' : 'w-3 bg-line',
+              )}
             />
           ))}
         </div>
         <button
           type="button"
           onClick={() => (isGuest ? void finishGuest(false) : next())}
-          className="min-h-[36px] px-2 text-[12px] font-bold text-muted"
+          className="min-h-[36px] px-2 text-xs font-semibold text-muted hover:text-fg"
         >
           {t('onboarding2.skip')}
         </button>
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-4 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center gap-5 py-6 text-center">
         {isSlides ? (
-          <>
-            <div className="animate-float">{slides[step].art}</div>
-            <h1 className="text-display text-[24px] font-extrabold text-fg">{slides[step].title}</h1>
-            <p className="max-w-[32ch] text-[14px] leading-relaxed text-muted">{slides[step].body}</p>
-          </>
+          <div className="flex flex-col items-center gap-4">
+            <div className="p-4 rounded-xl border border-line bg-surface shadow-sm">
+              {slides[step].art}
+            </div>
+            <h1 className="text-display text-2xl font-bold text-fg mt-2">{slides[step].title}</h1>
+            <p className="max-w-[36ch] text-sm leading-relaxed text-muted">{slides[step].body}</p>
+          </div>
         ) : (
-          <div className="w-full space-y-3 text-start">
-            <h1 className="text-display text-[22px] font-extrabold text-fg">{t('onboarding2.consentTitle')}</h1>
-            <p className="text-[13px] leading-relaxed text-muted">{t('onboarding2.consentBody')}</p>
+          <div className="w-full space-y-4 text-start surface-card p-6">
+            <div>
+              <h1 className="text-display text-xl font-bold text-fg">{t('onboarding2.consentTitle')}</h1>
+              <p className="mt-1 text-xs leading-relaxed text-muted">{t('onboarding2.consentBody')}</p>
+            </div>
 
             {isGuest ? (
-              <>
+              <div className="space-y-3 pt-2">
                 <Disclaimer>{t('guest.localOnly')}</Disclaimer>
                 <Button fullWidth size="lg" loading={busy} onClick={() => void finishGuest(true)}>
                   {t('guest.demo')}
@@ -121,11 +131,11 @@ export function OnboardingPage() {
                 <Button fullWidth variant="secondary" onClick={() => void finishGuest(false)}>
                   {t('onboarding2.start')}
                 </Button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="space-y-3 pt-2">
                 <Checkbox label={t('consent.health')} checked={consent} onChange={setConsent} />
-                <p className="text-[13px] text-muted">{t('consent.finance')}</p>
+                <p className="text-xs text-muted leading-relaxed">{t('consent.finance')}</p>
                 <Button
                   fullWidth
                   size="lg"
@@ -133,11 +143,12 @@ export function OnboardingPage() {
                   disabled={!consent}
                   icon={<Check className="h-4 w-4" aria-hidden />}
                   onClick={() => void finishUser()}
+                  className="mt-2"
                 >
                   {t('consent.accept')}
                 </Button>
-                {!consent ? <p className="text-center text-[11px] text-warn">{t('consent.mustAccept')}</p> : null}
-              </>
+                {!consent ? <p className="text-center text-[11px] text-warn font-semibold">{t('consent.mustAccept')}</p> : null}
+              </div>
             )}
           </div>
         )}
@@ -148,7 +159,7 @@ export function OnboardingPage() {
           {t('onboarding2.next')}
         </Button>
       ) : (
-        <p className="text-center text-[10px] leading-relaxed text-muted">{t('alerts.sharia')}</p>
+        <p className="text-center text-[11px] leading-relaxed text-muted">{t('alerts.sharia')}</p>
       )}
     </div>
   );

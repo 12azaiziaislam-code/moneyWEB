@@ -36,7 +36,7 @@ export function GuestUpgradeSheet() {
     await setGuestData({
       version: 1,
       settings: guestData?.settings ?? {
-        locale: 'ru',
+        locale: guestData?.settings?.locale ?? 'ar',
         currency: 'RUB',
         timezone: 'Europe/Moscow',
         madhhab: 'none',

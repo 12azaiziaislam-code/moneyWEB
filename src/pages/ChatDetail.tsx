@@ -1,4 +1,6 @@
-/** One conversation screen. */
+/**
+ * One Consultation Conversation Screen.
+ */
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +9,6 @@ import { ChatView } from '../components/ChatView';
 import { Button, IconButton } from '../components/ui/Button';
 import { Disclaimer, Skeleton } from '../components/ui/Feedback';
 import { useChatDetail, useChatMutations } from '../data/chats';
-import { useChatMutations as _unused } from '../data/chats';
 import { usePageTheme } from '../lib/theme';
 import { useToast } from '../state/ToastContext';
 
@@ -42,23 +43,23 @@ export function ChatDetailPage() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <header className="flex items-center gap-2 py-2">
+      <header className="flex items-center gap-2.5 py-2.5 border-b border-line mb-2">
         <IconButton label={t('common.back')} onClick={() => navigate('/chats')}>
           <ChevronLeft className="flip-rtl h-5 w-5" aria-hidden />
         </IconButton>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[15px] font-extrabold">{chat?.title ?? t('chats.title')}</h1>
+          <h1 className="truncate text-sm sm:text-base font-bold text-fg">{chat?.title ?? t('chats.title')}</h1>
           {chat ? <p className="text-[11px] text-muted">{t(`chats.kinds.${chat.kind}`)}</p> : null}
         </div>
         <IconButton label={t('common.delete')} onClick={() => void remove()}>
-          <Trash2 className="h-5 w-5" aria-hidden />
+          <Trash2 className="h-4 w-4 text-muted hover:text-danger" aria-hidden />
         </IconButton>
       </header>
 
       {loading ? (
-        <div className="space-y-2 py-2">
+        <div className="space-y-3 py-4">
           <Skeleton className="h-16 w-3/4" />
-          <Skeleton className="h-16 w-2/3" />
+          <Skeleton className="h-16 w-2/3 ms-auto" />
         </div>
       ) : chat ? (
         <ChatView
@@ -68,7 +69,7 @@ export function ChatDetailPage() {
           disclaimer={disclaimer}
         />
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 surface-card p-8 text-center my-6">
           <p className="text-sm text-muted">{t('errors.not_found')}</p>
           <Button variant="secondary" onClick={() => navigate('/chats')}>
             {t('common.back')}

@@ -7,7 +7,6 @@ import {
   Lock,
   Mail,
   ShieldCheck,
-  Sparkles,
   User as UserIcon,
   Wallet,
   Activity,
@@ -20,56 +19,7 @@ import { LOCALE_LABEL, SUPPORTED_LOCALES } from '../../shared/constants';
 import { changeLocale, type Locale } from '../i18n';
 import { usePageTheme } from '../lib/theme';
 import { haptic, HAPTIC } from '../lib/haptics';
-
-function BrandEmblem({ size = 48 }: { size?: number }) {
-  return (
-    <div
-      className="relative flex items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/10 to-transparent p-2.5 ring-1 ring-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.2)]"
-      style={{ width: size, height: size }}
-      aria-hidden="true"
-    >
-      <svg viewBox="0 0 48 48" className="h-full w-full" fill="none">
-        {/* Subtle Islamic 8-Pointed Star Lattice */}
-        <rect
-          x="12"
-          y="12"
-          width="24"
-          height="24"
-          rx="4"
-          className="stroke-emerald-400/40"
-          strokeWidth="1.5"
-          transform="rotate(45 24 24)"
-        />
-        <rect
-          x="12"
-          y="12"
-          width="24"
-          height="24"
-          rx="4"
-          className="stroke-amber-400/50"
-          strokeWidth="1.5"
-        />
-        {/* Elegant Crescent */}
-        <path
-          d="M26 15c-5.5 1.5-9 6.5-8 12s6 10 11.5 8.5c-4.5.5-9-2.5-10-7.5s2-9.5 6.5-13Z"
-          fill="url(#goldGradient)"
-        />
-        {/* Guiding Star */}
-        <polygon
-          points="31,18 32.2,21.5 35.8,21.5 33,23.6 34,27 31,25 28,27 29,23.6 26.2,21.5 29.8,21.5"
-          fill="url(#goldGradient)"
-        />
-        <defs>
-          <linearGradient id="goldGradient" x1="16" y1="14" x2="36" y2="34" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FDE68A" />
-            <stop offset="0.5" stopColor="#F59E0B" />
-            <stop offset="1" stopColor="#D97706" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
-  );
-}
+import { Logo } from '../components/characters/Logo';
 
 function GoogleMark() {
   return (
@@ -175,76 +125,54 @@ export function LoginPage() {
           : t('auth.error')
       : null);
 
-  const features = [
+  const capabilities = [
     {
-      title: i18n.language === 'ar' ? 'التدقيق الشرعي المالي' : 'Halal Financial Intelligence',
-      desc:
-        i18n.language === 'ar'
-          ? 'فحص شرعي فوري للأسهم، المعاملات، ونسب التطهير بدقة فائقة.'
-          : 'Instant halal analysis of stocks, transactions, and purification ratios.',
+      title: t('landing.cap1Title'),
+      desc: t('landing.cap1Desc'),
       Icon: ShieldCheck,
-      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
     },
     {
-      title: i18n.language === 'ar' ? 'المحاسب الذكي والزكاة' : 'Smart Wealth & Zakat',
-      desc:
-        i18n.language === 'ar'
-          ? 'إدارة الميزانية الشخصية، تتبع المصروفات، وحساب زكاة المال بدقة.'
-          : 'Personal budgeting, expense tracking, and precise Zakat calculation.',
+      title: t('landing.cap2Title'),
+      desc: t('landing.cap2Desc'),
       Icon: Wallet,
-      color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
     },
     {
-      title: i18n.language === 'ar' ? 'المستشار الصحي والغذائي' : 'Pure Health & Nutrition',
-      desc:
-        i18n.language === 'ar'
-          ? 'فحص الأغذية والأدوية للتأكد من سلامتها وخلوها من المحرمات.'
-          : 'AI food & medicine scanning for dietary purity and wellness.',
+      title: t('landing.cap3Title'),
+      desc: t('landing.cap3Desc'),
       Icon: Activity,
-      color: 'text-teal-400 bg-teal-500/10 border-teal-500/20',
     },
   ];
 
   return (
-    <div className="relative min-h-[100dvh] w-full overflow-x-hidden bg-[#071311] text-slate-100 font-body selection:bg-emerald-500 selection:text-white">
-      {/* Ambient Islamic Lattice Background */}
-      <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.04]">
-        <div className="pattern-islamic absolute inset-0 bg-repeat" />
+    <div className="relative min-h-[100dvh] w-full bg-bg text-fg font-body selection:bg-accent selection:text-accent-fg">
+      {/* Subtle architectural backdrop */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div className="pattern-islamic absolute inset-0" />
       </div>
-
-      {/* Radiant glow orbs for luxury depth */}
-      <div
-        className="pointer-events-none fixed -top-40 start-10 h-96 w-96 rounded-full bg-emerald-500/15 blur-[120px]"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none fixed -bottom-40 end-10 h-96 w-96 rounded-full bg-teal-600/10 blur-[140px]"
-        aria-hidden="true"
-      />
 
       <div className="relative z-10 mx-auto min-h-[100dvh] max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col justify-between">
         {/* Navigation Bar */}
-        <header className="flex items-center justify-between py-2 border-b border-white/5">
+        <header className="flex items-center justify-between pb-4 border-b border-line">
           <div className="flex items-center gap-3">
-            <BrandEmblem size={44} />
+            <Logo size={40} />
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-display text-2xl font-extrabold tracking-tight text-white">
+                <span className="font-display text-2xl font-bold tracking-tight text-fg">
                   {t('app.name')}
                 </span>
-                <span className="hidden sm:inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-300">
-                  AI Financial & Ethical Portal
+                <span className="hidden sm:inline-flex rounded border border-line bg-surface2 px-2 py-0.5 text-[11px] font-semibold text-muted">
+                  {t('landing.badge')}
                 </span>
               </div>
-              <p className="text-[11px] text-emerald-100/60 hidden sm:block">
+              <p className="text-[12px] text-muted hidden sm:block">
                 {t('app.tagline')}
               </p>
             </div>
           </div>
 
           {/* Clean Segmented Language Switcher */}
-          <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] p-1 backdrop-blur-md">
-            <Globe className="ms-2 h-3.5 w-3.5 text-emerald-400/80" aria-hidden="true" />
+          <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-1 shadow-sm">
+            <Globe className="ms-1.5 me-0.5 h-3.5 w-3.5 text-muted" aria-hidden="true" />
             {SUPPORTED_LOCALES.map((locale: Locale) => (
               <button
                 key={locale}
@@ -252,10 +180,10 @@ export function LoginPage() {
                 onClick={() => void changeLocale(locale)}
                 aria-pressed={i18n.language === locale}
                 className={cn(
-                  'rounded-full px-2.5 py-1 text-xs font-semibold transition-all duration-200',
+                  'rounded px-2.5 py-1 text-xs font-semibold transition-colors duration-fast',
                   i18n.language === locale
-                    ? 'bg-emerald-500 text-slate-950 shadow-sm font-bold'
-                    : 'text-slate-300 hover:text-white hover:bg-white/5',
+                    ? 'bg-accent text-accent-fg font-bold'
+                    : 'text-muted hover:text-fg hover:bg-surface2',
                 )}
               >
                 {LOCALE_LABEL[locale]}
@@ -265,84 +193,60 @@ export function LoginPage() {
         </header>
 
         {/* Main Split Layout */}
-        <main className="my-auto py-8 sm:py-12 grid gap-12 lg:grid-cols-12 lg:items-center">
-          {/* Left / Brand Narrative Column (Desktop 7 cols) */}
-          <section className="lg:col-span-7 flex flex-col justify-center space-y-6 sm:space-y-8 text-start">
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3.5 py-1 text-xs font-medium text-amber-200 w-fit">
-              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-              <span>
-                {i18n.language === 'ar'
-                  ? 'منظومة الذكاء الاصطناعي الشرعي والمالي'
-                  : 'AI-Powered Halal & Wealth Advisory'}
+        <main className="my-auto py-8 sm:py-12 grid gap-10 lg:grid-cols-12 lg:items-center">
+          {/* Left Column: Brand Mission & Capabilities (7 cols) */}
+          <section className="lg:col-span-7 flex flex-col justify-center space-y-6 text-start">
+            <div className="space-y-3">
+              <span className="inline-block rounded border border-line bg-surface2 px-3 py-1 text-xs font-semibold text-accent">
+                {t('landing.badge')}
               </span>
-            </div>
-
-            <div className="space-y-4">
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.2]">
-                {i18n.language === 'ar' ? (
-                  <>
-                    استثمر بوعي، وتداول بحلال،{' '}
-                    <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">
-                      وأدر ثروتك ببركة.
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    Invest with confidence, verify halal,{' '}
-                    <span className="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">
-                      and grow with Baraka.
-                    </span>
-                  </>
-                )}
+              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-fg leading-[1.2]">
+                {t('landing.headline')}
               </h1>
-              <p className="max-w-2xl text-base sm:text-lg leading-relaxed text-slate-300/90 font-normal">
-                {i18n.language === 'ar'
-                  ? 'منصتك الموثوقة للفحص الشرعي الفوري للمعاملات والأسهم، المحاسبة الذكية، والاستشارات الصحية والغذائية — مستندة إلى الضوابط الشرعية المعتمدة وأحدث تقنيات التحليل.'
-                  : 'Your intelligent advisory portal for halal stock screening, ethical accounting, and wellness analysis — built with privacy, precision, and verified standards.'}
+              <p className="max-w-2xl text-base sm:text-lg leading-relaxed text-muted font-normal">
+                {t('landing.description')}
               </p>
             </div>
 
-            {/* Feature Cards Grid */}
+            {/* Core Capabilities */}
             <div className="grid gap-3 sm:grid-cols-3 pt-2">
-              {features.map(({ title, desc, Icon, color }) => (
+              {capabilities.map(({ title, desc, Icon }) => (
                 <div
                   key={title}
-                  className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 backdrop-blur-sm transition-all hover:border-emerald-500/40 hover:bg-white/[0.04]"
+                  className="rounded-lg border border-line bg-surface p-4 shadow-sm"
                 >
-                  <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl border mb-3', color)}>
-                    <Icon className="h-5 w-5" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-md border border-line bg-surface2 text-accent mb-3">
+                    <Icon className="h-5 w-5" strokeWidth={1.8} />
                   </div>
-                  <h3 className="font-display text-sm font-bold text-white mb-1">{title}</h3>
-                  <p className="text-xs leading-relaxed text-slate-400">{desc}</p>
+                  <h2 className="font-display text-sm font-bold text-fg mb-1">{title}</h2>
+                  <p className="text-xs leading-relaxed text-muted">{desc}</p>
                 </div>
               ))}
             </div>
 
-            {/* Trust Assurance */}
-            <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-slate-400">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span>{i18n.language === 'ar' ? 'تشفير وحماية بيانات تامة' : 'Bank-grade encryption'}</span>
+            {/* Trust Assurance (Honest & Verified) */}
+            <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-muted">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-ok" />
+                <span>{t('landing.trustSecurity')}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span>{i18n.language === 'ar' ? 'استجابة فائقة السرعة' : 'Ultra-fast AI engine'}</span>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-ok" />
+                <span>{t('landing.trustPrivacy')}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span>{i18n.language === 'ar' ? 'مستند لضوابط شرعية دقيقة' : 'Compliant standards'}</span>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-ok" />
+                <span>{t('landing.trustStandards')}</span>
               </div>
             </div>
           </section>
 
-          {/* Right / Authentication Portal Column (Desktop 5 cols) */}
+          {/* Right Column: Authentication Card (5 cols) */}
           <section className="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
-            <div className="relative rounded-3xl border border-white/10 bg-gradient-to-b from-[#0f2420]/90 to-[#0a1815]/95 p-6 sm:p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl">
-              {/* Inner card subtle glow */}
-              <div className="pointer-events-none absolute -top-12 inset-x-0 mx-auto h-24 w-48 rounded-full bg-emerald-500/10 blur-xl" />
-
-              <div className="relative mb-6">
-                <div className="flex rounded-xl border border-white/10 bg-black/20 p-1">
+            <div className="surface-card p-6 sm:p-8">
+              {/* Tab Selector */}
+              <div className="mb-6">
+                <div className="flex rounded-md border border-line bg-surface2 p-1">
                   <button
                     type="button"
                     onClick={() => {
@@ -350,10 +254,10 @@ export function LoginPage() {
                       setLocalError(null);
                     }}
                     className={cn(
-                      'flex-1 rounded-lg py-2.5 text-xs sm:text-sm font-bold transition-all duration-200',
+                      'flex-1 rounded py-2 text-xs sm:text-sm font-semibold transition-colors duration-fast',
                       tab === 'signin'
-                        ? 'bg-emerald-500 text-slate-950 shadow-md font-extrabold'
-                        : 'text-slate-300 hover:text-white',
+                        ? 'bg-surface text-fg font-bold shadow-sm'
+                        : 'text-muted hover:text-fg',
                     )}
                   >
                     {t('auth.signInTab')}
@@ -365,10 +269,10 @@ export function LoginPage() {
                       setLocalError(null);
                     }}
                     className={cn(
-                      'flex-1 rounded-lg py-2.5 text-xs sm:text-sm font-bold transition-all duration-200',
+                      'flex-1 rounded py-2 text-xs sm:text-sm font-semibold transition-colors duration-fast',
                       tab === 'register'
-                        ? 'bg-emerald-500 text-slate-950 shadow-md font-extrabold'
-                        : 'text-slate-300 hover:text-white',
+                        ? 'bg-surface text-fg font-bold shadow-sm'
+                        : 'text-muted hover:text-fg',
                     )}
                   >
                     {t('auth.registerTab')}
@@ -378,7 +282,7 @@ export function LoginPage() {
 
               {errorMessage ? (
                 <div
-                  className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs font-medium text-red-200"
+                  className="mb-5 rounded-md border border-danger/30 bg-dangerSoft p-3 text-xs font-medium text-danger"
                   role="alert"
                 >
                   {errorMessage}
@@ -394,7 +298,7 @@ export function LoginPage() {
                       onChange={(e) => setLoginInput(e.target.value)}
                       autoComplete="username"
                       required
-                      suffix={<UserIcon className="h-4 w-4 text-emerald-400/80" />}
+                      suffix={<UserIcon className="h-4 w-4 text-muted" />}
                     />
                     <Input
                       label={t('auth.password')}
@@ -403,7 +307,7 @@ export function LoginPage() {
                       onChange={(e) => setPasswordInput(e.target.value)}
                       autoComplete="current-password"
                       required
-                      suffix={<Lock className="h-4 w-4 text-emerald-400/80" />}
+                      suffix={<Lock className="h-4 w-4 text-muted" />}
                     />
                     <Button
                       fullWidth
@@ -411,7 +315,7 @@ export function LoginPage() {
                       type="submit"
                       loading={busy === 'credentials'}
                       disabled={busy !== null}
-                      className="mt-2 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold hover:from-emerald-400 hover:to-teal-400 shadow-lg shadow-emerald-500/25 border-none"
+                      className="mt-2 h-11"
                     >
                       {t('auth.submitSignIn')}
                     </Button>
@@ -424,7 +328,7 @@ export function LoginPage() {
                       onChange={(e) => setUsernameInput(e.target.value)}
                       autoComplete="username"
                       required
-                      suffix={<UserIcon className="h-4 w-4 text-emerald-400/80" />}
+                      suffix={<UserIcon className="h-4 w-4 text-muted" />}
                     />
                     <Input
                       label={t('auth.email')}
@@ -433,7 +337,7 @@ export function LoginPage() {
                       onChange={(e) => setEmailInput(e.target.value)}
                       autoComplete="email"
                       required
-                      suffix={<Mail className="h-4 w-4 text-emerald-400/80" />}
+                      suffix={<Mail className="h-4 w-4 text-muted" />}
                     />
                     <Input
                       label={t('auth.password')}
@@ -443,7 +347,7 @@ export function LoginPage() {
                       hint={t('auth.passwordHint')}
                       autoComplete="new-password"
                       required
-                      suffix={<Lock className="h-4 w-4 text-emerald-400/80" />}
+                      suffix={<Lock className="h-4 w-4 text-muted" />}
                     />
                     <Button
                       fullWidth
@@ -451,7 +355,7 @@ export function LoginPage() {
                       type="submit"
                       loading={busy === 'credentials'}
                       disabled={busy !== null}
-                      className="mt-2 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold hover:from-emerald-400 hover:to-teal-400 shadow-lg shadow-emerald-500/25 border-none"
+                      className="mt-2 h-11"
                     >
                       {t('auth.submitRegister')}
                     </Button>
@@ -460,17 +364,17 @@ export function LoginPage() {
               </form>
 
               {/* Divider */}
-              <div className="relative my-6 flex items-center justify-center">
+              <div className="relative my-5 flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10" />
+                  <div className="w-full border-t border-line" />
                 </div>
-                <span className="relative bg-[#0d211d] px-3 text-[11px] font-semibold text-slate-400">
+                <span className="relative bg-surface px-3 text-[11px] font-semibold text-muted">
                   {t('auth.or')}
                 </span>
               </div>
 
               {/* Secondary Options */}
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {configured ? (
                   <Button
                     fullWidth
@@ -480,7 +384,7 @@ export function LoginPage() {
                     disabled={busy !== null}
                     onClick={() => void runGoogle()}
                     icon={<GoogleMark />}
-                    className="h-11 border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08]"
+                    className="h-10"
                   >
                     {busy === 'google' ? t('auth.signingIn') : t('auth.google')}
                   </Button>
@@ -491,42 +395,38 @@ export function LoginPage() {
                     type="button"
                     disabled={busy !== null}
                     onClick={() => void runGuest()}
-                    className="w-full group flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-xs sm:text-sm font-semibold text-emerald-200 transition-all hover:bg-emerald-500/15 hover:border-emerald-500/30"
+                    className="w-full group flex items-center justify-between rounded-md border border-line bg-surface2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-fg hover:border-accent/40 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-amber-300 animate-pulse" />
+                      <ShieldCheck className="h-4 w-4 text-accent" />
                       <span>{t('guest.try')}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-emerald-400/80 group-hover:text-emerald-300">
-                      <span>{i18n.language === 'ar' ? 'تجربة فورية' : 'Instant Demo'}</span>
+                    <div className="flex items-center gap-1 text-[11px] text-muted group-hover:text-accent">
+                      <span>{t('landing.instantDemo')}</span>
                       <ArrowRight className="flip-rtl h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
                     </div>
                   </button>
                 ) : null}
               </div>
 
-              {/* Reassurance Note */}
-              <div className="mt-5 flex items-start gap-2 text-[11px] leading-relaxed text-slate-400">
-                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+              {/* Consent Note */}
+              <div className="mt-5 border-t border-line/60 pt-3 text-[11px] leading-relaxed text-muted">
                 <p>{t('onboarding2.guestNote')}</p>
+                <p className="mt-1 text-[10px] text-muted/80">{t('consent.body')}</p>
               </div>
-
-              <p className="mt-4 text-center text-[10px] leading-relaxed text-slate-500">
-                {t('consent.body')}
-              </p>
             </div>
           </section>
         </main>
 
-        {/* Footer */}
-        <footer className="py-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-          <p>© {new Date().getFullYear()} بركة (Baraka) — جميع الحقوق محفوظة.</p>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>فحص شرعي ذكي</span>
+        {/* Footer (100% Multilingual & Localized) */}
+        <footer className="py-4 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted">
+          <p>{t('landing.footerCopyright', { year: new Date().getFullYear() })}</p>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span>{t('landing.footerHalal')}</span>
             <span>•</span>
-            <span>حساب الزكاة والمال</span>
+            <span>{t('landing.footerBudget')}</span>
             <span>•</span>
-            <span>سلامة الغذاء والصحة</span>
+            <span>{t('landing.footerHealth')}</span>
           </div>
         </footer>
       </div>

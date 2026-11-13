@@ -1,4 +1,6 @@
-/** The verdict moment: bloom / stamp / swing, then the reason and the objection CTA. */
+/**
+ * The Verdict Moment: Architectural evaluation stamp, verified reason, and consultative discussion.
+ */
 
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -65,14 +67,14 @@ export function VerdictCard({
 
   return (
     <div ref={cardRef} className="space-y-3">
-      <div className="surface-card p-4">
-        <div className="flex items-center gap-3">
-          <div ref={badgeRef} className={cn('flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl', style.ring)}>
-            <Icon className="h-8 w-8" strokeWidth={2.2} aria-hidden />
+      <div className="surface-card p-4 sm:p-5">
+        <div className="flex items-center gap-3.5">
+          <div ref={badgeRef} className={cn('flex h-14 w-14 shrink-0 items-center justify-center rounded-lg shadow-sm', style.ring)}>
+            <Icon className="h-7 w-7" strokeWidth={2} aria-hidden />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">{t('home.verdictTitle')}</p>
-            <p className="text-display text-[22px] font-extrabold leading-tight">{t(`halal.verdict.${result.verdict}`)}</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">{t('home.verdictTitle')}</p>
+            <p className="text-display text-2xl font-bold leading-tight text-fg">{t(`halal.verdict.${result.verdict}`)}</p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Badge tone={style.tone}>{t('halal.confidence', { value: Math.round(result.confidence * 100) })}</Badge>
               {result.cached ? <Badge tone="neutral">{t('halal.cached')}</Badge> : null}
@@ -80,23 +82,23 @@ export function VerdictCard({
           </div>
         </div>
 
-        {result.product ? <p className="mt-3 text-sm font-bold">{result.product}</p> : null}
-        {imageUrl ? <img src={imageUrl} alt="" className="mt-3 max-h-40 w-full rounded-md object-cover" loading="lazy" /> : null}
+        {result.product ? <p className="mt-3 text-sm font-bold text-fg">{result.product}</p> : null}
+        {imageUrl ? <img src={imageUrl} alt="" className="mt-3 max-h-48 w-full rounded-md object-cover border border-line" loading="lazy" /> : null}
 
-        <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed">
+        <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-fg">
           {result.reason.slice(0, reasonShown)}
-          {reasonShown < result.reason.length ? <span className="animate-pulse">▍</span> : null}
+          {reasonShown < result.reason.length ? <span className="text-accent animate-pulse">▍</span> : null}
         </p>
       </div>
 
       {result.ingredients.length ? (
-        <div className="surface-card p-3">
+        <div className="surface-card p-3.5">
           <p className="text-[11px] font-bold uppercase tracking-wide text-muted">
             {t('home.ingredientsCount', { count: result.ingredients.length })}
           </p>
-          <ul className="mt-1 max-h-56 divide-y divide-line overflow-y-auto pe-1">
+          <ul className="mt-2 max-h-56 divide-y divide-line overflow-y-auto pe-1">
             {result.ingredients.slice(0, 40).map((ingredient, index) => (
-              <li key={`${ingredient.name}-${index}`} className="flex items-start justify-between gap-2 py-1.5 text-[13px]">
+              <li key={`${ingredient.name}-${index}`} className="flex items-start justify-between gap-2 py-2 text-xs sm:text-[13px]">
                 <span className="min-w-0 flex-1 leading-snug">{ingredient.name}</span>
                 <Badge
                   tone={
@@ -118,22 +120,28 @@ export function VerdictCard({
       ) : null}
 
       {result.concerns.length ? (
-        <div className="surface-card p-3">
+        <div className="surface-card p-3.5">
           <p className="text-[11px] font-bold uppercase tracking-wide text-muted">{t('halal.concerns')}</p>
-          <ul className="mt-1 space-y-1 text-[13px] leading-snug">
+          <ul className="mt-1.5 space-y-1 text-xs sm:text-[13px] leading-snug text-fg">
             {result.concerns.map((concern) => (
-              <li key={concern}>• {concern}</li>
+              <li key={concern} className="flex items-start gap-1.5">
+                <span className="text-warn mt-0.5">•</span>
+                <span>{concern}</span>
+              </li>
             ))}
           </ul>
         </div>
       ) : null}
 
       {result.needed.length ? (
-        <div className="surface-card border-dashed p-3">
+        <div className="surface-card border-dashed p-3.5">
           <p className="text-[11px] font-bold uppercase tracking-wide text-muted">{t('halal.needed')}</p>
-          <ul className="mt-1 space-y-1 text-[13px] leading-snug">
+          <ul className="mt-1.5 space-y-1 text-xs sm:text-[13px] leading-snug text-fg">
             {result.needed.map((item) => (
-              <li key={item}>✓ {item}</li>
+              <li key={item} className="flex items-start gap-1.5">
+                <span className="text-ok mt-0.5">✓</span>
+                <span>{item}</span>
+              </li>
             ))}
           </ul>
         </div>

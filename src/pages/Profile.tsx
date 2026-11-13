@@ -83,10 +83,9 @@ export function ProfilePage() {
     <div className="flex flex-1 flex-col gap-3 pb-4">
       <PageHeader title={t('nav.profile')} />
 
-      <div className="surface-card flex items-center gap-3 p-4">
+      <div className="surface-card flex items-center gap-3.5 p-4">
         <div
-          className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-[22px] font-black text-white"
-          style={{ background: 'linear-gradient(140deg, var(--hero-grad-a), var(--hero-grad-b))' }}
+          className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-line bg-surface2 text-xl font-bold text-accent shadow-sm"
         >
           {user && 'photoURL' in user && user.photoURL ? (
             <img src={String(user.photoURL)} alt="" className="h-full w-full object-cover" />
@@ -95,8 +94,8 @@ export function ProfilePage() {
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-extrabold">{name}</p>
-          <p className="truncate text-[11px] text-muted">{isGuest ? t('guest.localOnly') : user?.email}</p>
+          <p className="truncate text-base font-bold text-fg">{name}</p>
+          <p className="truncate text-xs text-muted">{isGuest ? t('guest.localOnly') : user?.email}</p>
           <div className="mt-1 flex flex-wrap gap-1.5">
             <Badge tone={completeness > 60 ? 'ok' : 'warn'}>{t('profile2.completeness', { value: completeness })}</Badge>
             {plan ? <Badge tone="neutral">{t(`accountant.level.${plan.level}`)}</Badge> : null}
@@ -133,7 +132,10 @@ export function ProfilePage() {
                   aria-label={value}
                   aria-pressed={accent === value}
                   onClick={() => setAccent(value)}
-                  className={cn('h-9 w-9 rounded-full border-2 transition-transform active:scale-95', accent === value ? 'border-fg' : 'border-transparent')}
+                  className={cn(
+                    'h-8 w-8 rounded-md border-2 transition-transform active:scale-95',
+                    accent === value ? 'border-fg ring-2 ring-accent-soft' : 'border-transparent',
+                  )}
                   style={{ background: ACCENT_SWATCH[value] }}
                 />
               ))}
@@ -141,7 +143,7 @@ export function ProfilePage() {
           </div>
 
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[13px] font-semibold">{t('profile.language')}</span>
+            <span className="text-xs sm:text-[13px] font-semibold">{t('profile.language')}</span>
             <div className="flex gap-1.5">
               {SUPPORTED_LOCALES.map((locale: Locale) => (
                 <button
@@ -150,8 +152,10 @@ export function ProfilePage() {
                   onClick={() => void saveLocale(locale)}
                   aria-pressed={i18n.language === locale}
                   className={cn(
-                    'min-h-[34px] rounded-full px-2.5 text-[11px] font-bold',
-                    i18n.language === locale ? 'bg-accent text-accent-fg' : 'bg-surface2 text-muted',
+                    'min-h-[32px] rounded-md px-3 text-xs font-semibold transition-colors',
+                    i18n.language === locale
+                      ? 'bg-accent text-accent-fg font-bold'
+                      : 'bg-surface2 text-muted hover:text-fg',
                   )}
                 >
                   {LOCALE_LABEL[locale]}

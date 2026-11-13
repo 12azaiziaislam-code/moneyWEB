@@ -28,7 +28,7 @@ import { haptic, HAPTIC } from '../lib/haptics';
 const MOOD: Record<string, AccountantMood> = { green: 'happy', yellow: 'calm', orange: 'worried', red: 'panic' };
 
 export function AccountantPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { show } = useToast();
   const { user } = useAuth();
   const { plan, transactions, pending, loading, currency, timezone, isGuest, finance, setLevel, setBalance, addTransaction, addTransactions, deleteTransaction, confirmIncome } = useFinance();
@@ -40,7 +40,7 @@ export function AccountantPage() {
   const [balanceDraft, setBalanceDraft] = useState('');
   const [items, setItems] = useState<ExtractedTransaction[]>([]);
   const [manual, setManual] = useState({ kind: 'expense' as 'expense' | 'income', amount: '', label: '', occurredAt: new Date().toISOString() });
-  const locale = user?.locale ?? 'ru';
+  const locale = (user?.locale ?? i18n.language ?? 'ru') as string;
 
   useEffect(() => {
     if (plan) countUp(balanceRef.current, plan.balanceMinor, (value) => formatMoney(Math.round(value), currency, locale));
@@ -120,7 +120,7 @@ export function AccountantPage() {
                 setBalanceDraft(String(Math.round(plan.balanceMinor / 100)));
                 setSheet('balance');
               }}
-              className="min-h-[36px] rounded-full bg-surface2 px-3 text-[11px] font-bold text-muted"
+              className="min-h-[36px] rounded-md border border-line bg-surface2 px-3 text-[11px] font-bold text-muted hover:text-fg transition-colors"
             >
               {t('accountant.editBalance')}
             </button>

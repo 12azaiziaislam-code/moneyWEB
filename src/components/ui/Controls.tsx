@@ -31,11 +31,11 @@ export function Segmented<T extends string>({
       ref={containerRef}
       role="tablist"
       aria-label={ariaLabel}
-      className={cn('relative flex rounded-full border border-line bg-surface2 p-1', className)}
+      className={cn('relative flex rounded-md border border-line bg-surface2 p-1', className)}
     >
       <span
         aria-hidden="true"
-        className="absolute inset-y-1 rounded-full bg-surface shadow-e1 transition-all duration-slow ease-spring"
+        className="absolute inset-y-1 rounded bg-surface shadow-e1 transition-all duration-slow ease-spring"
         style={{
           width: `calc(${width}% - 4px)`,
           insetInlineStart: `calc(${index * width}% + 2px)`,
@@ -51,8 +51,8 @@ export function Segmented<T extends string>({
             aria-selected={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'relative z-[1] flex min-h-[38px] flex-1 items-center justify-center gap-1.5 rounded-full px-2 text-[13px] font-semibold transition-colors duration-mid',
-              active ? 'text-fg' : 'text-muted',
+              'relative z-[1] flex min-h-[36px] flex-1 items-center justify-center gap-1.5 rounded px-2 text-xs sm:text-[13px] font-semibold transition-colors duration-fast',
+              active ? 'text-fg font-bold' : 'text-muted hover:text-fg',
             )}
           >
             {option.icon}

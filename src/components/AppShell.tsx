@@ -1,9 +1,12 @@
-/** App shell: 480px column, floating glass bottom nav, guest banner, offline hint. */
+/**
+ * App Shell: Responsive container, institutional navigation, guest banner, offline notice.
+ * Designed for mobile (360px) through desktop (1280px+).
+ */
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CloudOff, Library, MoonStar, Stethoscope, UserRound, Wallet } from 'lucide-react';
+import { CloudOff, Library, ShieldCheck, Stethoscope, UserRound, Wallet } from 'lucide-react';
 import { applyServiceWorkerUpdate, initInstallPrompt, registerServiceWorker } from '../lib/pwa';
 import { cn } from './ui';
 import { Button } from './ui/Button';
@@ -12,7 +15,7 @@ import { useAuth } from '../state/AuthContext';
 import type { LucideIcon } from 'lucide-react';
 
 const NAV: Array<{ to: string; key: string; Icon: LucideIcon; end?: boolean }> = [
-  { to: '/', key: 'halal', Icon: MoonStar, end: true },
+  { to: '/', key: 'halal', Icon: ShieldCheck, end: true },
   { to: '/chats', key: 'chats', Icon: Library },
   { to: '/doctor', key: 'doctor', Icon: Stethoscope },
   { to: '/accountant', key: 'accountant', Icon: Wallet },
@@ -39,7 +42,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col bg-bg">
+    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-4xl flex-col bg-bg text-fg">
+      {/* Subtle architectural background lattice */}
       <div className="pointer-events-none fixed inset-0 mx-auto max-w-5xl overflow-hidden">
         <div className="pattern-islamic absolute inset-0" />
       </div>
@@ -47,20 +51,20 @@ export function AppShell({ children }: { children: ReactNode }) {
       {!online ? (
         <div
           role="status"
-          className="safe-top relative z-10 flex items-center justify-center gap-2 bg-warn px-3 py-1.5 text-center text-[12px] font-semibold text-white"
+          className="safe-top relative z-10 flex items-center justify-center gap-2 bg-warn px-4 py-2 text-center text-xs font-semibold text-white shadow-sm"
         >
           <CloudOff className="h-4 w-4" aria-hidden />
-          {t('common.offline')}
+          <span>{t('common.offline')}</span>
         </div>
       ) : null}
 
       {updateReady ? (
-        <div className="relative z-10 flex items-center justify-between gap-2 bg-fg px-3 py-2 text-[12px] text-bg">
+        <div className="relative z-10 flex items-center justify-between gap-3 border-b border-line bg-surface px-4 py-2.5 text-xs text-fg">
           <span>{t('common.update')}</span>
           <button
             type="button"
             onClick={applyServiceWorkerUpdate}
-            className="rounded-full bg-[var(--accent-2)] px-3 py-1 font-bold text-[#1b1207]"
+            className="rounded-md bg-accent px-3 py-1 font-bold text-accent-fg hover:opacity-90"
           >
             {t('common.reload')}
           </button>
@@ -68,20 +72,24 @@ export function AppShell({ children }: { children: ReactNode }) {
       ) : null}
 
       {role === 'guest' ? (
-        <div className="relative z-10 mx-3 mt-2 flex items-center gap-2 rounded-md border border-line bg-surface2 px-3 py-2">
-          <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-fg">{t('guest.badge')}</span>
-          <p className="min-w-0 flex-1 truncate text-[11px] text-muted">{t('guest.localOnly')}</p>
+        <div className="relative z-10 mx-3 mt-3 flex items-center justify-between gap-3 rounded-lg border border-line bg-surface px-3.5 py-2 shadow-sm">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="shrink-0 rounded bg-accent-soft px-2 py-0.5 text-[10px] font-bold text-accent">
+              {t('guest.badge')}
+            </span>
+            <p className="min-w-0 truncate text-xs text-muted">{t('guest.localOnly')}</p>
+          </div>
           <button
             type="button"
             onClick={() => void signIn()}
-            className="shrink-0 text-[11px] font-bold text-accent underline-offset-2 hover:underline"
+            className="shrink-0 text-xs font-bold text-accent hover:underline underline-offset-4"
           >
             {t('guest.signInToSave')}
           </button>
         </div>
       ) : null}
 
-      <main className="relative z-[1] flex min-h-0 flex-1 flex-col px-3 pb-[calc(var(--nav-h)+1.75rem+var(--safe-bottom))] pt-2 safe-x">
+      <main className="relative z-[1] flex min-h-0 flex-1 flex-col px-3.5 pb-[calc(var(--nav-h)+2rem+var(--safe-bottom))] pt-3 sm:px-6 safe-x">
         {children}
       </main>
 
@@ -89,7 +97,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         aria-label={t('app.name')}
         className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-xl md:max-w-2xl px-3 pb-[calc(0.5rem+var(--safe-bottom))]"
       >
-        <ul className="glass-surface flex items-center justify-between gap-1 rounded-2xl px-1.5 py-1.5 shadow-e3">
+        <ul className="institutional-nav flex items-center justify-between gap-1 p-1.5">
           {NAV.map(({ to, key, Icon, end }) => (
             <li key={to} className="flex-1">
               <NavLink
@@ -97,23 +105,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                 end={end}
                 className={({ isActive }) =>
                   cn(
-                    'relative flex min-h-[52px] flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] font-bold transition-all duration-mid',
-                    isActive ? 'text-accent' : 'text-muted hover:text-fg',
+                    'flex min-h-[50px] flex-col items-center justify-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-bold transition-colors duration-fast',
+                    isActive
+                      ? 'bg-accent-soft text-accent'
+                      : 'text-muted hover:text-fg hover:bg-surface2',
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <span
-                      className={cn(
-                        'absolute inset-x-2 top-1 h-[3px] rounded-full bg-accent transition-opacity duration-mid',
-                        isActive ? 'opacity-100' : 'opacity-0',
-                      )}
-                      aria-hidden="true"
-                    />
                     <Icon
-                      className={cn('h-[22px] w-[22px] transition-transform duration-mid', isActive && '-translate-y-[1px] scale-105')}
-                      strokeWidth={isActive ? 2.4 : 1.9}
+                      className={cn('h-5 w-5 transition-transform', isActive && 'scale-105')}
+                      strokeWidth={isActive ? 2.2 : 1.75}
                       aria-hidden
                     />
                     <span className="truncate">{t(`nav.${key}`)}</span>
@@ -141,13 +144,13 @@ export function PageHeader({
   ornament?: ReactNode;
 }) {
   return (
-    <header className="flex items-start justify-between gap-2 pb-1 pt-2">
+    <header className="flex items-start justify-between gap-3 pb-2 pt-2 border-b border-line/60 mb-2">
       <div className="min-w-0">
-        <h1 className="text-display text-[22px] font-extrabold leading-tight text-fg">{title}</h1>
-        {subtitle ? <p className="mt-0.5 text-[13px] leading-snug text-muted">{subtitle}</p> : null}
+        <h1 className="text-display text-xl sm:text-2xl font-bold leading-tight text-fg">{title}</h1>
+        {subtitle ? <p className="mt-0.5 text-xs sm:text-sm text-muted">{subtitle}</p> : null}
         {ornament}
       </div>
-      {action}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </header>
   );
 }

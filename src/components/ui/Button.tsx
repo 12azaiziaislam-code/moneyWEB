@@ -73,7 +73,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        'inline-flex h-11 w-11 items-center justify-center rounded-full text-fg transition-colors duration-mid hover:bg-surface2 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
+        'inline-flex h-10 w-10 items-center justify-center rounded-md border border-transparent text-fg transition-colors duration-fast hover:bg-surface2 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
         className,
       )}
     >

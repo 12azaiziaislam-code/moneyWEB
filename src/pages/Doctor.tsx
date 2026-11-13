@@ -1,9 +1,11 @@
-/** Doctor: health badge, photo analysis, structured result, emergency banner. */
+/**
+ * Dietary & Medication Safety: Health Profile Status, Photo/Text Analysis, Emergency 112 Notice.
+ */
 
 import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Camera, Phone } from 'lucide-react';
+import { Camera, Phone, X, ShieldAlert } from 'lucide-react';
 import type { DoctorResult } from '../../shared/types';
 import { bmi, isEmergencyText, isHealthProfileComplete } from '../../shared/health';
 import { PageHeader } from '../components/AppShell';
@@ -25,7 +27,7 @@ export function DoctorPage() {
   const navigate = useNavigate();
   const { show } = useToast();
   const { role, user } = useAuth();
-  const { health, isGuest } = useFinance();
+  const { health } = useFinance();
   const { createChat } = useChatMutations();
   usePageTheme('doctor');
 
@@ -34,7 +36,6 @@ export function DoctorPage() {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<DoctorResult | null>(null);
-  const [redirect, setRedirect] = useState<string | null>(null);
 
   const profileReady = useMemo(() => isHealthProfileComplete(health), [health]);
   const emergency = Boolean(result?.emergency) || isEmergencyText(text);
@@ -46,10 +47,9 @@ export function DoctorPage() {
     }
     setBusy(true);
     setResult(null);
-    setRedirect(null);
     try {
       const body: Record<string, unknown> = { text: text.trim() || undefined, hash: image?.hash };
-      if (isGuest) {
+      if (role === 'guest') {
         body.imageDataUrl = image?.dataUrl;
         body.guest = { locale: user?.locale ?? 'ar', madhhab: user?.madhhab ?? 'none', health };
       } else if (image) {
@@ -64,7 +64,7 @@ export function DoctorPage() {
         body,
       });
       setResult(response.result);
-      setRedirect(response.redirect ?? null);
+      if (response.redirect) navigate(response.redirect);
       haptic(response.result.emergency ? HAPTIC.danger : HAPTIC.success);
     } catch (cause) {
       if (cause instanceof ApiError && cause.code === 'forbidden') show(t('doctor.profileGate'), 'warning');
@@ -82,20 +82,23 @@ export function DoctorPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-3 pb-4">
+    <div className="flex flex-1 flex-col gap-4 pb-6">
       <PageHeader title={t('doctor.title')} subtitle={t('doctor.subtitle')} />
 
-      <div className="surface-card flex items-center gap-3 p-3">
-        <DoctorChar size={52} state={busy ? 'listening' : result ? 'done' : 'idle'} />
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-wide text-muted">{t('doctorCard.title')}</p>
-          <p className="num text-[13px] font-semibold">
-            {health.age ?? '—'} · {health.weightKg ?? '—'} kg · BMI {bmi(health.weightKg, health.heightCm) ?? '—'}
-          </p>
-          <div className="mt-1">
-            <Badge tone={profileReady ? 'ok' : 'warn'}>
-              {profileReady ? t('doctorCard.complete') : t('doctorCard.incomplete')}
-            </Badge>
+      {/* Health Profile Card */}
+      <div className="surface-card flex items-center justify-between gap-3 p-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <DoctorChar size={48} className="shrink-0" />
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted">{t('doctorCard.title')}</p>
+            <p className="num text-sm sm:text-base font-bold text-fg">
+              {health.age ?? '—'} · {health.weightKg ?? '—'} kg · BMI {bmi(health.weightKg, health.heightCm) ?? '—'}
+            </p>
+            <div className="mt-1">
+              <Badge tone={profileReady ? 'ok' : 'warn'}>
+                {profileReady ? t('doctorCard.complete') : t('doctorCard.incomplete')}
+              </Badge>
+            </div>
           </div>
         </div>
         {!profileReady ? (
@@ -105,162 +108,102 @@ export function DoctorPage() {
         ) : null}
       </div>
 
+      {/* Emergency Notice (If triggered) */}
       {emergency ? (
-        <div className="animate-shake space-y-2 rounded-lg bg-risk-red p-4 text-riskRedFg shadow-e2">
-          <p className="text-[15px] font-extrabold">{t('doctor.emergency')}</p>
-          <p className="text-[13px]">{t('doctor.emergencyBody')}</p>
+        <div className="space-y-3 rounded-lg border border-danger/40 bg-dangerSoft p-4 text-danger shadow-sm">
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="h-5 w-5 shrink-0" />
+            <p className="text-base font-bold">{t('doctor.emergency')}</p>
+          </div>
+          <p className="text-xs sm:text-sm leading-relaxed">{t('doctor.emergencyBody')}</p>
           <a
             href="tel:112"
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-md bg-white px-4 text-[14px] font-bold text-riskRed"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-md bg-danger px-4 text-sm font-bold text-white hover:opacity-90"
           >
-            <Phone className="h-4 w-4" aria-hidden /> {t('doctor.call112')}
+            <Phone className="h-4 w-4" aria-hidden />
+            <span>{t('doctor.call112')}</span>
           </a>
         </div>
       ) : null}
 
-      <div className="surface-card space-y-3 p-3">
+      {/* Analysis Workspace */}
+      <div className="surface-card space-y-4 p-5">
         {image ? (
-          <div className="relative">
-            <img src={image.dataUrl} alt="" className="max-h-44 w-full rounded-md object-cover" />
+          <div className="relative rounded-md border border-line overflow-hidden bg-surface2">
+            <img src={image.dataUrl} alt="" className="max-h-52 w-full object-contain" />
             <IconButton
               label={t('common.clear')}
               onClick={() => setImage(null)}
-              className="absolute end-1 top-1 bg-black/50 text-white"
+              className="absolute end-2 top-2 bg-black/60 text-white hover:bg-black/80"
             >
-              ✕
+              <X className="h-4 w-4" aria-hidden />
             </IconButton>
           </div>
         ) : (
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="flex min-h-[118px] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-line bg-surface2 text-accent"
+            className="flex min-h-[110px] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-line bg-surface2 text-muted hover:text-fg hover:border-accent/40 transition-colors"
           >
-            <Camera className="h-8 w-8" aria-hidden />
-            <span className="text-[12px] font-bold">{t('common.camera')}</span>
+            <Camera className="h-7 w-7 text-accent" strokeWidth={1.8} aria-hidden />
+            <span className="text-xs font-semibold">{t('common.camera')}</span>
           </button>
         )}
-        <Textarea label={t('doctor.subtitle')} value={text} maxLength={4000} onChange={(event) => setText(event.target.value)} />
-        <Button fullWidth loading={busy} disabled={!profileReady} onClick={() => void analyze()}>
+
+        <Textarea
+          label={t('doctor.subtitle')}
+          value={text}
+          maxLength={4000}
+          onChange={(event) => setText(event.target.value)}
+        />
+
+        <Button
+          fullWidth
+          size="lg"
+          loading={busy}
+          disabled={!profileReady}
+          onClick={() => void analyze()}
+          className="h-11"
+        >
           {busy ? t('doctor.analyzing') : t('halal.scan')}
         </Button>
+
         <input
           ref={fileRef}
           type="file"
           accept="image/*"
-          capture="environment"
           className="hidden"
           onChange={async (event) => {
             const file = event.target.files?.[0];
-            if (!file) return;
-            try {
-              setImage(await prepareImage(file));
-            } catch {
-              show(t('errors.validation_failed'), 'danger');
-            }
+            if (file) setImage(await prepareImage(file));
           }}
         />
       </div>
 
       {busy ? (
-        <div className="surface-card space-y-2 p-3">
-          <Skeleton className="h-5 w-1/2" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
+        <div className="surface-card p-6 space-y-3">
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-16 w-full" />
         </div>
       ) : null}
 
-      {redirect === 'accountant' ? (
-        <Button variant="soft" fullWidth onClick={() => navigate('/accountant')}>
-          {t('doctor.openAccountant')}
-        </Button>
-      ) : null}
-
+      {/* Result Display */}
       {result ? (
-        <div className="surface-card animate-rise space-y-2 p-3">
-          <div className="flex items-center justify-between">
-            <Badge tone="info">{t(`doctor.types.${result.type}`)}</Badge>
-            <span className="num text-[11px] text-muted">
-              {t('halal.confidence', { value: Math.round(result.confidence * 100) })}
-            </span>
+        <div className="surface-card p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-line pb-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-muted">{t('doctor.title')}</p>
+              <h3 className="text-display text-lg font-bold text-fg">{result.type}</h3>
+            </div>
+            <Button size="sm" variant="gold" onClick={() => void discuss()}>
+              {t('halal.discuss')}
+            </Button>
           </div>
-          <p className="whitespace-pre-wrap text-[13px] leading-relaxed">{result.summary}</p>
-
-          {result.medicine ? (
-            <div className="space-y-1 border-t border-line pt-2">
-              <p className="text-[15px] font-bold">{result.medicine.name}</p>
-              <p className="text-[12px] text-muted">{result.medicine.activeIngredient}</p>
-              {result.medicine.dosage ? <p className="text-[13px]">{result.medicine.dosage}</p> : null}
-              {result.medicine.interactions.length ? (
-                <p className="text-[12px]">
-                  <strong>{t('doctor.interactions')}:</strong> {result.medicine.interactions.join(' · ')}
-                </p>
-              ) : null}
-              {result.medicine.contraindications.length ? (
-                <p className="text-[12px]">
-                  <strong>{t('doctor.contraindications')}:</strong> {result.medicine.contraindications.join(' · ')}
-                </p>
-              ) : null}
-              {result.medicine.whenToSeeDoctor.length ? (
-                <p className="text-[12px]">
-                  <strong>{t('doctor.whenToSee')}:</strong> {result.medicine.whenToSeeDoctor.join(' · ')}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-
-          {result.food ? (
-            <div className="space-y-2 border-t border-line pt-2">
-              <div className="grid grid-cols-3 gap-1.5">
-                {([
-                  [t('doctor.calories'), result.food.calories, t('units.kcal')],
-                  [t('doctor.protein'), result.food.proteinG, t('units.g')],
-                  [t('doctor.fat'), result.food.fatG, t('units.g')],
-                  [t('doctor.carbs'), result.food.carbsG, t('units.g')],
-                  [t('doctor.sugar'), result.food.sugarG, t('units.g')],
-                  [t('doctor.sodium'), result.food.sodiumMg, t('units.mg')],
-                ] as const).map(([label, range, unit]) => {
-                  if (!range || (!range.min && !range.max)) return null;
-                  return (
-                    <div key={label} className="rounded-md bg-surface2 px-2 py-1.5">
-                      <p className="text-[10px] text-muted">{label}</p>
-                      <p className="num text-[12px] font-bold">
-                        {Math.round(range.min)}–{Math.round(range.max)} {unit}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-              {result.food.exercise ? (
-                <p className="text-[12px] text-muted">
-                  {t('doctor.exercise')} {result.food.exercise.walkingMin} {t('common.min')}
-                </p>
-              ) : null}
-              {result.food.suitability ? <p className="text-[13px]">{result.food.suitability}</p> : null}
-            </div>
-          ) : null}
-
-          {result.lab ? (
-            <div className="space-y-1 border-t border-line pt-2">
-              {result.lab.values.map((value) => (
-                <div key={`${value.name}-${value.value}`} className="flex items-baseline justify-between gap-2 text-[13px]">
-                  <span className="flex-1">{value.name}</span>
-                  <span className="num font-bold">{value.value}</span>
-                  <span className="num text-[11px] text-muted">{value.reference ?? ''}</span>
-                </div>
-              ))}
-              {result.lab.note ? <p className="text-[12px] text-muted">{result.lab.note}</p> : null}
-            </div>
-          ) : null}
-
-          <Button variant="secondary" fullWidth onClick={() => void discuss()}>
-            {t('halal.discuss')}
-          </Button>
+          <p className="text-sm leading-relaxed text-fg whitespace-pre-wrap">{result.summary}</p>
         </div>
       ) : null}
 
       <Disclaimer>{t('doctor.disclaimer')}</Disclaimer>
-      {role === 'guest' ? <p className="text-center text-[10px] text-muted">{t('guest.localOnly')}</p> : null}
     </div>
   );
 }
