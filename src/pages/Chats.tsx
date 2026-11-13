@@ -26,7 +26,7 @@ export function ChatsPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { show } = useToast();
-  const { user } = useAuth();
+  const { user, role, signIn } = useAuth();
   const { deleteChat } = useChatMutations();
   const [filter, setFilter] = useState<'all' | ChatKind>('all');
   const [query, setQuery] = useState('');
@@ -56,6 +56,17 @@ export function ChatsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 pb-6">
       <PageHeader title={t('chats.title')} />
+
+      {role === 'guest' ? (
+        <div className="surface-card p-5 rounded-xl border border-[#B88E3E]/40 bg-[#B88E3E]/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start">
+          <p className="text-xs sm:text-sm text-fg leading-relaxed">
+            {t('guest.aiRequiresAuth')}
+          </p>
+          <Button size="sm" variant="gold" onClick={() => void signIn()} className="shrink-0 w-full sm:w-auto">
+            {t('guest.signInPrompt')}
+          </Button>
+        </div>
+      ) : null}
 
       <Input
         label={t('chats.search')}

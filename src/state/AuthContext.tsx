@@ -287,17 +287,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     setStatus('loading');
     try {
-      await startGuestSession();
+      try {
+        await startGuestSession();
+      } catch {
+        // Fallback to local guest mode
+      }
       applyGuest(await loadGuestData(detectLocale()));
       setStatus('guest');
       setGuestEnabled(true);
     } catch (cause) {
-      if (cause instanceof ApiError && cause.code === 'forbidden') {
-        setGuestEnabled(false);
-        setError('guest_disabled');
-      } else {
-        setError(cause instanceof Error ? cause.message : 'guest_failed');
-      }
+      setError(cause instanceof Error ? cause.message : 'guest_failed');
       setStatus('signedOut');
     }
   }, [applyGuest]);

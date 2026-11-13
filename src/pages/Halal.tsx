@@ -26,7 +26,7 @@ export function HalalPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { show } = useToast();
-  const { role, user } = useAuth();
+  const { role, signIn } = useAuth();
   const { createChat } = useChatMutations();
   usePageTheme('halal');
 
@@ -67,6 +67,10 @@ export function HalalPage() {
   };
 
   const scan = async () => {
+    if (isGuest) {
+      show(t('guest.aiRequiresAuth'), 'warning');
+      return;
+    }
     if (!image && text.trim().length < 3) {
       show(t('halal.empty'), 'warning');
       return;
@@ -75,10 +79,7 @@ export function HalalPage() {
     setResult(null);
     try {
       const body: Record<string, unknown> = { text: text.trim() || undefined, hash: image?.hash };
-      if (isGuest) {
-        body.imageDataUrl = image?.dataUrl;
-        body.guest = { locale: user?.locale ?? 'ar', madhhab: user?.madhhab ?? 'none' };
-      } else if (image) {
+      if (image) {
         const uploaded = await apiFetch<{ id: string }>('/api/uploads', {
           method: 'POST',
           body: { dataUrl: image.dataUrl, hash: image.hash },
@@ -104,6 +105,10 @@ export function HalalPage() {
   };
 
   const discuss = async () => {
+    if (isGuest) {
+      show(t('guest.aiRequiresAuth'), 'warning');
+      return;
+    }
     if (!result) return;
     setDiscussing(true);
     try {
@@ -144,6 +149,17 @@ export function HalalPage() {
           </div>
 
           <div className="border-t border-line/60 pt-4 flex flex-col items-center gap-4">
+            {isGuest ? (
+              <div className="w-full rounded-xl border border-[#B88E3E]/40 bg-[#B88E3E]/10 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start">
+                <p className="text-xs sm:text-sm text-fg leading-relaxed">
+                  {t('guest.aiRequiresAuth')}
+                </p>
+                <Button size="sm" variant="gold" onClick={() => void signIn()} className="shrink-0 w-full sm:w-auto">
+                  {t('guest.signInPrompt')}
+                </Button>
+              </div>
+            ) : null}
+
             {/* Action Triggers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
               <button

@@ -390,7 +390,9 @@
     "noExport": "Export is available after signing in.",
     "noDelete": "Account deletion is available after signing in.",
     "oneDevice": "Guest mode does not sync across devices.",
-    "title": "You are in guest mode"
+    "title": "You are in guest mode",
+    "aiRequiresAuth": "AI screening and consultations require a registered account. Please sign in or create an account to proceed.",
+    "signInPrompt": "Sign In / Register"
   },
   "onboarding2": {
     "skip": "Skip",

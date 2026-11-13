@@ -64,12 +64,12 @@ const routes: Route[] = [
   { method: 'PATCH', pattern: '/api/chats/:id', handler: chatsHandler.patchChat },
   { method: 'DELETE', pattern: '/api/chats/:id', handler: chatsHandler.deleteChat },
 
-  { method: 'POST', pattern: '/api/ai/chat', handler: aiHandler.streamChat, role: 'any' },
+  { method: 'POST', pattern: '/api/ai/chat', handler: aiHandler.streamChat },
 
-  { method: 'POST', pattern: '/api/halal/scan', handler: analysisHandler.halalScan, role: 'any' },
-  { method: 'POST', pattern: '/api/doctor/analyze', handler: analysisHandler.doctorAnalyze, role: 'any' },
-  { method: 'POST', pattern: '/api/accountant/extract', handler: analysisHandler.receiptExtract, role: 'any' },
-  { method: 'POST', pattern: '/api/accountant/balance', handler: analysisHandler.balanceExtract, role: 'any' },
+  { method: 'POST', pattern: '/api/halal/scan', handler: analysisHandler.halalScan },
+  { method: 'POST', pattern: '/api/doctor/analyze', handler: analysisHandler.doctorAnalyze },
+  { method: 'POST', pattern: '/api/accountant/extract', handler: analysisHandler.receiptExtract },
+  { method: 'POST', pattern: '/api/accountant/balance', handler: analysisHandler.balanceExtract },
 
   { method: 'GET', pattern: '/api/finance', handler: financeHandler.getFinance },
   { method: 'PUT', pattern: '/api/finance', handler: financeHandler.putFinance },

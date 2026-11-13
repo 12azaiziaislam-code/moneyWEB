@@ -26,7 +26,7 @@ export function DoctorPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { show } = useToast();
-  const { role, user } = useAuth();
+  const { role, signIn } = useAuth();
   const { health } = useFinance();
   const { createChat } = useChatMutations();
   usePageTheme('doctor');
@@ -41,6 +41,10 @@ export function DoctorPage() {
   const emergency = Boolean(result?.emergency) || isEmergencyText(text);
 
   const analyze = async () => {
+    if (role === 'guest') {
+      show(t('guest.aiRequiresAuth'), 'warning');
+      return;
+    }
     if (!image && text.trim().length < 3) {
       show(t('halal.empty'), 'warning');
       return;
@@ -49,10 +53,7 @@ export function DoctorPage() {
     setResult(null);
     try {
       const body: Record<string, unknown> = { text: text.trim() || undefined, hash: image?.hash };
-      if (role === 'guest') {
-        body.imageDataUrl = image?.dataUrl;
-        body.guest = { locale: user?.locale ?? 'ar', madhhab: user?.madhhab ?? 'none', health };
-      } else if (image) {
+      if (image) {
         const uploaded = await apiFetch<{ id: string }>('/api/uploads', {
           method: 'POST',
           body: { dataUrl: image.dataUrl, hash: image.hash },
@@ -75,6 +76,10 @@ export function DoctorPage() {
   };
 
   const discuss = async () => {
+    if (role === 'guest') {
+      show(t('guest.aiRequiresAuth'), 'warning');
+      return;
+    }
     if (!result) return;
     const seed = [`Type: ${result.type}`, `Summary: ${result.summary}`].join('\n');
     const chat = await createChat({ kind: 'doctor', title: result.medicine?.name ?? result.type, seedText: seed });
@@ -123,6 +128,18 @@ export function DoctorPage() {
             <Phone className="h-4 w-4" aria-hidden />
             <span>{t('doctor.call112')}</span>
           </a>
+        </div>
+      ) : null}
+
+      {/* Guest notice */}
+      {role === 'guest' ? (
+        <div className="surface-card p-4 rounded-xl border border-[#B88E3E]/40 bg-[#B88E3E]/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start">
+          <p className="text-xs sm:text-sm text-fg leading-relaxed">
+            {t('guest.aiRequiresAuth')}
+          </p>
+          <Button size="sm" variant="gold" onClick={() => void signIn()} className="shrink-0 w-full sm:w-auto">
+            {t('guest.signInPrompt')}
+          </Button>
         </div>
       ) : null}
 

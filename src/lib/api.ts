@@ -199,20 +199,31 @@ export interface GuestSession {
 }
 
 export async function startGuestSession(turnstileToken?: string): Promise<GuestSession> {
-  let response: Response;
+  const localSession: GuestSession = {
+    token: `guest_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    guestId: `local_${Date.now()}`,
+    expiresIn: 86400,
+    limits: { perDay: 0 },
+  };
+
   try {
-    response = await fetch('/api/guest/start', {
+    const response = await fetch('/api/guest/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(turnstileToken ? { turnstileToken } : {}),
     });
+    if (response.ok) {
+      const session = (await response.json()) as GuestSession;
+      setGuestToken(session.token);
+      return session;
+    }
   } catch {
-    throw new ApiError('network', 0, 'Network error');
+    // Network or server error — continue locally seamlessly
   }
-  if (!response.ok) throw await parseError(response);
-  const session = (await response.json()) as GuestSession;
-  setGuestToken(session.token);
-  return session;
+
+  // Fallback to local guest token so guests can explore and track data locally
+  setGuestToken(localSession.token);
+  return localSession;
 }
 
 /* ---------------------------------- SSE ----------------------------------- */

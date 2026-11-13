@@ -58,6 +58,10 @@ export function AccountantPage() {
 
   const onReceipt = async (file?: File) => {
     if (!file) return;
+    if (isGuest) {
+      show(t('guest.aiRequiresAuth'), 'warning');
+      return;
+    }
     setSheet(null);
     try {
       const prepared: PreparedImage = await prepareImage(file);
@@ -93,7 +97,16 @@ export function AccountantPage() {
       <PageHeader
         title={t('accountant.title')}
         action={
-          <IconButton label={t('chef.drawerTitle')} onClick={() => setSheet('chat')}>
+          <IconButton
+            label={t('chef.drawerTitle')}
+            onClick={() => {
+              if (isGuest) {
+                show(t('guest.aiRequiresAuth'), 'warning');
+                return;
+              }
+              setSheet('chat');
+            }}
+          >
             <MessageCircle className="h-5 w-5" aria-hidden />
           </IconButton>
         }
