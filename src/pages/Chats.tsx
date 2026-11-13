@@ -10,8 +10,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Search,
   ShieldCheck,
-  Stethoscope,
-  Wallet,
   Trash2,
   MessagesSquare,
   Clock,
@@ -22,6 +20,7 @@ import { Button, IconButton } from '../components/ui/Button';
 import { Badge, EmptyState, Skeleton } from '../components/ui/Feedback';
 import { Input } from '../components/ui/Field';
 import { Segmented } from '../components/ui/Controls';
+import { PersonaAvatar } from '../components/characters/Personas';
 import { useChatList, useChatMutations } from '../data/chats';
 import { formatDateTime } from '../lib/format';
 import { usePageTheme } from '../lib/theme';
@@ -125,15 +124,7 @@ export function ChatsPage() {
                 <div className="group rounded-xl border border-line bg-surface p-3.5 hover:border-accent/40 hover:shadow-e1 transition-all">
                   <div className="flex items-center gap-3">
                     <Link to={`/chats/${chat.id}`} className="flex min-w-0 flex-1 items-start gap-3">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface2 text-accent border border-line/60">
-                        {chat.kind === 'doctor' ? (
-                          <Stethoscope className="h-5 w-5" strokeWidth={2} />
-                        ) : chat.kind === 'accountant' ? (
-                          <Wallet className="h-5 w-5" strokeWidth={2} />
-                        ) : (
-                          <ShieldCheck className="h-5 w-5" strokeWidth={2} />
-                        )}
-                      </div>
+                      <PersonaAvatar kind={chat.kind} size="md" />
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <div className="flex items-center justify-between gap-2">
                           <p className="font-display text-sm font-bold text-fg truncate">{chat.title}</p>

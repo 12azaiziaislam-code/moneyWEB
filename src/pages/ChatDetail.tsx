@@ -8,6 +8,7 @@ import { ChevronLeft, Trash2 } from 'lucide-react';
 import { ChatView } from '../components/ChatView';
 import { Button, IconButton } from '../components/ui/Button';
 import { Disclaimer, Skeleton } from '../components/ui/Feedback';
+import { PersonaAvatar } from '../components/characters/Personas';
 import { useChatDetail, useChatMutations } from '../data/chats';
 import { usePageTheme } from '../lib/theme';
 import { useToast } from '../state/ToastContext';
@@ -47,6 +48,7 @@ export function ChatDetailPage() {
         <IconButton label={t('common.back')} onClick={() => navigate('/chats')}>
           <ChevronLeft className="flip-rtl h-5 w-5" aria-hidden />
         </IconButton>
+        {chat ? <PersonaAvatar kind={chat.kind} size="sm" /> : null}
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-sm sm:text-base font-bold text-fg">{chat?.title ?? t('chats.title')}</h1>
           {chat ? <p className="text-[11px] text-muted">{t(`chats.kinds.${chat.kind}`)}</p> : null}

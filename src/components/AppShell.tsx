@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   CloudOff,
@@ -36,6 +36,8 @@ const NAV: Array<{ to: string; key: string; Icon: LucideIcon; end?: boolean }> =
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isChatDetail = location.pathname.startsWith('/chats/') && location.pathname !== '/chats';
   const { role, signIn, themeMode, setThemeMode } = useAuth();
   const [online, setOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [updateReady, setUpdateReady] = useState(false);
@@ -204,7 +206,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         ) : null}
 
         {/* Page View Wrapper (Spacious on desktop) */}
-        <main className="flex-1 flex flex-col w-full max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-[calc(var(--nav-h)+2rem+var(--safe-bottom))] lg:pb-12 safe-x">
+        <main
+          className={cn(
+            'flex-1 flex flex-col w-full max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 lg:pb-12 safe-x',
+            isChatDetail ? 'pb-4' : 'pb-[calc(var(--nav-h)+2rem+var(--safe-bottom))]',
+          )}
+        >
           {children}
         </main>
       </div>
@@ -212,41 +219,44 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* =====================================================================
           MOBILE BOTTOM FLOATING TAB BAR (< 1024px)
           Never overlaps modals, respects safe-area insets.
+          Hidden on chat detail view to allow clean, unblocked conversation flow.
           ===================================================================== */}
-      <nav
-        aria-label={t('app.name')}
-        className="lg:hidden fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-lg px-3 pb-[calc(0.5rem+var(--safe-bottom))]"
-      >
-        <ul className="flex items-center justify-between gap-1 rounded-xl border border-line bg-surface/95 backdrop-blur-md p-1.5 shadow-e2">
-          {NAV.map(({ to, key, Icon, end }) => (
-            <li key={to} className="flex-1">
-              <NavLink
-                to={to}
-                end={end}
-                className={({ isActive }) =>
-                  cn(
-                    'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-[10.5px] font-bold transition-all duration-fast cursor-pointer',
-                    isActive
-                      ? 'bg-surface2 text-fg border border-line/60 shadow-xs'
-                      : 'text-muted hover:text-fg hover:bg-surface2/50',
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <Icon
-                      className={cn('h-5 w-5 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
-                      strokeWidth={isActive ? 2.2 : 1.75}
-                      aria-hidden
-                    />
-                    <span className="truncate">{t(`nav.${key}`)}</span>
-                  </>
-                )}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {!isChatDetail ? (
+        <nav
+          aria-label={t('app.name')}
+          className="lg:hidden fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-lg px-3 pb-[calc(0.5rem+var(--safe-bottom))]"
+        >
+          <ul className="flex items-center justify-between gap-1 rounded-xl border border-line bg-surface/95 backdrop-blur-md p-1.5 shadow-e2">
+            {NAV.map(({ to, key, Icon, end }) => (
+              <li key={to} className="flex-1">
+                <NavLink
+                  to={to}
+                  end={end}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-[10.5px] font-bold transition-all duration-fast cursor-pointer',
+                      isActive
+                        ? 'bg-surface2 text-fg border border-line/60 shadow-xs'
+                        : 'text-muted hover:text-fg hover:bg-surface2/50',
+                    )
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <Icon
+                        className={cn('h-5 w-5 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
+                        strokeWidth={isActive ? 2.2 : 1.75}
+                        aria-hidden
+                      />
+                      <span className="truncate">{t(`nav.${key}`)}</span>
+                    </>
+                  )}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ) : null}
     </div>
   );
 }

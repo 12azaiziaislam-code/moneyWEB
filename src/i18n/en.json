@@ -117,7 +117,7 @@
     "subtitle": "Photograph the ingredients, the pack or the barcode",
     "placeholder": "Or type the ingredients here…",
     "scan": "Check now",
-    "scanning": "Sheikh AI is reading the ingredients…",
+    "scanning": "Reading and screening ingredients…",
     "verdict": {
       "halal": "Halal",
       "haram": "Haram",
@@ -148,13 +148,14 @@
     "stopped": "The stream stopped. You can retry.",
     "kinds": {
       "shaykh": "Sheikh",
+      "sheikh": "Sheikh",
       "doctor": "Doctor",
       "accountant": "Accountant"
     },
     "objection": "I disagree:"
   },
   "doctor": {
-    "title": "Doctor AI",
+    "title": "Medical & Dietary Consultation",
     "subtitle": "Photo of medicine, food or a lab test — I'll explain",
     "profileGate": "Complete your health profile first so the answer fits your situation.",
     "completeProfile": "Complete health profile",

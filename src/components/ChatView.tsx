@@ -12,9 +12,7 @@ import { IconButton } from './ui/Button';
 import { Textarea } from './ui/Field';
 import { cn } from './ui';
 import { haptic, HAPTIC } from '../lib/haptics';
-import { Sheikh } from './characters/Sheikh';
-import { DoctorChar } from './characters/DoctorChar';
-import { AccountantChar } from './characters/AccountantChar';
+import { PersonaAvatar, PersonaCard } from './characters/Personas';
 
 export interface ChatViewProps {
   kind: ChatKind;
@@ -173,12 +171,14 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
     show(t('chats.stopped'), 'warning');
   };
 
-  const avatar =
-    kind === 'doctor' ? <DoctorChar size={32} /> : kind === 'accountant' ? <AccountantChar size={32} mood="calm" /> : <Sheikh size={32} />;
+  const avatar = <PersonaAvatar kind={kind} size="sm" />;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex-1 space-y-2.5 overflow-y-auto px-0.5 py-2">
+      <div className="flex-1 space-y-3 overflow-y-auto px-0.5 py-2">
+        {/* Advisory Persona Profile Card */}
+        <PersonaCard kind={kind} />
+
         {loading ? (
           <div className="space-y-2">
             <div className="skeleton h-16 w-3/4 rounded-md bg-surface2" />
@@ -189,12 +189,14 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
         {messages.map((message) => {
           const isUser = message.role === 'user';
           return (
-            <div key={message.id} className={cn('flex items-end gap-1.5', isUser ? 'justify-end' : 'justify-start')}>
+            <div key={message.id} className={cn('flex items-end gap-2', isUser ? 'justify-end' : 'justify-start')}>
               {!isUser ? <div className="mb-0.5 shrink-0">{avatar}</div> : null}
               <div
                 className={cn(
-                  'max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[14px] leading-relaxed shadow-e1',
-                  isUser ? 'rounded-ee-md bg-accent text-accent-fg' : 'rounded-es-md border border-line bg-surface text-fg',
+                  'max-w-[85%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm',
+                  isUser
+                    ? 'rounded-ee-md bg-accent text-accent-fg font-medium'
+                    : 'rounded-es-md border border-line bg-surface text-fg',
                 )}
               >
                 {isUser ? <p className="whitespace-pre-wrap">{message.content}</p> : <RichText text={message.content} />}
