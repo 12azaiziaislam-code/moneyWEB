@@ -50,8 +50,8 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   /* ---- typography ---- */
-  --font-display: 'Readex Pro', 'Manrope', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'IBM Plex Sans Arabic', 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --font-display: 'Cairo', 'Tajawal', 'Readex Pro', system-ui, sans-serif;
+  --font-body: 'Cairo', 'Tajawal', 'IBM Plex Sans Arabic', system-ui, sans-serif;
   --font-latin: 'Manrope', 'Inter', system-ui, sans-serif;
   --font-num: 'Inter', ui-monospace, 'SF Mono', monospace;
   --text-xs: 12px;

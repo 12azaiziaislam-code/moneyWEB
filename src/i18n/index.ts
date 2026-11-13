@@ -24,7 +24,7 @@ function isLocale(value: unknown): value is Locale {
   return value === 'ar' || value === 'ru' || value === 'en';
 }
 
-/** First paint language: stored choice → browser language → Russian (target market). */
+/** First paint language: stored choice → Arabic (default). */
 export function detectLocale(): Locale {
   try {
     const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
@@ -32,12 +32,7 @@ export function detectLocale(): Locale {
   } catch {
     /* private mode */
   }
-  const candidates = [navigator.language, ...(navigator.languages ?? [])];
-  for (const candidate of candidates) {
-    const base = (candidate ?? '').slice(0, 2).toLowerCase();
-    if (isLocale(base)) return base;
-  }
-  return 'ru';
+  return 'ar';
 }
 
 export function dirFor(locale: Locale): 'rtl' | 'ltr' {

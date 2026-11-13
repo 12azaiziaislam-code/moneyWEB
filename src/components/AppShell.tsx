@@ -39,8 +39,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-app flex-col bg-bg">
-      <div className="pointer-events-none fixed inset-0 mx-auto max-w-app overflow-hidden">
+    <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-5xl flex-col bg-bg">
+      <div className="pointer-events-none fixed inset-0 mx-auto max-w-5xl overflow-hidden">
         <div className="pattern-islamic absolute inset-0" />
       </div>
 
@@ -87,7 +87,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <nav
         aria-label={t('app.name')}
-        className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-app px-3 pb-[calc(0.5rem+var(--safe-bottom))]"
+        className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-xl md:max-w-2xl px-3 pb-[calc(0.5rem+var(--safe-bottom))]"
       >
         <ul className="glass-surface flex items-center justify-between gap-1 rounded-2xl px-1.5 py-1.5 shadow-e3">
           {NAV.map(({ to, key, Icon, end }) => (
