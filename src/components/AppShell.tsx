@@ -10,6 +10,7 @@ import { CloudOff, Library, ShieldCheck, Stethoscope, UserRound, Wallet } from '
 import { applyServiceWorkerUpdate, initInstallPrompt, registerServiceWorker } from '../lib/pwa';
 import { cn } from './ui';
 import { Button } from './ui/Button';
+import { IslamicPattern } from './ui/IslamicPattern';
 import { useAuth } from '../state/AuthContext';
 
 import type { LucideIcon } from 'lucide-react';
@@ -43,10 +44,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-4xl flex-col bg-bg text-fg">
-      {/* Subtle architectural background lattice */}
-      <div className="pointer-events-none fixed inset-0 mx-auto max-w-5xl overflow-hidden">
-        <div className="pattern-islamic absolute inset-0" />
-      </div>
+      {/* Sovereign Sacred Geometry Backdrop & Ambient Illumination */}
+      <IslamicPattern />
 
       {!online ? (
         <div
@@ -144,10 +143,10 @@ export function PageHeader({
   ornament?: ReactNode;
 }) {
   return (
-    <header className="flex items-start justify-between gap-3 pb-2 pt-2 border-b border-line/60 mb-2">
+    <header className="relative flex items-start justify-between gap-3 pb-3 pt-3 border-b border-line/60 mb-3">
       <div className="min-w-0">
-        <h1 className="text-display text-xl sm:text-2xl font-bold leading-tight text-fg">{title}</h1>
-        {subtitle ? <p className="mt-0.5 text-xs sm:text-sm text-muted">{subtitle}</p> : null}
+        <h1 className="font-display text-2xl sm:text-3xl font-bold leading-tight tracking-tight text-fg">{title}</h1>
+        {subtitle ? <p className="mt-1 text-xs sm:text-sm text-muted leading-relaxed">{subtitle}</p> : null}
         {ornament}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
