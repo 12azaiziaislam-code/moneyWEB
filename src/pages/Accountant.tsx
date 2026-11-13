@@ -12,9 +12,9 @@ import {
   Trash2,
   Calendar,
   AlertTriangle,
-  MessagesSquare,
   X,
   CreditCard,
+  Sparkles,
 } from 'lucide-react';
 import type { ExtractedTransaction } from '../../shared/types';
 import { formatMoney, majorToMinor } from '../../shared/money';
@@ -68,6 +68,7 @@ export function AccountantPage() {
     kind: 'expense' as 'expense' | 'income',
     amount: '',
     label: '',
+    category: 'food',
     occurredAt: new Date().toISOString(),
   });
   const locale = (user?.locale ?? i18n.language ?? 'ru') as string;
@@ -139,15 +140,15 @@ export function AccountantPage() {
 
   const modeDescriptions: Record<'hard' | 'normal' | 'easy', { title: string; desc: string }> = {
     hard: {
-      title: 'مشدد (ادخار 30%)',
-      desc: 'استقطاع ادخار مكثف مع تقليص سقف المصروف اليومي لمضاعفة التوفير.',
+      title: 'ادخار مكثف (30%)',
+      desc: 'استقطاع ادخار مكثف مع تقليص سقف المصروف اليومي لمضاعفة التوفير وحالات الطوارئ.',
     },
     normal: {
-      title: 'متوازن (ادخار 15%)',
+      title: 'متوازن (15%)',
       desc: 'التوزيع القياسي الموصى به بين المصروف اليومي وصندوق الأمان.',
     },
     easy: {
-      title: 'مرن (ادخار 5%)',
+      title: 'مرن (5%)',
       desc: 'سعة إنفاق يومية واسعة مع ادخار رمزي مريح.',
     },
   };
@@ -160,7 +161,7 @@ export function AccountantPage() {
           <Button
             size="sm"
             variant="outline"
-            icon={<MessagesSquare className="h-4 w-4" />}
+            icon={<Sparkles className="h-4 w-4 text-accent" />}
             onClick={() => {
               if (isGuest) {
                 show(t('guest.aiRequiresAuth'), 'warning');
@@ -169,7 +170,7 @@ export function AccountantPage() {
               setSheet('chat');
             }}
           >
-            {t('chef.drawerTitle')}
+            اسأل المحاسب AI
           </Button>
         }
       />
@@ -208,8 +209,15 @@ export function AccountantPage() {
                   <div className="flex items-center gap-1.5 pt-1 text-xs text-muted font-medium">
                     <Calendar className="h-3.5 w-3.5 text-accent" />
                     <span>
-                      {t('accountant.cycleEnd', { date: formatCalendarDate(plan.cycleEnd, locale) })} ·{' '}
-                      {t('accountant.daysLeft', { count: plan.daysLeft })}
+                      موعد الراتب القادم: {formatCalendarDate(plan.cycleEnd, locale)} (باقٍ {plan.daysLeft}{' '}
+                      {plan.daysLeft === 1
+                        ? 'يوم'
+                        : plan.daysLeft === 2
+                          ? 'يومان'
+                          : plan.daysLeft >= 3 && plan.daysLeft <= 10
+                            ? 'أيام'
+                            : 'يوماً'}
+                      )
                     </span>
                   </div>
                 </div>
@@ -230,20 +238,28 @@ export function AccountantPage() {
               <div className="mt-4 pt-3 border-t border-line/60 flex items-center justify-between">
                 <span className="text-xs text-muted">حالة الميزانية:</span>
                 <Badge tone={plan.danger === 'red' ? 'danger' : plan.danger === 'orange' ? 'warn' : 'ok'}>
-                  {t(`accountant.danger.${plan.danger}`)}
+                  {plan.balanceMinor <= 0
+                    ? 'عجز مالي - الرصيد صفر'
+                    : plan.danger === 'red' && plan.availableMinor < 0
+                      ? 'عجز في سداد الالتزامات'
+                      : t(`accountant.danger.${plan.danger}`)}
                 </Badge>
               </div>
 
-              {/* Red Warning Banner */}
+              {/* Warning Banner */}
               {plan.danger === 'red' ? (
                 <div className="mt-3 rounded-xl bg-danger-soft/50 border border-danger/25 p-3 text-xs leading-relaxed text-danger flex items-start gap-2.5">
                   <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-danger" />
                   <div className="text-fg leading-relaxed">
-                    <strong className="text-danger font-bold block mb-0.5">{t('accountant.redTitle')}</strong>
-                    {t('accountant.redBody', {
-                      date: formatCalendarDate(plan.projectedRunOutDate ?? plan.cycleEnd, locale),
-                      days: plan.daysWithoutMoney || plan.daysLeft,
-                    })}
+                    <strong className="text-danger font-bold block mb-0.5">
+                      {plan.balanceMinor <= 0 ? 'تنبيه: لا يوجد رصيد حالي' : t('accountant.redTitle')}
+                    </strong>
+                    {plan.balanceMinor <= 0
+                      ? 'رصيدك الحالي صفر ولا توجد سيولة للمصروف اليومي حتى موعد الدخل القادم. اضغط على «تعديل الرصيد» لتسجيل رصيدك الفعلي.'
+                      : t('accountant.redBody', {
+                          date: formatCalendarDate(plan.projectedRunOutDate ?? plan.cycleEnd, locale),
+                          days: plan.daysWithoutMoney || plan.daysLeft,
+                        })}
                   </div>
                 </div>
               ) : null}
@@ -391,18 +407,7 @@ export function AccountantPage() {
                 <EmptyState
                   icon={<CreditCard className="h-10 w-10 text-muted-soft" strokeWidth={1.5} />}
                   title={t('accountant.emptyTransactions')}
-                  body="ابدأ بمسح إيصال الشراء أو إضافة عملية يدوية لتتبع ميزانيتك اليومية بدقة."
-                  action={
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      icon={<Plus className="h-4 w-4" />}
-                      onClick={() => setSheet('manual')}
-                      className="mt-2"
-                    >
-                      {t('accountant.addManual')}
-                    </Button>
-                  }
+                  body="ابدأ بمسح إيصال الشراء بالكاميرا أو أضف معاملة يدوياً من الأزرار أعلاه لتتبع مصاريفك اليومية بدقة."
                 />
               ) : (
                 <ul className="divide-y divide-line/60 overflow-hidden">
@@ -477,7 +482,7 @@ export function AccountantPage() {
             variant="primary"
             onClick={async () => {
               const minor = majorToMinor(balanceDraft, currency);
-              if (minor === null || minor < 0) {
+              if (minor === null || minor < 0 || minor > 1_000_000_000_00) {
                 show(t('errors.validation_failed'), 'danger');
                 return;
               }
@@ -511,7 +516,7 @@ export function AccountantPage() {
             variant="primary"
             onClick={async () => {
               const minor = majorToMinor(manual.amount, currency);
-              if (minor === null || minor <= 0 || !manual.label.trim()) {
+              if (minor === null || minor <= 0 || minor > 1_000_000_000_00 || !manual.label.trim()) {
                 show(t('errors.validation_failed'), 'danger');
                 return;
               }
@@ -519,10 +524,10 @@ export function AccountantPage() {
                 kind: manual.kind,
                 amountMinor: minor,
                 label: manual.label.trim(),
-                category: 'other',
+                category: manual.kind === 'expense' ? manual.category : 'income',
                 occurredAt: manual.occurredAt,
               });
-              setManual({ ...manual, amount: '', label: '' });
+              setManual({ ...manual, amount: '', label: '', category: 'food' });
               setSheet(null);
               haptic(HAPTIC.success);
               show(t('common.added'), 'success');
@@ -532,41 +537,76 @@ export function AccountantPage() {
           </Button>
         }
       >
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant={manual.kind === 'expense' ? 'primary' : 'outline'}
-            onClick={() => setManual({ ...manual, kind: 'expense' })}
-          >
-            {t('accountant.expense')}
-          </Button>
-          <Button
-            variant={manual.kind === 'income' ? 'primary' : 'outline'}
-            onClick={() => setManual({ ...manual, kind: 'income' })}
-          >
-            {t('accountant.income')}
-          </Button>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant={manual.kind === 'expense' ? 'primary' : 'outline'}
+              onClick={() => setManual({ ...manual, kind: 'expense' })}
+            >
+              {t('accountant.expense')}
+            </Button>
+            <Button
+              variant={manual.kind === 'income' ? 'primary' : 'outline'}
+              onClick={() => setManual({ ...manual, kind: 'income' })}
+            >
+              {t('accountant.income')}
+            </Button>
+          </div>
+
+          {manual.kind === 'expense' ? (
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold text-muted">التصنيف:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { id: 'food', label: 'طعام' },
+                  { id: 'groceries', label: 'بقالة' },
+                  { id: 'transport', label: 'مواصلات' },
+                  { id: 'utilities', label: 'فواتير وخدمات' },
+                  { id: 'health', label: 'صحة' },
+                  { id: 'entertainment', label: 'ترفيه' },
+                  { id: 'other', label: 'أخرى' },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setManual((prev) => ({ ...prev, category: cat.id }))}
+                    className={cn(
+                      'px-2.5 py-1 text-xs font-semibold rounded-lg border transition-colors cursor-pointer',
+                      manual.category === cat.id
+                        ? 'bg-accent text-accent-fg border-accent'
+                        : 'bg-surface2 text-muted hover:text-fg border-line',
+                    )}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <Input
+            label={t('accountant.amount')}
+            inputMode="decimal"
+            value={manual.amount}
+            onChange={(event) => setManual({ ...manual, amount: event.target.value })}
+            suffix={currency}
+          />
+          <Input
+            label={t('accountant.label')}
+            placeholder="مثال: مشتريات السوبرماركت، قهوة، بنزين..."
+            value={manual.label}
+            maxLength={80}
+            onChange={(event) => setManual({ ...manual, label: event.target.value })}
+          />
+          <Input
+            label={t('accountant.date')}
+            type="datetime-local"
+            value={toDateTimeLocal(manual.occurredAt, timezone)}
+            onChange={(event) =>
+              setManual({ ...manual, occurredAt: fromDateTimeLocal(event.target.value, timezone) })
+            }
+          />
         </div>
-        <Input
-          label={t('accountant.amount')}
-          inputMode="decimal"
-          value={manual.amount}
-          onChange={(event) => setManual({ ...manual, amount: event.target.value })}
-          suffix={currency}
-        />
-        <Input
-          label={t('accountant.label')}
-          value={manual.label}
-          maxLength={80}
-          onChange={(event) => setManual({ ...manual, label: event.target.value })}
-        />
-        <Input
-          label={t('accountant.date')}
-          type="datetime-local"
-          value={toDateTimeLocal(manual.occurredAt, timezone)}
-          onChange={(event) =>
-            setManual({ ...manual, occurredAt: fromDateTimeLocal(event.target.value, timezone) })
-          }
-        />
       </Sheet>
 
       {/* 3. Receipt Extracted Review Sheet */}

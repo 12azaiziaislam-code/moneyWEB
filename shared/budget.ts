@@ -161,7 +161,7 @@ export function computePlan(input: PlanInput): PlanResult {
 
   let projectedRunOutDate: string | null = null;
   let daysWithoutMoney = 0;
-  if (availableMinor < 0) {
+  if (availableMinor < 0 || input.balanceMinor <= 0) {
     projectedRunOutDate = today;
     daysWithoutMoney = daysLeft;
   } else if (averageDailySpendMinor > 0) {
@@ -174,10 +174,15 @@ export function computePlan(input: PlanInput): PlanResult {
   }
 
   let danger: DangerLevel;
-  if (availableMinor < 0 || projectedRunOutDate !== null || todayRatio > 2) danger = 'red';
-  else if (todayRatio > 1.3) danger = 'orange';
-  else if (todayRatio > 1) danger = 'yellow';
-  else danger = 'green';
+  if (input.balanceMinor <= 0 || availableMinor <= 0 || projectedRunOutDate !== null || todayRatio > 2) {
+    danger = 'red';
+  } else if (todayRatio > 1.3) {
+    danger = 'orange';
+  } else if (todayRatio > 1) {
+    danger = 'yellow';
+  } else {
+    danger = 'green';
+  }
 
   return {
     currency,

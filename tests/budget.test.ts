@@ -92,6 +92,13 @@ describe('budget: overspending behaviour', () => {
     expect(plan.projectedRunOutDate).toBe('2026-11-02');
     expect(plan.daysWithoutMoney).toBe(plan.daysLeft);
   });
+
+  it('flags zero balance as red danger and zero daily budget even with no expenses', () => {
+    const plan = computePlan({ ...baseInput, balanceMinor: 0, fixedExpenses: [], incomes: [] });
+    expect(plan.danger).toBe('red');
+    expect(plan.dailyBudgetMinor).toBe(0);
+    expect(plan.daysWithoutMoney).toBe(plan.daysLeft);
+  });
 });
 
 describe('budget: projection', () => {
