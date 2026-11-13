@@ -83,3 +83,4 @@ export function IslamicPattern({ className }: { className?: string }) {
     </div>
   );
 }
+
