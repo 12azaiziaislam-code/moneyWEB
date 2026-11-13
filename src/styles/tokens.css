@@ -119,53 +119,53 @@
    Dark Canvas (Sovereign Peat Slate - Zero Neon Glow)
    ========================================================================== */
 .dark {
-  --bg: #0E1513;
-  --bg-2: #141C1A;
-  --surface: #141E1B;
-  --surface-2: #1A2623;
-  --border: #22312C;
-  --border-subtle: #1C2924;
-  --fg: #E8EBE9;
+  --bg: #101614;
+  --bg-2: #161F1C;
+  --surface: #17231F;
+  --surface-2: #1F2E29;
+  --border: #283A33;
+  --border-subtle: #1E2D27;
+  --fg: #E8ECE9;
   --muted: #8E9893;
-  --accent: #2E6B5A;
-  --accent-fg: #F4F7F5;
-  --accent-soft: #18332B;
-  --accent-2: #D4A853;
-  --ring: #3C836E;
+  --accent: #25614E;
+  --accent-fg: #FFFFFF;
+  --accent-soft: #162E25;
+  --accent-2: #C99E4A;
+  --ring: #25614E;
 
-  --ok: #34A873;
-  --ok-soft: #123323;
-  --warn: #D89D42;
-  --warn-soft: #382810;
-  --danger: #D65555;
-  --danger-soft: #381515;
-  --info: #4BA2C7;
-  --info-soft: #122B36;
+  --ok: #2A855A;
+  --ok-soft: #132E21;
+  --warn: #C98E3A;
+  --warn-soft: #33230C;
+  --danger: #C24545;
+  --danger-soft: #331313;
+  --info: #3A8DAE;
+  --info-soft: #10252E;
 
-  --risk-green: #34A873;
-  --risk-green-fg: #082116;
-  --risk-green-soft: #123323;
-  --risk-yellow: #D89D42;
-  --risk-yellow-fg: #261905;
-  --risk-yellow-soft: #382810;
-  --risk-orange: #E0783D;
-  --risk-orange-fg: #281005;
-  --risk-orange-soft: #3B1B0B;
-  --risk-red: #D65555;
-  --risk-red-fg: #280808;
-  --risk-red-soft: #381515;
+  --risk-green: #2A855A;
+  --risk-green-fg: #FFFFFF;
+  --risk-green-soft: #132E21;
+  --risk-yellow: #C98E3A;
+  --risk-yellow-fg: #FFFFFF;
+  --risk-yellow-soft: #33230C;
+  --risk-orange: #C96B36;
+  --risk-orange-fg: #FFFFFF;
+  --risk-orange-soft: #36170A;
+  --risk-red: #C24545;
+  --risk-red-fg: #FFFFFF;
+  --risk-red-soft: #331313;
 
-  --ch-sheikh: #34A873;
-  --ch-doctor: #4BA2C7;
-  --ch-accountant: #D89D42;
+  --ch-sheikh: #2A855A;
+  --ch-doctor: #3A8DAE;
+  --ch-accountant: #C98E3A;
 
-  --pattern-ink: #D4A853;
-  --pattern-opacity: 0.045;
-  --hero-grad-a: #1D3D33;
-  --hero-grad-b: #0B1915;
-  --glass: rgb(20 30 27 / 0.94);
-  --glass-border: #22312C;
-  --overlay: rgb(0 0 0 / 0.7);
+  --pattern-ink: #C99E4A;
+  --pattern-opacity: 0.035;
+  --hero-grad-a: #162923;
+  --hero-grad-b: #0E1614;
+  --glass: rgb(23 35 31 / 0.94);
+  --glass-border: #283A33;
+  --overlay: rgb(0 0 0 / 0.75);
 
   --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
   --shadow-2: 0 4px 12px -2px rgb(0 0 0 / 0.45);
@@ -224,11 +224,11 @@
    PAGE IDENTITIES (DARK)
    ========================================================================== */
 .dark[data-theme='halal'] {
-  --accent: #34A873;
-  --accent-fg: #082116;
-  --accent-soft: #123323;
-  --accent-2: #D4A853;
-  --ring: #34A873;
+  --accent: #25614E;
+  --accent-fg: #FFFFFF;
+  --accent-soft: #162E25;
+  --accent-2: #C99E4A;
+  --ring: #25614E;
 }
 
 .dark[data-theme='chats'] {
@@ -256,10 +256,10 @@
 }
 
 .dark[data-theme='profile'] {
-  --accent: #34A873;
-  --accent-fg: #082116;
-  --accent-soft: #123323;
-  --ring: #34A873;
+  --accent: #25614E;
+  --accent-fg: #FFFFFF;
+  --accent-soft: #162E25;
+  --ring: #25614E;
 }
 
 /* ==========================================================================

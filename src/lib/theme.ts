@@ -42,7 +42,7 @@ export function getStoredAccent(): Accent {
 
 export function getStoredTheme(): ThemeMode {
   const value = read(THEME_KEY);
-  return value === 'light' || value === 'dark' ? value : 'system';
+  return value === 'dark' || value === 'system' ? value : 'light';
 }
 
 export function applyAccent(accent: Accent): void {

@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   User as UserIcon,
   Wallet,
-  Activity,
 } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 import { Button } from '../components/ui/Button';
@@ -125,23 +124,7 @@ export function LoginPage() {
           : t('auth.error')
       : null);
 
-  const capabilities = [
-    {
-      title: t('landing.cap1Title'),
-      desc: t('landing.cap1Desc'),
-      Icon: ShieldCheck,
-    },
-    {
-      title: t('landing.cap2Title'),
-      desc: t('landing.cap2Desc'),
-      Icon: Wallet,
-    },
-    {
-      title: t('landing.cap3Title'),
-      desc: t('landing.cap3Desc'),
-      Icon: Activity,
-    },
-  ];
+
 
   return (
     <div className="relative min-h-[100dvh] w-full bg-bg text-fg font-body selection:bg-accent selection:text-accent-fg">
@@ -200,44 +183,53 @@ export function LoginPage() {
               <span className="inline-block rounded border border-line bg-surface2 px-3 py-1 text-xs font-semibold text-accent">
                 {t('landing.badge')}
               </span>
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-fg leading-[1.2]">
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-fg leading-snug">
                 {t('landing.headline')}
               </h1>
-              <p className="max-w-2xl text-base sm:text-lg leading-relaxed text-muted font-normal">
+              <p className="max-w-xl text-sm sm:text-base leading-relaxed text-muted font-normal">
                 {t('landing.description')}
               </p>
             </div>
 
-            {/* Core Capabilities */}
-            <div className="grid gap-3 sm:grid-cols-3 pt-2">
-              {capabilities.map(({ title, desc, Icon }) => (
-                <div
-                  key={title}
-                  className="rounded-lg border border-line bg-surface p-4 shadow-sm"
-                >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-md border border-line bg-surface2 text-accent mb-3">
-                    <Icon className="h-5 w-5" strokeWidth={1.8} />
-                  </div>
-                  <h2 className="font-display text-sm font-bold text-fg mb-1">{title}</h2>
-                  <p className="text-xs leading-relaxed text-muted">{desc}</p>
+            {/* Core Pillars */}
+            <div className="space-y-3.5 pt-1">
+              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface p-4 shadow-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-surface2 text-accent">
+                  <ShieldCheck className="h-5 w-5" strokeWidth={1.8} />
                 </div>
-              ))}
+                <div>
+                  <h2 className="font-display text-sm font-bold text-fg mb-0.5">{t('landing.cap1Title')}</h2>
+                  <p className="text-xs leading-relaxed text-muted">{t('landing.cap1Desc')}</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface p-4 shadow-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-surface2 text-accent">
+                  <Wallet className="h-5 w-5" strokeWidth={1.8} />
+                </div>
+                <div>
+                  <h2 className="font-display text-sm font-bold text-fg mb-0.5">{t('landing.cap2Title')}</h2>
+                  <p className="text-xs leading-relaxed text-muted">{t('landing.cap2Desc')}</p>
+                </div>
+              </div>
             </div>
 
             {/* Trust Assurance (Honest & Verified) */}
-            <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-muted">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-ok" />
-                <span>{t('landing.trustSecurity')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-ok" />
-                <span>{t('landing.trustPrivacy')}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-ok" />
-                <span>{t('landing.trustStandards')}</span>
-              </div>
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-3.5 pt-1 text-[11px] text-muted">
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-ok" />
+                {t('landing.trustPrivacy')}
+              </span>
+              <span className="text-muted/40">•</span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-ok" />
+                {t('landing.trustSecurity')}
+              </span>
+              <span className="text-muted/40">•</span>
+              <span className="inline-flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-ok" />
+                {t('landing.trustStandards')}
+              </span>
             </div>
           </section>
 
