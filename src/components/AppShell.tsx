@@ -103,14 +103,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="space-y-6">
           {/* Brand Identity */}
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-fg shadow-e1">
-              <Logo size={28} />
-            </div>
+            <Logo size={40} className="rounded-xl shadow-e1 shrink-0" />
             <div className="min-w-0">
               <span className="font-display text-lg font-bold tracking-tight text-fg block leading-none">
                 {t('app.name')}
               </span>
-              <span className="text-[11px] font-semibold text-muted tracking-normal mt-0.5 block truncate">
+              <span className="text-[11px] font-semibold text-muted tracking-normal mt-1 block truncate">
                 {t('app.tagline')}
               </span>
             </div>

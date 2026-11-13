@@ -5,6 +5,7 @@
  */
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Lock,
@@ -144,9 +145,7 @@ export function LoginPage() {
       {/* Top Header: Brand & Utilities */}
       <header className="relative z-10 flex items-center justify-between max-w-md mx-auto w-full pt-2">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-fg shadow-e1">
-            <Logo size={24} />
-          </div>
+          <Logo size={38} className="rounded-xl shadow-e1 shrink-0" />
           <span className="font-display text-lg font-bold tracking-tight text-fg">
             {t('app.name')}
           </span>
@@ -334,9 +333,20 @@ export function LoginPage() {
         </div>
       </main>
 
-      {/* Quiet Footer */}
-      <footer className="relative z-10 text-center text-xs text-muted-soft max-w-md mx-auto w-full pb-2">
-        <span>تشفير تام عبر HTTPS · خصوصية وحفظ محلي</span>
+      {/* Sovereign Dignified Footer */}
+      <footer className="relative z-10 flex flex-col items-center justify-center gap-1.5 text-center text-[11.5px] text-muted max-w-md mx-auto w-full pb-4 pt-2">
+        <div className="flex items-center justify-center gap-3">
+          <Link to="/legal/privacy" className="hover:text-fg transition-colors">
+            {t('profile.privacy')}
+          </Link>
+          <span className="text-muted/40">·</span>
+          <Link to="/legal/terms" className="hover:text-fg transition-colors">
+            {t('profile.terms')}
+          </Link>
+        </div>
+        <p className="text-[10.5px] text-muted/60">
+          © {new Date().getFullYear()} {t('app.name')} · {t('app.tagline')}
+        </p>
       </footer>
     </div>
   );
