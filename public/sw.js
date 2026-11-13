@@ -3,7 +3,7 @@
  * already fetched by the authenticated page.
  */
 
-const VERSION = 'baraka-v1.0.0';
+const VERSION = 'baraka-v2.1.0';
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const SHELL_FILES = [
@@ -16,11 +16,11 @@ const SHELL_FILES = [
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches
       .open(SHELL_CACHE)
       .then((cache) => Promise.allSettled(SHELL_FILES.map((file) => cache.add(new Request(file, { cache: 'reload' })))))
-      .then(() => self.skipWaiting()),
   );
 });
 
@@ -29,7 +29,7 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) =>
-        Promise.all(keys.filter((key) => !key.startsWith(VERSION)).map((key) => caches.delete(key))),
+        Promise.all(keys.filter((key) => key !== SHELL_CACHE && key !== ASSET_CACHE).map((key) => caches.delete(key))),
       )
       .then(() => self.clients.claim()),
   );
@@ -59,13 +59,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Navigations: network first, fall back to the cached shell (SPA routes work offline).
+  // Navigations: always network first with cache reload to prevent serving stale versions
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'reload' })
         .then((response) => {
-          const copy = response.clone();
-          caches.open(SHELL_CACHE).then((cache) => cache.put('/index.html', copy)).catch(() => {});
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(SHELL_CACHE).then((cache) => cache.put('/index.html', copy)).catch(() => {});
+          }
           return response;
         })
         .catch(() => caches.match('/index.html').then((cached) => cached || caches.match('/'))),

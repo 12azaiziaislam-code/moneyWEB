@@ -189,6 +189,12 @@ async function migrateLocalDatabase() {
     info('local D1 state wiped (--fresh)');
   }
 
+  // Fast mode: skip re-running migrations if local D1 database already exists
+  if (flag('fast') && !flag('fresh') && existsSync(path.join(ROOT, '.wrangler', 'state'))) {
+    ok('local D1 database state found (skipping migrations in fast mode)');
+    return;
+  }
+
   const result = await run(
     'npx',
     ['wrangler', 'd1', 'migrations', 'apply', 'baraka-db', '--local', '--persist-to', '.wrangler/state'],
@@ -321,6 +327,19 @@ async function smokeTest(guestOn) {
     if (passed) ok(line);
     else bad(line);
   };
+
+  // In fast mode, do a quick single-call ping to /api/health to save time
+  if (flag('fast')) {
+    try {
+      const health = await hit('/api/health');
+      check('Server Health & D1', health.status === 200, 'GET /api/health 200', String(health.status));
+    } catch (error) {
+      bad(`Health check failed: ${error.message}`);
+      results.push({ name: 'health', passed: false, expectation: '200', actual: 'error' });
+    }
+    const failed = results.filter((entry) => !entry.passed);
+    return { passed: results.length - failed.length, total: results.length, failed };
+  }
 
   try {
     const html = await hit('/');
