@@ -81,13 +81,15 @@
 }
 
 @layer components {
-  /* Subtle architectural geometric backdrop */
+  /* Sovereign Islamic Geometric Backdrop */
   .pattern-islamic {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23184437' stroke-width='0.8'%3E%3Crect x='16' y='16' width='32' height='32' rx='2' transform='rotate(45 32 32)'/%3E%3Crect x='16' y='16' width='32' height='32' rx='2'/%3E%3Ccircle cx='32' cy='32' r='20'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 64px 64px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23C5A059' stroke-width='0.85' stroke-opacity='0.3'%3E%3Crect x='25' y='25' width='30' height='30' rx='2' transform='rotate(45 40 40)'/%3E%3Crect x='25' y='25' width='30' height='30' rx='2'/%3E%3Ccircle cx='40' cy='40' r='10' stroke-dasharray='2,2' stroke-opacity='0.45'/%3E%3Crect x='-15' y='-15' width='30' height='30' rx='2' transform='rotate(45 0 0)'/%3E%3Crect x='65' y='-15' width='30' height='30' rx='2' transform='rotate(45 80 0)'/%3E%3Crect x='65' y='65' width='30' height='30' rx='2' transform='rotate(45 80 80)'/%3E%3Crect x='-15' y='65' width='30' height='30' rx='2' transform='rotate(45 0 80)'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 80px 80px;
     opacity: var(--pattern-opacity);
-    mask-image: radial-gradient(100% 80% at 50% 0%, #000 20%, transparent 80%);
-    -webkit-mask-image: radial-gradient(100% 80% at 50% 0%, #000 20%, transparent 80%);
+  }
+
+  .dome-glow {
+    background: radial-gradient(110% 70% at 50% -10%, rgba(212, 175, 55, 0.18) 0%, rgba(197, 160, 89, 0.06) 45%, transparent 75%);
   }
 
   .surface-card {
@@ -95,7 +97,20 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-1);
+    position: relative;
     transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+  }
+
+  .surface-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+    opacity: 0.45;
+    pointer-events: none;
   }
 
   .surface-card-hover:hover {

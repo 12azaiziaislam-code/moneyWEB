@@ -19,6 +19,7 @@ import { changeLocale, type Locale } from '../i18n';
 import { usePageTheme } from '../lib/theme';
 import { haptic, HAPTIC } from '../lib/haptics';
 import { Logo } from '../components/characters/Logo';
+import { IslamicPattern } from '../components/ui';
 
 function GoogleMark() {
   return (
@@ -128,22 +129,20 @@ export function LoginPage() {
 
   return (
     <div className="relative min-h-[100dvh] w-full bg-bg text-fg font-body selection:bg-accent selection:text-accent-fg">
-      {/* Subtle architectural backdrop */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="pattern-islamic absolute inset-0" />
-      </div>
+      {/* Sovereign Islamic Architectural Backdrop & Ambient Illumination */}
+      <IslamicPattern />
 
       <div className="relative z-10 mx-auto min-h-[100dvh] max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col justify-between">
         {/* Navigation Bar */}
         <header className="flex items-center justify-between pb-4 border-b border-line">
-          <div className="flex items-center gap-3">
-            <Logo size={40} />
+          <div className="flex items-center gap-3.5">
+            <Logo size={42} />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-display text-2xl font-bold tracking-tight text-fg">
                   {t('app.name')}
                 </span>
-                <span className="hidden sm:inline-flex rounded border border-line bg-surface2 px-2 py-0.5 text-[11px] font-semibold text-muted">
+                <span className="hidden sm:inline-flex rounded-full border border-[#B88E3E]/30 bg-[#B88E3E]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#B88E3E] dark:text-[#D4AF37]">
                   {t('landing.badge')}
                 </span>
               </div>
@@ -165,7 +164,7 @@ export function LoginPage() {
                 className={cn(
                   'rounded px-2.5 py-1 text-xs font-semibold transition-colors duration-fast',
                   i18n.language === locale
-                    ? 'bg-accent text-accent-fg font-bold'
+                    ? 'bg-surface2 text-fg font-bold border border-line shadow-sm'
                     : 'text-muted hover:text-fg hover:bg-surface2',
                 )}
               >
@@ -180,7 +179,8 @@ export function LoginPage() {
           {/* Left Column: Brand Mission & Capabilities (7 cols) */}
           <section className="lg:col-span-7 flex flex-col justify-center space-y-6 text-start">
             <div className="space-y-3">
-              <span className="inline-block rounded border border-line bg-surface2 px-3 py-1 text-xs font-semibold text-accent">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B88E3E]/30 bg-[#B88E3E]/10 px-3 py-1 text-xs font-semibold text-[#B88E3E] dark:text-[#D4AF37]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#B88E3E] dark:bg-[#D4AF37]" />
                 {t('landing.badge')}
               </span>
               <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-fg leading-snug">
@@ -193,8 +193,8 @@ export function LoginPage() {
 
             {/* Core Pillars */}
             <div className="space-y-3.5 pt-1">
-              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface p-4 shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-surface2 text-accent">
+              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface/80 p-4 shadow-sm backdrop-blur-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#B88E3E]/30 bg-[#B88E3E]/10 text-[#B88E3E] dark:text-[#D4AF37]">
                   <ShieldCheck className="h-5 w-5" strokeWidth={1.8} />
                 </div>
                 <div>
@@ -203,8 +203,8 @@ export function LoginPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface p-4 shadow-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line bg-surface2 text-accent">
+              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface/80 p-4 shadow-sm backdrop-blur-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#B88E3E]/30 bg-[#B88E3E]/10 text-[#B88E3E] dark:text-[#D4AF37]">
                   <Wallet className="h-5 w-5" strokeWidth={1.8} />
                 </div>
                 <div>
@@ -217,17 +217,17 @@ export function LoginPage() {
             {/* Trust Assurance (Honest & Verified) */}
             <div className="flex flex-wrap items-center gap-y-2 gap-x-3.5 pt-1 text-[11px] text-muted">
               <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-ok" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#B88E3E] dark:text-[#D4AF37]" />
                 {t('landing.trustPrivacy')}
               </span>
               <span className="text-muted/40">•</span>
               <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-ok" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#B88E3E] dark:text-[#D4AF37]" />
                 {t('landing.trustSecurity')}
               </span>
               <span className="text-muted/40">•</span>
               <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-ok" />
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#B88E3E] dark:text-[#D4AF37]" />
                 {t('landing.trustStandards')}
               </span>
             </div>
@@ -235,7 +235,8 @@ export function LoginPage() {
 
           {/* Right Column: Authentication Card (5 cols) */}
           <section className="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
-            <div className="surface-card p-6 sm:p-8">
+            <div className="surface-card p-6 sm:p-8 relative overflow-hidden backdrop-blur-sm">
+              <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent opacity-80" />
               {/* Tab Selector */}
               <div className="mb-6">
                 <div className="flex rounded-md border border-line bg-surface2 p-1">
@@ -307,7 +308,7 @@ export function LoginPage() {
                       type="submit"
                       loading={busy === 'credentials'}
                       disabled={busy !== null}
-                      className="mt-2 h-11"
+                      className="mt-2 h-11 bg-[#164E3F] hover:bg-[#1C5C4A] text-white font-bold border border-[#277D64]/30 shadow-sm"
                     >
                       {t('auth.submitSignIn')}
                     </Button>
@@ -347,7 +348,7 @@ export function LoginPage() {
                       type="submit"
                       loading={busy === 'credentials'}
                       disabled={busy !== null}
-                      className="mt-2 h-11"
+                      className="mt-2 h-11 bg-[#164E3F] hover:bg-[#1C5C4A] text-white font-bold border border-[#277D64]/30 shadow-sm"
                     >
                       {t('auth.submitRegister')}
                     </Button>
@@ -387,13 +388,13 @@ export function LoginPage() {
                     type="button"
                     disabled={busy !== null}
                     onClick={() => void runGuest()}
-                    className="w-full group flex items-center justify-between rounded-md border border-line bg-surface2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-fg hover:border-accent/40 transition-colors"
+                    className="w-full group flex items-center justify-between rounded-md border border-line bg-surface hover:bg-surface2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-fg hover:border-[#B88E3E]/50 transition-colors shadow-sm"
                   >
                     <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-accent" />
+                      <ShieldCheck className="h-4 w-4 text-[#B88E3E] dark:text-[#D4AF37]" />
                       <span>{t('guest.try')}</span>
                     </div>
-                    <div className="flex items-center gap-1 text-[11px] text-muted group-hover:text-accent">
+                    <div className="flex items-center gap-1 text-[11px] text-muted group-hover:text-fg">
                       <span>{t('landing.instantDemo')}</span>
                       <ArrowRight className="flip-rtl h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
                     </div>

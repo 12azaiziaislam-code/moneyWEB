@@ -5,3 +5,4 @@ export { Segmented, Switch, type SegmentOption } from './Controls';
 export { Skeleton, Spinner, Badge, Chip, EmptyState, ErrorState, Progress, Disclaimer } from './Feedback';
 export { Sheet } from './Sheet';
 export { ProgressRing, type RingTone } from './ProgressRing';
+export { IslamicPattern } from './IslamicPattern';
