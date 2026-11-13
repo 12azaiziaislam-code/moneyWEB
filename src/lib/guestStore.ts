@@ -185,7 +185,7 @@ export function demoGuestData(locale: Locale, currency = DEFAULT_CURRENCY): Gues
       lisinopril: 'ليزينوبريل 10 ملغ',
       penicillin: 'بنسلين',
       chatTitle: 'لوح طاقة بروتيني',
-      chatPreview: 'جيلاتين مجهول المصدر — شبهة.',
+      chatPreview: 'جيلاتين مجهول المصدر: شبهة.',
       chatUser: 'المكونات: شوفان، شراب، جيلاتين، نكهات طبيعية.',
       chatAssistant:
         'الملصق يذكر الجيلاتين دون توضيح مصدره الحيواني.\n\nالأحوط التوقف واعتباره مشبوهاً حتى التحقق من شهادة الحلال للمنتج.',

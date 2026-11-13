@@ -3,7 +3,7 @@
  * already fetched by the authenticated page.
  */
 
-const VERSION = 'baraka-v2.5.0';
+const VERSION = 'baraka-v2.6.0';
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const SHELL_FILES = [
