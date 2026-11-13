@@ -1,10 +1,10 @@
 /**
- * Baraka v2 — Form Controls: Segmented, ThemeSelector, and Switch
- * Fully accessible, touch-friendly, RTL compliant.
+ * Baraka v2 — Form Controls: SegmentedControl, OptionCard, RadioGroup, ThemeSelector, and Switch
+ * Fully accessible, touch-friendly, RTL compliant, WCAG 4.5:1+ contrast.
  */
 
 import { useRef, type ReactNode } from 'react';
-import { Sun, Moon, Laptop } from 'lucide-react';
+import { Sun, Moon, Laptop, Check } from 'lucide-react';
 import { cn } from './cn';
 import type { ThemeMode } from '../../lib/theme';
 
@@ -69,6 +69,96 @@ export function Segmented<T extends string>({
   );
 }
 
+export const SegmentedControl = Segmented;
+
+export function OptionCard<T extends string>({
+  value,
+  selected,
+  onSelect,
+  title,
+  description,
+  badge,
+  icon,
+  className,
+}: {
+  value: T;
+  selected: boolean;
+  onSelect: (value: T) => void;
+  title: string;
+  description?: string;
+  badge?: ReactNode;
+  icon?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      onClick={() => onSelect(value)}
+      className={cn(
+        'flex flex-col items-start w-full rounded-md border p-3.5 text-start transition-all cursor-pointer',
+        selected
+          ? 'border-accent bg-accent-soft/40 shadow-e1 ring-1 ring-accent'
+          : 'border-line bg-surface hover:bg-surface2/80',
+        className,
+      )}
+    >
+      <div className="flex items-center justify-between w-full gap-2 mb-1">
+        <div className="flex items-center gap-2 min-w-0">
+          {icon ? <span className="text-accent shrink-0">{icon}</span> : null}
+          <span className="font-display text-sm font-bold text-fg truncate">{title}</span>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {badge}
+          <div
+            className={cn(
+              'flex h-5 w-5 items-center justify-center rounded-full border transition-colors',
+              selected ? 'border-accent bg-accent text-accent-fg' : 'border-line bg-surface2',
+            )}
+          >
+            {selected ? <Check className="h-3 w-3 stroke-[3]" /> : null}
+          </div>
+        </div>
+      </div>
+      {description ? (
+        <p className="text-xs text-muted leading-relaxed line-clamp-2">{description}</p>
+      ) : null}
+    </button>
+  );
+}
+
+export function RadioGroup<T extends string>({
+  options,
+  value,
+  onChange,
+  ariaLabel,
+  className,
+}: {
+  options: Array<{ value: T; title: string; description?: string; badge?: ReactNode; icon?: ReactNode }>;
+  value: T;
+  onChange: (value: T) => void;
+  ariaLabel: string;
+  className?: string;
+}) {
+  return (
+    <div role="radiogroup" aria-label={ariaLabel} className={cn('space-y-2', className)}>
+      {options.map((opt) => (
+        <OptionCard
+          key={opt.value}
+          value={opt.value}
+          selected={value === opt.value}
+          onSelect={onChange}
+          title={opt.title}
+          description={opt.description}
+          badge={opt.badge}
+          icon={opt.icon}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function ThemeSelector({
   value,
   onChange,
@@ -109,6 +199,9 @@ export function ThemeSelector({
   );
 }
 
+/**
+ * Switch with visible status ("مفعّل" / "معطّل") and label directly adjacent
+ */
 export function Switch({
   checked,
   onChange,
@@ -131,8 +224,22 @@ export function Switch({
       )}
     >
       <div className="min-w-0 flex-1">
-        <span className="block text-sm font-bold text-fg">{label}</span>
-        {description ? <span className="mt-0.5 block text-xs text-muted leading-relaxed">{description}</span> : null}
+        <div className="flex items-center gap-2">
+          <span className="block text-sm font-bold text-fg">{label}</span>
+          <span
+            className={cn(
+              'rounded-full px-2 py-0.5 text-[11px] font-bold border',
+              checked
+                ? 'border-ok/30 bg-ok-soft text-ok'
+                : 'border-line bg-surface2 text-muted',
+            )}
+          >
+            {checked ? 'مفعّل' : 'معطّل'}
+          </span>
+        </div>
+        {description ? (
+          <span className="mt-0.5 block text-xs text-muted leading-relaxed">{description}</span>
+        ) : null}
       </div>
       <button
         type="button"

@@ -11,16 +11,16 @@ const base =
   'disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none cursor-pointer';
 
 const sizes: Record<Size, string> = {
-  sm: 'min-h-[38px] rounded-sm px-3 text-xs sm:text-sm',
+  sm: 'min-h-[38px] rounded-md px-3 text-xs sm:text-sm',
   md: 'min-h-[46px] rounded-md px-4 text-sm sm:text-base',
-  lg: 'min-h-[52px] rounded-lg px-6 text-base tracking-tight',
+  lg: 'min-h-[52px] rounded-md px-6 text-base',
 };
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-accent text-accent-fg border border-accent/40 shadow-1 hover:brightness-105 active:brightness-95',
+    'bg-accent text-accent-fg border border-accent/40 shadow-e1 hover:brightness-105 active:brightness-95',
   secondary:
-    'bg-surface2 text-fg border border-line shadow-1 hover:bg-surface2/80 active:bg-surface2',
+    'bg-surface2 text-fg border border-line shadow-e1 hover:bg-surface2/80 active:bg-surface2',
   outline:
     'bg-transparent text-fg border border-line hover:bg-surface2 hover:border-fg/20 active:bg-surface2',
   soft:
@@ -28,9 +28,9 @@ const variants: Record<Variant, string> = {
   ghost:
     'bg-transparent text-muted hover:text-fg hover:bg-surface2 active:bg-surface2',
   danger:
-    'bg-danger text-danger-fg border border-danger shadow-1 hover:opacity-95 active:opacity-90',
+    'bg-danger text-danger-fg border border-danger shadow-e1 hover:opacity-95 active:opacity-90',
   gold:
-    'bg-accent text-accent-fg border border-accent/40 shadow-1 hover:brightness-105 active:brightness-95',
+    'bg-accent text-accent-fg border border-accent/40 shadow-e1 hover:brightness-105 active:brightness-95',
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -82,7 +82,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-transparent text-muted transition-colors duration-fast hover:text-fg hover:bg-surface2 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring cursor-pointer',
+        'inline-flex min-h-[44px] min-w-[44px] h-11 w-11 shrink-0 items-center justify-center rounded-md border border-transparent text-muted transition-colors duration-fast hover:text-fg hover:bg-surface2 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring cursor-pointer',
         className,
       )}
     >

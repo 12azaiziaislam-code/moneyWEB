@@ -332,6 +332,14 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
                     : 'rounded-es-md border border-line bg-surface text-fg',
                 )}
               >
+                {!isUser ? (
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="inline-flex items-center gap-1 rounded-sm bg-accent-soft px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                      <Sparkles className="h-2.5 w-2.5" />
+                      <span>{i18n.language.startsWith('ru') ? 'ИИ' : i18n.language.startsWith('en') ? 'AI' : 'ذكاء اصطناعي'}</span>
+                    </span>
+                  </div>
+                ) : null}
                 {isUser ? <p className="whitespace-pre-wrap">{message.content}</p> : <RichText text={message.content} />}
               </div>
             </div>
@@ -342,6 +350,12 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
           <div className="flex items-end gap-1.5">
             <div className="mb-0.5 shrink-0">{avatar}</div>
             <div className="max-w-[86%] rounded-2xl rounded-es-md border border-line bg-surface px-3.5 py-2.5 text-[14px]">
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="inline-flex items-center gap-1 rounded-sm bg-accent-soft px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  <span>{i18n.language.startsWith('ru') ? 'ИИ' : i18n.language.startsWith('en') ? 'AI' : 'ذكاء اصطناعي'}</span>
+                </span>
+              </div>
               <RichText text={draft} />
               <span className="ms-0.5 inline-block h-3.5 w-1 animate-pulse bg-accent" aria-hidden="true" />
             </div>
@@ -360,10 +374,10 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
                 <p className="text-xs font-semibold text-fg/80">
                   {kind === 'shaykh'
                     ? (i18n.language.startsWith('ru')
-                        ? 'Шейх анализирует вопрос и нормы Шариата…'
+                        ? 'Ассистент Халяль анализирует вопрос и нормы Шариата…'
                         : i18n.language.startsWith('en')
-                          ? 'The Sheikh is reviewing Sharia principles…'
-                          : 'الشيخ يستحضر الضوابط الفقهية ويصيغ الجواب…')
+                          ? 'Halal Assistant is reviewing Sharia principles…'
+                          : 'مساعد الحلال يستحضر الضوابط الفقهية ويصيغ الجواب…')
                     : kind === 'doctor'
                       ? (i18n.language.startsWith('ru')
                           ? 'Врач сверяет данные с медицинским профилем…'

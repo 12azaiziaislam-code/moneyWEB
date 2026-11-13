@@ -29,3 +29,7 @@ Thumbs.db
 npm-debug.log*
 npm-ui.err
 coverage/
+
+# temporary test screenshots
+tests/*.png
+tests/**/*.png

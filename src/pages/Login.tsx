@@ -146,7 +146,7 @@ export function LoginPage() {
       <header className="relative z-10 flex items-center justify-between max-w-md mx-auto w-full pt-2">
         <div className="flex items-center gap-2.5">
           <Logo size={38} className="rounded-xl shadow-e1 shrink-0" />
-          <span className="font-display text-lg font-bold tracking-tight text-fg">
+          <span className="font-display text-lg font-bold text-fg">
             {t('app.name')}
           </span>
         </div>
@@ -308,7 +308,7 @@ export function LoginPage() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-line/60" />
             </div>
-            <span className="relative bg-surface px-3 text-[11px] font-bold text-muted uppercase">
+            <span className="relative bg-surface px-3 text-[11px] font-bold text-muted">
               {t('auth.or')}
             </span>
           </div>

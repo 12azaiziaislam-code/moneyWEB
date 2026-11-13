@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   CloudOff,
@@ -16,10 +16,14 @@ import {
   Wallet,
   Sun,
   Moon,
+  Home,
+  MoreHorizontal,
+  ChevronLeft,
 } from 'lucide-react';
 import { applyServiceWorkerUpdate, initInstallPrompt, registerServiceWorker } from '../lib/pwa';
 import { cn } from './ui';
-import { Button } from './ui/Button';
+import { Button, IconButton } from './ui/Button';
+import { Sheet } from './ui/Sheet';
 import { IslamicPattern } from './ui/IslamicPattern';
 import { Logo } from './characters/Logo';
 import { useAuth } from '../state/AuthContext';
@@ -27,22 +31,35 @@ import { useScan } from '../state/ScanContext';
 import { systemPrefersDark } from '../lib/theme';
 import type { LucideIcon } from 'lucide-react';
 
-const NAV: Array<{ to: string; key: string; Icon: LucideIcon; end?: boolean }> = [
-  { to: '/', key: 'halal', Icon: ShieldCheck, end: true },
-  { to: '/chats', key: 'chats', Icon: MessagesSquare },
+interface NavItem {
+  to: string;
+  key: string;
+  Icon: LucideIcon;
+  end?: boolean;
+}
+
+const TOOL_NAV: NavItem[] = [
+  { to: '/', key: 'home', Icon: Home, end: true },
+  { to: '/halal', key: 'halal', Icon: ShieldCheck },
   { to: '/doctor', key: 'doctor', Icon: Stethoscope },
   { to: '/accountant', key: 'accountant', Icon: Wallet },
+];
+
+const UTILITY_NAV: NavItem[] = [
+  { to: '/chats', key: 'chats', Icon: MessagesSquare },
   { to: '/profile', key: 'profile', Icon: UserRound },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const isChatDetail = location.pathname.startsWith('/chats/') && location.pathname !== '/chats';
   const { role, signIn, themeMode, setThemeMode } = useAuth();
   const { busy: halalBusy } = useScan();
   const [online, setOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [updateReady, setUpdateReady] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     initInstallPrompt();
@@ -61,6 +78,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const toggleTheme = () => {
     setThemeMode(isDark ? 'light' : 'dark');
   };
+
+  const isMoreActive = location.pathname.startsWith('/chats') || location.pathname.startsWith('/profile');
 
   return (
     <div className="relative min-h-[100dvh] lg:h-[100dvh] lg:max-h-[100dvh] w-full bg-bg text-fg flex flex-col lg:flex-row lg:overflow-hidden">
@@ -105,10 +124,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3">
             <Logo size={40} className="rounded-xl shadow-e1 shrink-0" />
             <div className="min-w-0">
-              <span className="font-display text-lg font-bold tracking-tight text-fg block leading-none">
+              <span className="font-display text-lg font-bold text-fg block leading-none">
                 {t('app.name')}
               </span>
-              <span className="text-[11px] font-semibold text-muted tracking-normal mt-1 block truncate">
+              <span className="text-[11px] font-medium text-muted mt-1 block truncate">
                 {t('app.tagline')}
               </span>
             </div>
@@ -132,62 +151,113 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           ) : null}
 
-          {/* Navigation Links */}
-          <nav aria-label="تنقل الصفحات">
-            <ul className="space-y-1">
-              {NAV.map(({ to, key, Icon, end }) => (
-                <li key={to}>
-                  <NavLink
-                    to={to}
-                    end={end}
-                    className={({ isActive }) =>
-                      cn(
-                        'relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-bold transition-all duration-fast cursor-pointer',
-                        isActive
-                          ? 'bg-surface2 text-fg border border-line shadow-sm'
-                          : 'text-muted hover:text-fg hover:bg-surface2/60',
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <span className="relative flex shrink-0 items-center justify-center">
-                          <Icon
-                            className={cn('h-5 w-5 shrink-0 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
-                            strokeWidth={isActive ? 2.2 : 1.75}
-                            aria-hidden
-                          />
-                          {halalBusy && key === 'halal' && !isActive ? (
-                            <span className="absolute -top-1 -end-1 flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
-                            </span>
+          {/* Navigation Links — Grouped */}
+          <nav aria-label="تنقل الصفحات" className="space-y-4">
+            {/* Group 1: Tools */}
+            <div className="space-y-1">
+              <span className="px-3 text-[11px] font-bold text-muted block mb-1">
+                {t('landing.badge', 'الأدوات')}
+              </span>
+              <ul className="space-y-1">
+                {TOOL_NAV.map(({ to, key, Icon, end }) => (
+                  <li key={to}>
+                    <NavLink
+                      to={to}
+                      end={end}
+                      className={({ isActive }) =>
+                        cn(
+                          'relative flex items-center gap-3 rounded-md px-3.5 py-2.5 text-sm font-bold transition-all duration-fast cursor-pointer overflow-hidden',
+                          isActive
+                            ? 'bg-surface2 text-fg border border-line/60 shadow-xs'
+                            : 'text-muted hover:text-fg hover:bg-surface2/60 border border-transparent',
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive ? (
+                            <span
+                              className="absolute inset-y-1.5 inset-inline-start-0 w-1 rounded-e-full bg-accent"
+                              aria-hidden="true"
+                            />
                           ) : null}
-                        </span>
-                        <span className="truncate flex-1">{t(`nav.${key}`)}</span>
-                        {isActive ? (
-                          <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-                        ) : null}
-                      </>
-                    )}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+                          <span className="relative flex shrink-0 items-center justify-center">
+                            <Icon
+                              className={cn('h-5 w-5 shrink-0 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
+                              strokeWidth={isActive ? 2.2 : 1.75}
+                              aria-hidden
+                            />
+                            {halalBusy && key === 'halal' && !isActive ? (
+                              <span className="absolute -top-1 -end-1 flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+                              </span>
+                            ) : null}
+                          </span>
+                          <span className="truncate flex-1">{t(`nav.${key}`)}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Separator */}
+            <div className="h-px bg-line/60 mx-2" role="separator" />
+
+            {/* Group 2: Utilities & Account */}
+            <div className="space-y-1">
+              <ul className="space-y-1">
+                {UTILITY_NAV.map(({ to, key, Icon, end }) => (
+                  <li key={to}>
+                    <NavLink
+                      to={to}
+                      end={end}
+                      className={({ isActive }) =>
+                        cn(
+                          'relative flex items-center gap-3 rounded-md px-3.5 py-2.5 text-sm font-bold transition-all duration-fast cursor-pointer overflow-hidden',
+                          isActive
+                            ? 'bg-surface2 text-fg border border-line/60 shadow-xs'
+                            : 'text-muted hover:text-fg hover:bg-surface2/60 border border-transparent',
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          {isActive ? (
+                            <span
+                              className="absolute inset-y-1.5 inset-inline-start-0 w-1 rounded-e-full bg-accent"
+                              aria-hidden="true"
+                            />
+                          ) : null}
+                          <span className="relative flex shrink-0 items-center justify-center">
+                            <Icon
+                              className={cn('h-5 w-5 shrink-0 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
+                              strokeWidth={isActive ? 2.2 : 1.75}
+                              aria-hidden
+                            />
+                          </span>
+                          <span className="truncate flex-1">{t(`nav.${key}`)}</span>
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </nav>
         </div>
 
-        {/* Footer in Rail: Theme Toggle & Info */}
-        <div className="border-t border-line/60 pt-4 flex items-center justify-between text-xs text-muted">
-          <button
-            type="button"
+        {/* Footer in Rail: Theme Toggle (Icon only with aria-label & tooltip, version removed) */}
+        <div className="border-t border-line/60 pt-4 flex items-center justify-between">
+          <IconButton
+            label={isDark ? t('theme.light') : t('theme.dark')}
             onClick={toggleTheme}
-            className="flex items-center gap-2 rounded-md px-2.5 py-1.5 hover:bg-surface2 text-fg font-semibold cursor-pointer transition-colors"
+            className="text-muted hover:text-fg hover:bg-surface2"
           >
-            {isDark ? <Sun className="h-4 w-4 text-[var(--accent-2)]" /> : <Moon className="h-4 w-4 text-accent" />}
-            <span>{isDark ? t('theme.light') : t('theme.dark')}</span>
-          </button>
-          <span className="text-[10px] text-muted-soft">v1.0.0</span>
+            {isDark ? <Sun className="h-5 w-5 text-accent" /> : <Moon className="h-5 w-5 text-accent" />}
+          </IconButton>
         </div>
       </aside>
 
@@ -235,6 +305,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* =====================================================================
           MOBILE BOTTOM FLOATING TAB BAR (< 1024px)
+          Items: الرئيسية، الحلال، الطبيب، المحاسب، المزيد (المحادثات + حسابي)
           Never overlaps modals, respects safe-area insets.
           Hidden on chat detail view to allow clean, unblocked conversation flow.
           ===================================================================== */}
@@ -244,14 +315,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           className="lg:hidden fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-lg px-3 pb-[calc(0.5rem+var(--safe-bottom))]"
         >
           <ul className="flex items-center justify-between gap-1 rounded-xl border border-line bg-surface/95 backdrop-blur-md p-1.5 shadow-e2">
-            {NAV.map(({ to, key, Icon, end }) => (
+            {TOOL_NAV.map(({ to, key, Icon, end }) => (
               <li key={to} className="flex-1">
                 <NavLink
                   to={to}
                   end={end}
                   className={({ isActive }) =>
                     cn(
-                      'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg px-1 py-1 text-[10.5px] font-bold transition-all duration-fast cursor-pointer',
+                      'flex min-h-[48px] flex-col items-center justify-center gap-1 rounded-md px-1 py-1 text-[10.5px] font-bold transition-all duration-fast cursor-pointer',
                       isActive
                         ? 'bg-surface2 text-fg border border-line/60 shadow-xs'
                         : 'text-muted hover:text-fg hover:bg-surface2/50',
@@ -279,9 +350,80 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </NavLink>
               </li>
             ))}
+
+            {/* Mobile "المزيد" (More) Tab Button */}
+            <li className="flex-1">
+              <button
+                type="button"
+                onClick={() => setMoreOpen(true)}
+                className={cn(
+                  'flex min-h-[48px] w-full flex-col items-center justify-center gap-1 rounded-md px-1 py-1 text-[10.5px] font-bold transition-all duration-fast cursor-pointer',
+                  isMoreActive
+                    ? 'bg-surface2 text-fg border border-line/60 shadow-xs'
+                    : 'text-muted hover:text-fg hover:bg-surface2/50',
+                )}
+              >
+                <MoreHorizontal
+                  className={cn('h-5 w-5 transition-transform', isMoreActive ? 'text-accent scale-105' : 'text-muted')}
+                  strokeWidth={isMoreActive ? 2.2 : 1.75}
+                  aria-hidden
+                />
+                <span className="truncate">{t('nav.more')}</span>
+              </button>
+            </li>
           </ul>
         </nav>
       ) : null}
+
+      {/* Mobile "المزيد" Drawer Sheet */}
+      <Sheet open={moreOpen} title={t('nav.more')} onClose={() => setMoreOpen(false)}>
+        <div className="space-y-2">
+          {UTILITY_NAV.map(({ to, key, Icon }) => {
+            const active = location.pathname.startsWith(to);
+            return (
+              <button
+                key={to}
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false);
+                  navigate(to);
+                }}
+                className={cn(
+                  'flex w-full items-center justify-between p-3.5 rounded-md border text-start transition-all cursor-pointer',
+                  active
+                    ? 'border-accent bg-accent-soft/40 shadow-xs ring-1 ring-accent'
+                    : 'border-line bg-surface hover:bg-surface2',
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-surface2 text-accent">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <span className="font-display text-sm font-bold text-fg block">{t(`nav.${key}`)}</span>
+                    <span className="text-xs text-muted">
+                      {key === 'chats' ? t('chats.search', 'سجل الاستشارات والمحادثات') : t('profile.title', 'إدارة الحساب والمظهر')}
+                    </span>
+                  </div>
+                </div>
+                <ChevronLeft className="flip-rtl h-5 w-5 text-muted" aria-hidden />
+              </button>
+            );
+          })}
+
+          <div className="pt-2 border-t border-line/60 flex items-center justify-between px-2">
+            <span className="text-xs font-bold text-muted">{t('profile.theme')}</span>
+            <Button
+              size="sm"
+              variant="outline"
+              icon={isDark ? <Sun className="h-4 w-4 text-accent" /> : <Moon className="h-4 w-4 text-accent" />}
+              onClick={toggleTheme}
+            >
+              {isDark ? t('theme.light') : t('theme.dark')}
+            </Button>
+          </div>
+        </div>
+      </Sheet>
     </div>
   );
 }
@@ -293,16 +435,16 @@ export function PageHeader({
   action,
   ornament,
 }: {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
   action?: ReactNode;
   ornament?: ReactNode;
 }) {
   return (
-    <header className="relative flex items-start justify-between gap-3 pb-3 pt-3 border-b border-line/60 mb-4">
-      <div className="min-w-0">
-        <h1 className="font-display text-2xl sm:text-3xl font-bold leading-tight tracking-tight text-fg">{title}</h1>
-        {subtitle ? <p className="mt-1 text-xs sm:text-sm text-muted leading-relaxed">{subtitle}</p> : null}
+    <header className="relative flex items-start justify-between gap-3 pb-3 pt-1 border-b border-line/60 mb-4">
+      <div className="min-w-0 flex-1">
+        <h1 className="font-display text-2xl font-bold leading-tight text-fg">{title}</h1>
+        {subtitle ? <p className="mt-1 text-xs sm:text-sm text-muted leading-relaxed line-clamp-1">{subtitle}</p> : null}
         {ornament}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}

@@ -37,7 +37,7 @@ export function SheikhAvatar({ size = 'md', className }: { size?: PersonaSize; c
         height={px}
         className="w-full h-full drop-shadow-sm"
         role="img"
-        aria-label="المستشار الشرعي (الشيخ)"
+        aria-label="مساعد الحلال"
         fill="none"
       >
         <defs>
@@ -346,20 +346,20 @@ export function PersonaCard({
 
   const info: Record<PersonaKind, { name: string; role: string; desc: string; tone: string }> = {
     sheikh: {
-      name: 'المستشار الشرعي (الشيخ)',
-      role: 'فحص الحلال والتوجيه الأخلاقي',
-      desc: 'تدقيق مكونات الأطعمة والأدوية ومسائل الذبح والشبهات بناءً على الفقه الإسلامي المعتمد.',
+      name: 'مساعد الحلال',
+      role: 'فحص الحلال والمكونات',
+      desc: 'تدقيق مكونات الأغذية والأدوية ومسائل التذكية والشبهات بالاستناد إلى الضوابط الفقهية المعتمدة.',
       tone: 'text-accent border-accent/30 bg-accent-soft/40',
     },
     doctor: {
-      name: 'المستشار الصحي (الطبيب)',
-      role: 'التوجيه الغذائي والمحاذير الطبية',
+      name: 'الطبيب',
+      role: 'الاستشارة الصحية والغذائية',
       desc: 'تحليل تداخلات الأدوية والحساسيات وملاءمة الجرعات وفق ملفك الصحي الشخصي.',
       tone: 'text-info border-info/30 bg-info-soft/40',
     },
     accountant: {
-      name: 'المستشار المالي (المحاسب)',
-      role: 'إدارة الميزانية ودورة الراتب',
+      name: 'المحاسب',
+      role: 'إدارة الميزانية والمصاريف',
       desc: 'مراقبة المصاريف اليومية وتحديد سقف الصرف وحساب الأيام المتبقية حتى الراتب القادم.',
       tone: 'text-warn border-warn/30 bg-warn-soft/40',
     },

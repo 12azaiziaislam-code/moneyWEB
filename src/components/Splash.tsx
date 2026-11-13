@@ -11,7 +11,7 @@ export function Splash({ label }: { label?: string }) {
     <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 bg-bg text-fg" data-theme="halal">
       <Logo size={72} className="rounded-2xl shadow-e2" />
       <div className="text-center space-y-1">
-        <p className="font-display text-2xl font-bold tracking-tight text-fg">{t('app.name')}</p>
+        <p className="font-display text-2xl font-bold text-fg">{t('app.name')}</p>
         <p className="text-xs text-muted">{label ?? t('app.tagline')}</p>
       </div>
     </div>

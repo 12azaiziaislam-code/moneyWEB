@@ -6,15 +6,15 @@
 import { useEffect } from 'react';
 
 export type PageTheme = 'halal' | 'chats' | 'doctor' | 'accountant' | 'profile';
-export type Accent = 'emerald' | 'bronze' | 'sapphire' | 'amber';
+export type Accent = 'bronze' | 'sapphire' | 'amber' | 'amethyst';
 export type ThemeMode = 'system' | 'light' | 'dark';
 
-export const ACCENTS: Accent[] = ['emerald', 'bronze', 'sapphire', 'amber'];
+export const ACCENTS: Accent[] = ['bronze', 'sapphire', 'amber', 'amethyst'];
 export const ACCENT_SWATCH: Record<Accent, { light: string; dark: string }> = {
-  emerald: { light: '#174E3E', dark: '#2FD69F' },
-  bronze: { light: '#966E26', dark: '#E5C07B' },
-  sapphire: { light: '#1E4B82', dark: '#63B3ED' },
-  amber: { light: '#9C5818', dark: '#F6AD55' },
+  bronze: { light: '#9A7432', dark: '#E5C07B' },
+  sapphire: { light: '#2563EB', dark: '#60A5FA' },
+  amber: { light: '#D97706', dark: '#F59E0B' },
+  amethyst: { light: '#7C3AED', dark: '#A78BFA' },
 };
 
 const ACCENT_KEY = 'baraka.accent';
@@ -46,7 +46,8 @@ export function systemPrefersDark(): boolean {
 
 export function getStoredAccent(): Accent {
   const value = read(ACCENT_KEY);
-  return ACCENTS.includes(value as Accent) ? (value as Accent) : 'emerald';
+  if (value && ACCENTS.includes(value as Accent)) return value as Accent;
+  return 'bronze'; // Default to sovereign dune gold
 }
 
 export function getStoredTheme(): ThemeMode {

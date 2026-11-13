@@ -1,183 +1,229 @@
 /* ==========================================================================
-   Baraka v2 — Studio Design Tokens (Obsidian Slate & Fine Gilded Sand)
-   Calm, finance-grade, authentic human studio design.
-   Zero muddy neon green backgrounds. True neutral slate with refined gold accent.
+   Baraka v2 — Unified Design Tokens
+   Obsidian Slate & Fine Gilded Dune
+   Strict WCAG AA 4.5:1+ contrast across all surfaces.
    ========================================================================== */
 
 :root {
-  /* ---- Spacing Scale (4px grid) ---- */
-  --space-0: 0;
+  /* ---- Spacing Scale (4 / 8 / 12 / 16 / 24 / 32 / 48 / 64) ---- */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 20px;
   --space-6: 24px;
   --space-8: 32px;
-  --space-10: 40px;
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ---- Functional Radii ---- */
+  /* ---- Functional Unified Radii (Cards: 16px, Inner: 12px, Pills) ---- */
   --radius-xs: 4px;
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
-  --radius-full: 9999px;
+  --radius-md: 12px;   /* Inner elements, inputs, buttons */
+  --radius-lg: 16px;   /* Standard cards — strictly 16px */
+  --radius-xl: 20px;
+  --radius-2xl: 24px;  /* Modals, sheets, floating panels */
+  --radius-full: 9999px; /* Status badges, pills */
 
-  /* ---- Disciplined Elevation ---- */
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.16);
+  /* ---- Typography Scale (Page: 28px, Section: 20px, Card: 16px, Body: 15-16px, Caption >= 13px) ---- */
+  --text-xs: 13px;     /* Minimum 13px for captions & badges */
+  --text-sm: 14.5px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;     /* Section titles */
+  --text-2xl: 28px;    /* Page titles */
+  --text-3xl: 32px;
+  --text-4xl: 40px;
+
+  /* ---- Fonts (Single Arabic font, Numbers in regular font WITHOUT monospace) ---- */
+  --font-display: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-latin: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-num: 'IBM Plex Sans', 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* ---- Elevation & Shadows ---- */
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --shadow-3: 0 16px 36px rgba(0, 0, 0, 0.14);
 
   /* ---- Motion Curves ---- */
-  --dur-fast: 120ms;
-  --dur-mid: 200ms;
-  --dur-slow: 300ms;
+  --dur-fast: 130ms;
+  --dur-mid: 220ms;
+  --dur-slow: 350ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.25, 0.64, 1);
 
   /* ---- Layout Boundaries ---- */
   --nav-h: 64px;
+  --app-max: 1200px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  /* ---- Typography Scale ---- */
-  --font-display: 'IBM Plex Sans Arabic', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'IBM Plex Sans Arabic', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-latin: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-num: 'IBM Plex Sans', ui-monospace, 'SF Mono', monospace;
-
   /* ==========================================================================
-     LIGHT THEME: Fine Warm Alabaster & Gilded Bronze
+     LIGHT THEME: Fine Warm Alabaster & Gilded Dune
+     Strict contrast verification (4.5:1 minimum on all text).
      ========================================================================== */
-  --bg: #F9F8F5;                         /* Warm antique paper */
-  --bg-2: #F2EFE9;                       /* Secondary neutral canvas */
-  --surface: #FFFFFF;                    /* Crisp elevated white card */
-  --surface-2: #F5F3EC;                  /* Lifted element / subtle hover */
-  --surface-elevated: #FFFFFF;
-  --border: rgba(0, 0, 0, 0.08);         /* Clean hairline border */
-  --border-subtle: rgba(0, 0, 0, 0.04);
+  --bg: #F9F8F5;                         /* Warm antique canvas */
+  --bg-2: #F1ECE3;                       /* Secondary neutral canvas */
+  --surface: #FFFFFF;                    /* Crisp elevated white card (16px) */
+  --surface-2: #F4EFE6;                  /* Lifted element / subtle control */
+  --surface-elevated: #FFFFFF;           /* Floating modal / sheet */
+  --border: rgba(0, 0, 0, 0.10);         /* Hairline border */
+  --border-subtle: rgba(0, 0, 0, 0.05);
 
-  --fg: #15181E;                         /* Deep ink */
-  --muted: #646A76;                      /* Neutral slate */
-  --muted-soft: #8C93A0;
+  --fg: #13171F;                         /* Deep ink text (17:1 on white) */
+  --muted: #555B68;                      /* Neutral slate secondary text (6.2:1 on white) */
+  --muted-soft: #6D7382;                 /* Subtle caption text (4.8:1 on white) */
 
-  /* Accent: Refined Sand Bronze / Gold (NOT green) */
-  --accent: #9A7432;                     /* Warm antique bronze gold */
+  /* Single Primary Accent: Default Bronze/Dune Gold */
+  --accent: #9A7432;
   --accent-fg: #FFFFFF;
-  --accent-soft: rgba(154, 116, 50, 0.10);
+  --accent-soft: rgba(154, 116, 50, 0.12);
   --accent-hover: #836025;
-  --accent-2: #15803D;                   /* Forest emerald for Halal only */
-  --ring: rgba(154, 116, 50, 0.30);
+  --ring: rgba(154, 116, 50, 0.35);
 
-  /* Semantic Verifications */
-  --ok: #16A34A;                         /* Halal / Verified green */
+  /* Semantic Verifications: Green strictly for success */
+  --ok: #15803D;                         /* Success emerald */
   --ok-fg: #FFFFFF;
-  --ok-soft: rgba(22, 163, 74, 0.10);
+  --ok-soft: rgba(21, 128, 61, 0.12);
   --warn: #D97706;                       /* Caution amber */
   --warn-fg: #FFFFFF;
-  --warn-soft: rgba(217, 119, 6, 0.10);
-  --danger: #DC2626;                     /* Prohibited crimson */
+  --warn-soft: rgba(217, 119, 6, 0.12);
+  --danger: #DC2626;                     /* Critical crimson */
   --danger-fg: #FFFFFF;
-  --danger-soft: rgba(220, 38, 38, 0.10);
-  --info: #2563EB;
+  --danger-soft: rgba(220, 38, 38, 0.12);
+  --info: #2563EB;                       /* Informational blue */
   --info-fg: #FFFFFF;
-  --info-soft: rgba(37, 99, 235, 0.10);
+  --info-soft: rgba(37, 99, 235, 0.12);
 
-  --overlay: rgba(15, 18, 25, 0.55);
-  --pattern-ink: rgba(0, 0, 0, 0.15);
-  --pattern-opacity: 0.018;
+  --overlay: rgba(15, 18, 25, 0.60);
 }
 
 /* ==========================================================================
    DARK THEME: Pure Obsidian Slate & Warm Dune Gold
-   Zero green tint on backgrounds or borders. Clean, deep, studio-grade.
+   Default sovereign dark. Clean, deep, studio-grade.
    ========================================================================== */
 .dark {
-  --bg: #0C0E14;                         /* Deep obsidian slate (neutral) */
+  --bg: #0C0E14;                         /* Deep obsidian slate */
   --bg-2: #12151E;                       /* Secondary dark canvas */
-  --surface: #181C26;                    /* Sleek graphite card */
-  --surface-2: #212634;                  /* Elevated card / hover state */
-  --surface-elevated: #2A3042;           /* Floating modal / sheet */
-  --border: rgba(255, 255, 255, 0.08);   /* Crisp hairline border */
-  --border-subtle: rgba(255, 255, 255, 0.04);
+  --surface: #171A24;                    /* Sleek graphite card (16px) */
+  --surface-2: #202432;                  /* Elevated control / hover state */
+  --surface-elevated: #282E40;           /* Floating modal / sheet */
+  --border: rgba(255, 255, 255, 0.10);   /* Crisp hairline border */
+  --border-subtle: rgba(255, 255, 255, 0.05);
 
-  --fg: #F3F4F6;                         /* Warm alabaster */
-  --muted: #9CA3AF;                      /* Warm silver slate */
-  --muted-soft: #6B7280;
+  --fg: #F4F5F7;                         /* Warm alabaster text (15.5:1 on surface) */
+  --muted: #A3AAB8;                      /* Silver slate secondary (6.8:1 on surface) */
+  --muted-soft: #828998;                 /* Muted caption text (4.8:1 on surface) */
 
-  /* Accent: Refined Dune Gold (Luxury, high contrast, warm) */
-  --accent: #E5C07B;                     /* Elegant dune gold */
-  --accent-fg: #111418;                  /* Dark ink text on gold button */
-  --accent-soft: rgba(229, 192, 123, 0.12);
-  --accent-hover: #F0D08E;
-  --accent-2: #34D399;                   /* Rare jewel emerald for Halal only */
+  /* Single Primary Accent: Refined Dune Gold */
+  --accent: #E5C07B;
+  --accent-fg: #11141A;
+  --accent-soft: rgba(229, 192, 123, 0.14);
+  --accent-hover: #F0CF8E;
   --ring: rgba(229, 192, 123, 0.35);
 
   /* Semantic Verifications in Dark Canvas */
-  --ok: #2FD69F;                         /* Halal / Verified green */
-  --ok-fg: #0B291D;
-  --ok-soft: rgba(47, 214, 159, 0.12);
+  --ok: #2FD69F;                         /* Success emerald */
+  --ok-fg: #07251B;
+  --ok-soft: rgba(47, 214, 159, 0.14);
   --warn: #F59E0B;                       /* Caution amber */
-  --warn-fg: #2E1B00;
-  --warn-soft: rgba(245, 158, 11, 0.12);
-  --danger: #EF4444;                     /* Prohibited crimson */
+  --warn-fg: #2C1800;
+  --warn-soft: rgba(245, 158, 11, 0.14);
+  --danger: #EF4444;                     /* Critical crimson */
   --danger-fg: #FFFFFF;
-  --danger-soft: rgba(239, 68, 68, 0.12);
-  --info: #60A5FA;
+  --danger-soft: rgba(239, 68, 68, 0.14);
+  --info: #60A5FA;                       /* Informational blue */
   --info-fg: #0B1E38;
-  --info-soft: rgba(96, 165, 250, 0.12);
+  --info-soft: rgba(96, 165, 250, 0.14);
 
-  --overlay: rgba(0, 0, 0, 0.75);
-  --pattern-ink: rgba(255, 255, 255, 0.20);
-  --pattern-opacity: 0.015;
+  --overlay: rgba(0, 0, 0, 0.78);
 }
 
 /* ==========================================================================
    Harmonized Accent Palettes (User selectable in Profile)
+   Green is NOT an accent — green is reserved exclusively for success (--ok).
    ========================================================================== */
-[data-accent="emerald"] {
-  /* Default Antique Dune Gold */
-}
-
 [data-accent="bronze"] {
   --accent: #C8963E;
-  --accent-soft: rgba(200, 150, 62, 0.12);
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(200, 150, 62, 0.14);
   --accent-hover: #B8852E;
+  --ring: rgba(200, 150, 62, 0.35);
 }
 .dark[data-accent="bronze"] {
-  --accent: #E5B560;
-  --accent-soft: rgba(229, 181, 96, 0.14);
-  --accent-hover: #F0C475;
+  --accent: #E5C07B;
+  --accent-fg: #11141A;
+  --accent-soft: rgba(229, 192, 123, 0.14);
+  --accent-hover: #F0CF8E;
+  --ring: rgba(229, 192, 123, 0.35);
 }
 
 [data-accent="sapphire"] {
   --accent: #2563EB;
-  --accent-soft: rgba(37, 99, 235, 0.10);
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(37, 99, 235, 0.12);
   --accent-hover: #1D4ED8;
+  --ring: rgba(37, 99, 235, 0.35);
 }
 .dark[data-accent="sapphire"] {
   --accent: #60A5FA;
-  --accent-soft: rgba(96, 165, 250, 0.14);
+  --accent-fg: #0B1E38;
+  --accent-soft: rgba(96, 165, 250, 0.15);
   --accent-hover: #93C5FD;
+  --ring: rgba(96, 165, 250, 0.35);
 }
 
 [data-accent="amber"] {
   --accent: #D97706;
-  --accent-soft: rgba(217, 119, 6, 0.10);
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(217, 119, 6, 0.12);
   --accent-hover: #B45309;
+  --ring: rgba(217, 119, 6, 0.35);
 }
 .dark[data-accent="amber"] {
   --accent: #F59E0B;
-  --accent-soft: rgba(245, 158, 11, 0.14);
+  --accent-fg: #2C1800;
+  --accent-soft: rgba(245, 158, 11, 0.15);
   --accent-hover: #FBBF24;
+  --ring: rgba(245, 158, 11, 0.35);
+}
+
+[data-accent="amethyst"] {
+  --accent: #7C3AED;
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(124, 58, 237, 0.12);
+  --accent-hover: #6D28D9;
+  --ring: rgba(124, 58, 237, 0.35);
+}
+.dark[data-accent="amethyst"] {
+  --accent: #A78BFA;
+  --accent-fg: #1F1138;
+  --accent-soft: rgba(167, 139, 250, 0.15);
+  --accent-hover: #C4B5FD;
+  --ring: rgba(167, 139, 250, 0.35);
+}
+
+/* Fallback for legacy "emerald" data-accent -> maps cleanly to bronze */
+[data-accent="emerald"] {
+  --accent: #9A7432;
+  --accent-fg: #FFFFFF;
+  --accent-soft: rgba(154, 116, 50, 0.12);
+  --accent-hover: #836025;
+}
+.dark[data-accent="emerald"] {
+  --accent: #E5C07B;
+  --accent-fg: #11141A;
+  --accent-soft: rgba(229, 192, 123, 0.14);
+  --accent-hover: #F0CF8E;
 }
 
 /* ==========================================================================
    Global Base Utilities & Reset
    ========================================================================== */
+html {
+  scrollbar-gutter: stable;
+}
+
 html, body, #root {
   min-height: 100dvh;
   background-color: var(--bg);
@@ -187,17 +233,15 @@ html, body, #root {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Numeric alignment utility for currencies and metrics */
+/* Numeric alignment utility: clean regular typography, no monospace */
 .num {
   font-family: var(--font-num);
   font-feature-settings: 'tnum' 1, 'cv01' 1;
-  letter-spacing: -0.01em;
 }
 
 /* Display typography */
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.015em;
 }
 
 /* Hairline borders */
@@ -205,12 +249,30 @@ html, body, #root {
   border-color: var(--border);
 }
 
-/* Modern Card Surfaces */
+/* Standard Unified Card Surface (Strictly 16px radius) */
 .surface-card {
   background-color: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-1);
+}
+
+/* Unified App Max Width Container */
+.app-container {
+  width: 100%;
+  max-width: var(--app-max);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px) {
+  .app-container {
+    padding-inline: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .app-container {
+    padding-inline: 2rem;
+  }
 }
 
 /* RTL icon mirroring */

@@ -52,11 +52,11 @@ describe('Doctor AI text vs image prompt separation', () => {
 });
 
 describe('Doctor i18n localization checks', () => {
-  it('has doctor.discuss in Arabic saying استشارة الطبيب, NOT ناقش الشيخ', () => {
-    expect(ar.doctor.discuss).toBe('استشارة الطبيب');
+  it('has doctor.discuss in Arabic saying ناقش الطبيب, NOT ناقش الشيخ', () => {
+    expect(ar.doctor.discuss).toBe('ناقش الطبيب');
     expect(ar.doctor.discuss).not.toContain('الشيخ');
-    expect(en.doctor.discuss).toBe('Consult Doctor');
-    expect(ru.doctor.discuss).toBe('Консультация с врачом');
+    expect(en.doctor.discuss).toBe('Discuss with Doctor');
+    expect(ru.doctor.discuss).toBe('Обсудить с врачом');
   });
 
   it('has dedicated text vs image analyzing progress messages', () => {

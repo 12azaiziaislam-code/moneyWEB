@@ -179,7 +179,7 @@ export function OnboardingPage() {
 
               {/* Title & Body */}
               <div className="space-y-2">
-                <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-fg">
+                <h1 className="font-display text-xl sm:text-2xl font-bold text-fg">
                   {slides[step].title}
                 </h1>
                 <p className="max-w-[40ch] mx-auto text-xs sm:text-sm leading-relaxed text-muted font-normal">

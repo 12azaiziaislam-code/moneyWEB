@@ -1,10 +1,14 @@
 /**
- * Baraka v2 — Consultations & Chats Archive
- * Unified category tabs matching navigation, real-time query filtering,
- * human-designed empty states (no server rack art), and fast management.
+ * Baraka v2 — Consultations & Chats Archive (المحادثات)
+ * Features:
+ * 1. Chronological time grouping: اليوم (Today), أمس (Yesterday), هذا الأسبوع (This Week), أقدم (Older).
+ * 2. Navigation-matched category filters: الكل، الحلال، الطبيب، المحاسب.
+ * 3. Consistent card design: Assistant Persona Avatar, bold title, line-clamp preview, relative timestamp.
+ * 4. Safe deletion via ConfirmDialog with instant feedback.
+ * 5. Clean, professional empty state without cartoon illustrations.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,23 +19,57 @@ import {
   Clock,
   Activity,
   CreditCard,
-  Sparkles,
 } from 'lucide-react';
-import type { ChatKind } from '../../shared/types';
+import type { ChatKind, ChatSummary } from '../../shared/types';
+import { localDateISO } from '../../shared/payday';
 import { PageHeader } from '../components/AppShell';
 import { Button, IconButton } from '../components/ui/Button';
-import { Badge, EmptyState, Skeleton } from '../components/ui/Feedback';
+import { StatusBadge, EmptyState, Skeleton, ConfirmDialog } from '../components/ui/Feedback';
 import { Input } from '../components/ui/Field';
 import { Segmented } from '../components/ui/Controls';
 import { PersonaAvatar } from '../components/characters/Personas';
 import { useChatList, useChatMutations } from '../data/chats';
-import { formatDateTime } from '../lib/format';
+import { formatRelativeTime } from '../lib/format';
 import { usePageTheme } from '../lib/theme';
-import { staggerRise } from '../lib/motion';
 import { useToast } from '../state/ToastContext';
 import { useAuth } from '../state/AuthContext';
 import { haptic, HAPTIC } from '../lib/haptics';
 import type { Locale } from '../i18n';
+
+interface TimeGroup {
+  key: string;
+  labelKey: string;
+  chats: ChatSummary[];
+}
+
+function groupChatsByTime(chats: ChatSummary[], tz = 'Europe/Moscow'): TimeGroup[] {
+  const now = new Date();
+  const today = localDateISO(now.toISOString(), tz);
+  const yesterday = localDateISO(new Date(now.getTime() - 86400000).toISOString(), tz);
+  const sevenDaysAgo = localDateISO(new Date(now.getTime() - 7 * 86400000).toISOString(), tz);
+
+  const groups: TimeGroup[] = [
+    { key: 'today', labelKey: 'chats.today', chats: [] },
+    { key: 'yesterday', labelKey: 'chats.yesterday', chats: [] },
+    { key: 'thisWeek', labelKey: 'chats.thisWeek', chats: [] },
+    { key: 'older', labelKey: 'chats.older', chats: [] },
+  ];
+
+  for (const chat of chats) {
+    const chatDate = localDateISO(chat.updatedAt, tz);
+    if (chatDate === today) {
+      groups[0].chats.push(chat);
+    } else if (chatDate === yesterday) {
+      groups[1].chats.push(chat);
+    } else if (chatDate >= sevenDaysAgo) {
+      groups[2].chats.push(chat);
+    } else {
+      groups[3].chats.push(chat);
+    }
+  }
+
+  return groups.filter((g) => g.chats.length > 0);
+}
 
 export function ChatsPage() {
   const { t, i18n } = useTranslation();
@@ -42,37 +80,38 @@ export function ChatsPage() {
   const [filter, setFilter] = useState<'all' | ChatKind>('all');
   const [query, setQuery] = useState('');
   const { chats, loading } = useChatList(filter, query);
-  const listRef = useRef<HTMLUListElement>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   usePageTheme('chats');
 
-  const locale = (user?.locale ?? i18n.language ?? 'ru') as Locale;
-
-  useEffect(() => {
-    staggerRise(listRef.current, 'li');
-  }, [chats.length]);
+  const locale = (user?.locale ?? i18n.language ?? 'ar') as Locale;
+  const timezone = user?.timezone || 'Europe/Moscow';
 
   const empty = useMemo(() => !loading && chats.length === 0, [chats.length, loading]);
+  const groupedChats = useMemo(() => groupChatsByTime(chats, timezone), [chats, timezone]);
 
-  const remove = async (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!window.confirm(t('chats.deleteConfirm'))) return;
+  const confirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setIsDeleting(true);
     try {
-      await deleteChat(id);
-      haptic(HAPTIC.heavy);
-      show(t('common2.deleted'), 'success');
+      await deleteChat(deleteTargetId);
+      haptic(HAPTIC.tap);
+      show(t('common.deleted', 'تم حذف المحادثة'), 'info');
+      setDeleteTargetId(null);
     } catch {
       show(t('errors.generic'), 'danger');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-4 pb-8">
-      <PageHeader title={t('chats.title')} />
+    <div className="flex flex-1 flex-col gap-5 pb-8">
+      <PageHeader title={t('chats.title', 'المحادثات')} />
 
       {/* Search Input */}
       <Input
-        label={t('chats.search')}
+        label={t('chats.search', 'ابحث في محادثاتك')}
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
@@ -81,32 +120,35 @@ export function ChatsPage() {
 
       {/* Filter Tabs Matching Bottom Navigation Items */}
       <Segmented
-        ariaLabel={t('chats.title')}
+        ariaLabel={t('chats.title', 'المحادثات')}
         value={filter}
-        onChange={(value) => setFilter(value)}
+        onChange={(value) => setFilter(value as 'all' | ChatKind)}
         options={[
-          { value: 'all', label: t('common.all') },
-          { value: 'shaykh', label: t('nav.halal') },
-          { value: 'doctor', label: t('nav.doctor') },
-          { value: 'accountant', label: t('nav.accountant') },
+          { value: 'all', label: t('common.all', 'الكل') },
+          { value: 'shaykh', label: t('nav.halal', 'الحلال') },
+          { value: 'doctor', label: t('nav.doctor', 'الطبيب') },
+          { value: 'accountant', label: t('nav.accountant', 'المحاسب') },
         ]}
       />
 
       {/* Loading Skeleton */}
       {loading ? (
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {[0, 1, 2].map((index) => (
-            <Skeleton key={index} className="h-20 w-full rounded-xl" />
+            <Skeleton key={index} className="h-20 w-full rounded-2xl" />
           ))}
         </div>
       ) : empty ? (
-        /* Empty State with Role-Tailored Guidance & Direct CTA */
-        <div className="rounded-2xl border border-line bg-surface p-8 text-center shadow-e1">
+        /* Empty State with Role-Tailored Guidance & Direct Action */
+        <div className="surface-card p-8 text-center space-y-4">
           {filter === 'doctor' ? (
             <EmptyState
-              icon={<Activity className="h-12 w-12 text-accent" strokeWidth={1.5} />}
-              title={t('chats.emptyDoctor')}
-              body={t('chats.emptyDoctorHint')}
+              icon={<Activity className="h-10 w-10 text-accent" strokeWidth={1.8} />}
+              title={t('chats.emptyDoctor', 'لا توجد استشارات مع الطبيب بعد')}
+              body={t(
+                'chats.emptyDoctorHint',
+                'اطرح أي استفسار صحي أو افحص دوائك وملاءمته لملفك الطبي لبدء محادثة طبية متخصصة.'
+              )}
               action={
                 <Button
                   variant="primary"
@@ -114,72 +156,78 @@ export function ChatsPage() {
                   onClick={() => navigate('/doctor')}
                   className="mt-2"
                 >
-                  {t('chats.ctaDoctor')}
+                  {t('chats.ctaDoctor', 'استشر الطبيب الآن')}
                 </Button>
               }
             />
           ) : filter === 'accountant' ? (
             <EmptyState
-              icon={<CreditCard className="h-12 w-12 text-accent" strokeWidth={1.5} />}
-              title={t('chats.emptyAccountant')}
-              body={t('chats.emptyAccountantHint')}
+              icon={<CreditCard className="h-10 w-10 text-accent" strokeWidth={1.8} />}
+              title={t('chats.emptyAccountant', 'لا توجد محادثات محاسبية بعد')}
+              body={t(
+                'chats.emptyAccountantHint',
+                'استشر المحاسب بخصوص خطة التوفير، حساب المصروف اليومي، ومتابعة ميزانيتك.'
+              )}
               action={
                 <Button
                   variant="primary"
-                  icon={<Sparkles className="h-4 w-4" />}
+                  icon={<CreditCard className="h-4 w-4" />}
                   onClick={() => navigate('/accountant')}
                   className="mt-2"
                 >
-                  {t('chats.ctaAccountant')}
+                  {t('chats.ctaAccountant', 'استشر المحاسب')}
                 </Button>
               }
             />
           ) : filter === 'shaykh' ? (
             <EmptyState
-              icon={<ShieldCheck className="h-12 w-12 text-accent" strokeWidth={1.5} />}
-              title={t('chats.emptyShaykh')}
-              body={t('chats.emptyShaykhHint')}
+              icon={<ShieldCheck className="h-10 w-10 text-accent" strokeWidth={1.8} />}
+              title={t('chats.emptyShaykh', 'لا توجد استفسارات حلال بعد')}
+              body={t(
+                'chats.emptyShaykhHint',
+                'صوّر مكونات أي منتج أو استشر مساعد الحلال في الأحكام الغذائية والشبهات.'
+              )}
               action={
                 <Button
                   variant="primary"
                   icon={<ShieldCheck className="h-4 w-4" />}
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/halal')}
                   className="mt-2"
                 >
-                  {t('chats.ctaShaykh')}
+                  {t('chats.ctaShaykh', 'فحص منتج غذائي')}
                 </Button>
               }
             />
           ) : (
             <EmptyState
-              icon={<MessagesSquare className="h-12 w-12 text-accent" strokeWidth={1.5} />}
-              title={t('chats.empty')}
-              body={t('chats.emptyHint')}
+              icon={<MessagesSquare className="h-10 w-10 text-accent" strokeWidth={1.8} />}
+              title={t('chats.empty', 'لا محادثات بعد')}
+              body={t('chats.emptyHint', 'ابدأ من فحص الحلال أو الطبيب أو المحاسب.')}
               action={
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
                   <Button
                     variant="primary"
                     size="sm"
+                    icon={<ShieldCheck className="h-3.5 w-3.5" />}
+                    onClick={() => navigate('/halal')}
+                  >
+                    {t('nav.halal', 'الحلال')}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     icon={<Activity className="h-3.5 w-3.5" />}
                     onClick={() => navigate('/doctor')}
                   >
-                    {t('chats.ctaDoctor')}
+                    {t('nav.doctor', 'الطبيب')}
                   </Button>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    icon={<ShieldCheck className="h-3.5 w-3.5" />}
-                    onClick={() => navigate('/')}
-                  >
-                    {t('chats.ctaShaykh')}
-                  </Button>
-                  <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     icon={<CreditCard className="h-3.5 w-3.5" />}
                     onClick={() => navigate('/accountant')}
                   >
-                    {t('chats.ctaAccountant')}
+                    {t('nav.accountant', 'المحاسب')}
                   </Button>
                 </div>
               }
@@ -187,45 +235,73 @@ export function ChatsPage() {
           )}
         </div>
       ) : (
-        /* Conversations List */
-        <ul ref={listRef} className="space-y-2.5">
-          {chats.map((chat) => {
-            return (
-              <li key={chat.id} data-stagger>
-                <div className="group rounded-xl border border-line bg-surface p-3.5 hover:border-accent/40 hover:shadow-e1 transition-all">
-                  <div className="flex items-center gap-3">
-                    <Link to={`/chats/${chat.id}`} className="flex min-w-0 flex-1 items-start gap-3">
-                      <PersonaAvatar kind={chat.kind} size="md" />
-                      <div className="min-w-0 flex-1 space-y-0.5">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-display text-sm font-bold text-fg truncate">{chat.title}</p>
-                          <Badge tone="neutral" className="shrink-0 text-[10px]">
-                            {t(`chats.kinds.${chat.kind}`)}
-                          </Badge>
-                        </div>
-                        <p className="line-clamp-1 text-xs text-muted leading-relaxed">
-                          {chat.preview || '—'}
-                        </p>
-                        <div className="flex items-center gap-1.5 pt-0.5 text-[11px] text-muted-soft">
-                          <Clock className="h-3 w-3" />
-                          <span>{formatDateTime(chat.updatedAt, locale)}</span>
-                        </div>
+        /* Chronologically Grouped Conversations List */
+        <div className="space-y-6">
+          {groupedChats.map((group) => (
+            <div key={group.key} className="space-y-2.5">
+              <h3 className="text-xs font-bold text-muted ps-1">
+                {t(group.labelKey)}
+              </h3>
+
+              <ul className="space-y-2.5">
+                {group.chats.map((chat) => (
+                  <li key={chat.id}>
+                    <div className="group surface-card p-3.5 hover:border-accent/40 hover:shadow-e1 transition-all">
+                      <div className="flex items-center gap-3">
+                        <Link to={`/chats/${chat.id}`} className="flex min-w-0 flex-1 items-start gap-3">
+                          <PersonaAvatar kind={chat.kind} size="md" />
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="font-display text-sm font-bold text-fg truncate">
+                                <bdi dir="auto">{chat.title}</bdi>
+                              </p>
+                              <StatusBadge tone="neutral" className="text-[11px] shrink-0">
+                                {t(`chats.kinds.${chat.kind}`)}
+                              </StatusBadge>
+                            </div>
+                            <p className="line-clamp-1 text-xs text-muted leading-relaxed">
+                              <bdi dir="auto">{chat.preview || '—'}</bdi>
+                            </p>
+                            <div className="flex items-center gap-1.5 pt-0.5 text-[11px] text-muted font-normal">
+                              <Clock className="h-3 w-3" />
+                              <span>{formatRelativeTime(chat.updatedAt, locale)}</span>
+                            </div>
+                          </div>
+                        </Link>
+
+                        <IconButton
+                          label={t('common.delete', 'حذف')}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDeleteTargetId(chat.id);
+                          }}
+                          className="text-muted hover:text-danger hover:bg-danger-soft/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden />
+                        </IconButton>
                       </div>
-                    </Link>
-                    <IconButton
-                      label={t('common.delete')}
-                      onClick={(e) => void remove(chat.id, e)}
-                      className="text-muted hover:text-danger hover:bg-danger-soft/40"
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden />
-                    </IconButton>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       )}
+
+      {/* Confirmation Dialog for Chat Deletion */}
+      <ConfirmDialog
+        open={Boolean(deleteTargetId)}
+        title={t('chats.deleteTitle', 'حذف المحادثة')}
+        message={t('chats.deleteConfirm', 'هل أنت متأكد من حذف هذه المحادثة نهائياً؟')}
+        confirmLabel={t('common.delete', 'حذف')}
+        cancelLabel={t('common.cancel', 'إلغاء')}
+        tone="danger"
+        loading={isDeleting}
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => setDeleteTargetId(null)}
+      />
     </div>
   );
 }

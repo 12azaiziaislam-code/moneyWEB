@@ -29,7 +29,7 @@ export function RichText({ text }: { text: string }) {
         if (!line.trim()) return <div key={key} className="h-2" />;
         if (/^#{1,6}\s/.test(line)) {
           return (
-            <p key={key} className="pt-2 text-sm sm:text-base font-bold text-fg font-display tracking-tight">
+            <p key={key} className="pt-2 text-sm sm:text-base font-bold text-fg font-display">
               {inline(line.replace(/^#{1,6}\s*/, ''), key)}
             </p>
           );

@@ -9,7 +9,7 @@ export const LOCALES: Locale[] = ['ar', 'ru', 'en'];
 export type ChatKind = 'shaykh' | 'doctor' | 'accountant';
 export const CHAT_KINDS: ChatKind[] = ['shaykh', 'doctor', 'accountant'];
 
-export type Verdict = 'halal' | 'haram' | 'mashbooh';
+export type Verdict = 'halal' | 'haram' | 'mashbooh' | 'inconclusive';
 export type Madhhab = 'hanafi' | 'shafii' | 'maliki' | 'hanbali' | 'none';
 export type AiMode = 'builtin' | 'own';
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -183,6 +183,7 @@ export interface DoctorResult {
     };
   };
   lab?: { values: { name: string; value: string; reference: string | null }[]; note: string };
+  suitability?: 'suitable' | 'caution' | 'unsuitable' | 'inconclusive';
   emergency: boolean;
   createdAt: string;
 }

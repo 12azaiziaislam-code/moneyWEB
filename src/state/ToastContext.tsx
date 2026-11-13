@@ -1,21 +1,44 @@
-/** Toasts + inline confirmations (accessible, auto-dismiss, RTL safe). */
+/**
+ * Baraka v2 — Toasts with Undo Action
+ * Accessible, auto-dismiss, RTL safe, compliant with design tokens and 16px radius.
+ */
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
+import { cn } from '../components/ui/cn';
 
-type ToastVariant = 'info' | 'success' | 'warning' | 'danger';
+export type ToastVariant = 'info' | 'success' | 'warning' | 'danger';
 
-interface ToastItem {
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
+export interface ToastItem {
   id: number;
   message: string;
   variant: ToastVariant;
+  action?: ToastAction;
 }
 
-interface ToastApi {
-  show: (message: string, variant?: ToastVariant, durationMs?: number) => void;
+export interface ToastApi {
+  show: (
+    message: string,
+    variant?: ToastVariant,
+    durationMs?: number,
+    action?: ToastAction,
+  ) => void;
   dismiss: (id: number) => void;
 }
 
 const ToastContext = createContext<ToastApi | null>(null);
+
+const variantIcons: Record<ToastVariant, ReactNode> = {
+  success: <CheckCircle2 className="h-4 w-4 text-ok shrink-0" aria-hidden />,
+  warning: <AlertTriangle className="h-4 w-4 text-warn shrink-0" aria-hidden />,
+  danger: <AlertCircle className="h-4 w-4 text-danger shrink-0" aria-hidden />,
+  info: <Info className="h-4 w-4 text-accent shrink-0" aria-hidden />,
+};
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
@@ -26,10 +49,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const show = useCallback(
-    (message: string, variant: ToastVariant = 'info', durationMs = 3800) => {
+    (message: string, variant: ToastVariant = 'info', durationMs = 4200, action?: ToastAction) => {
       counter.current += 1;
       const id = counter.current;
-      setItems((current) => [...current.slice(-2), { id, message, variant }]);
+      setItems((current) => [...current.slice(-2), { id, message, variant, action }]);
       window.setTimeout(() => dismiss(id), durationMs);
     },
     [dismiss],
@@ -41,31 +64,46 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
-        className="pointer-events-none fixed inset-x-0 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[60] flex flex-col items-center gap-2 px-4"
+        className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[120] flex flex-col items-center gap-2 px-4"
         role="status"
         aria-live="polite"
       >
         {items.map((item) => (
           <div
             key={item.id}
-            className={[
-              'pointer-events-auto w-full max-w-app rounded-2xl px-4 py-3 text-sm shadow-card animate-pop',
-              item.variant === 'success'
-                ? 'bg-brand-600 text-white'
-                : item.variant === 'danger'
-                  ? 'bg-rose-600 text-white'
-                  : item.variant === 'warning'
-                    ? 'bg-amber-500 text-white'
-                    : 'bg-slate-900/90 text-white dark:bg-slate-100 dark:text-slate-900',
-            ].join(' ')}
+            className={cn(
+              'pointer-events-auto flex items-center justify-between gap-3 w-full max-w-md rounded-lg border p-3.5 shadow-e2 bg-surface text-fg animate-pop',
+              item.variant === 'danger' && 'border-danger/30 bg-danger-soft/40',
+              item.variant === 'warning' && 'border-warn/30 bg-warn-soft/40',
+              item.variant === 'success' && 'border-ok/30 bg-ok-soft/40',
+              item.variant === 'info' && 'border-accent/30 bg-accent-soft/40',
+            )}
           >
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              {variantIcons[item.variant]}
+              <span className="text-xs sm:text-sm font-bold text-fg leading-snug truncate">
+                <bdi dir="auto">{item.message}</bdi>
+              </span>
+            </div>
+            {item.action ? (
+              <button
+                type="button"
+                onClick={() => {
+                  item.action?.onClick();
+                  dismiss(item.id);
+                }}
+                className="shrink-0 text-xs font-bold text-accent hover:underline px-2 py-1 rounded cursor-pointer"
+              >
+                {item.action.label}
+              </button>
+            ) : null}
             <button
               type="button"
-              className="w-full text-start"
               onClick={() => dismiss(item.id)}
-              aria-label={item.message}
+              className="text-muted hover:text-fg p-1 rounded transition-colors cursor-pointer"
+              aria-label="إغلاق التنبيه"
             >
-              {item.message}
+              <X className="h-4 w-4" aria-hidden />
             </button>
           </div>
         ))}

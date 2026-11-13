@@ -115,3 +115,21 @@ export function fromDateTimeLocal(value: string, timeZone = 'Europe/Moscow'): st
 export function percent(value: number): string {
   return `${Math.round(value)}%`;
 }
+
+export function formatRelativeTime(iso: string, locale: string): string {
+  try {
+    const elapsedSec = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    if (Math.abs(elapsedSec) < 60) return rtf.format(-Math.max(1, elapsedSec), 'second');
+    const elapsedMin = Math.round(elapsedSec / 60);
+    if (Math.abs(elapsedMin) < 60) return rtf.format(-elapsedMin, 'minute');
+    const elapsedHours = Math.round(elapsedMin / 60);
+    if (Math.abs(elapsedHours) < 24) return rtf.format(-elapsedHours, 'hour');
+    const elapsedDays = Math.round(elapsedHours / 24);
+    if (Math.abs(elapsedDays) < 30) return rtf.format(-elapsedDays, 'day');
+    return formatDate(iso, locale);
+  } catch {
+    return iso.slice(0, 10);
+  }
+}
+

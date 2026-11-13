@@ -1,14 +1,10 @@
 /**
- * Baraka v2 — Halal Ingredient Verification Desk (Ultra-Fast Edition)
- * Features:
- * 1. Direct one-trip payload submission (eliminating redundant upload step).
- * 2. Instant client & server hash-based cache (0ms - 20ms return on re-checks).
- * 3. Instant local rule engine for text screening (0.001ms).
- * 4. Auto-scan on camera / gallery capture with zero extra button friction.
- * 5. High-precision laser-scan visualizer with real-time progressive steps.
+ * Baraka v2 — Halal Ingredient Verification Desk
+ * Single responsibility: Islamic Sharia evaluation of product ingredients (food/medicine/cosmetics).
+ * No medical advice here.
  */
 
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,25 +14,30 @@ import {
   X,
   ScanLine,
   History,
-  ShieldCheck,
   AlertTriangle,
   CheckCircle2,
   Clock,
   Sparkles,
+  ChevronDown,
 } from 'lucide-react';
+import type { HalalResult, Madhhab, Verdict } from '../../shared/types';
 import { quickScreenText } from '../../shared/halalRules';
 import { PageHeader } from '../components/AppShell';
+import { SheikhAvatar } from '../components/characters/Personas';
 import { VerdictCard } from '../components/VerdictCard';
 import { Button, IconButton } from '../components/ui/Button';
-import { Disclaimer, Badge } from '../components/ui/Feedback';
+import { Disclaimer, StatusBadge } from '../components/ui/Feedback';
 import { Textarea } from '../components/ui/Field';
 import { prepareImage } from '../lib/image';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
 import { useScan } from '../state/ScanContext';
+import { useDoctorScan } from '../state/DoctorScanContext';
 import { usePageTheme } from '../lib/theme';
 import { useChatMutations } from '../data/chats';
+import { formatCalendarDate } from '../lib/format';
 import { haptic, HAPTIC } from '../lib/haptics';
+import { idbGet, idbSet } from '../lib/idb';
 
 const SCAN_STEPS = [
   { key: 'ocr', labelAr: 'قراءة نصوص الملصق والـ OCR', labelEn: 'Extracting label text & OCR', labelRu: 'Распознавание текста с этикетки' },
@@ -45,13 +46,17 @@ const SCAN_STEPS = [
   { key: 'verdict', labelAr: 'صياغة التقرير والنتيجة النهائية', labelEn: 'Preparing final verdict', labelRu: 'Формирование итогового заключения' },
 ];
 
+const MADHHABS: Madhhab[] = ['none', 'hanafi', 'shafii', 'maliki', 'hanbali'];
+const HALAL_HISTORY_KEY = 'halal.history.v2';
+
 export function HalalPage() {
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith('ru') ? 'Ru' : i18n.language.startsWith('en') ? 'En' : 'Ar';
   const navigate = useNavigate();
   const { show } = useToast();
-  const { role } = useAuth();
+  const { role, user, patchUser, updateGuestSettings } = useAuth();
   const { createChat } = useChatMutations();
+  const { setImage: setDoctorImage, setText: setDoctorText } = useDoctorScan();
   usePageTheme('halal');
 
   const isGuest = role === 'guest';
@@ -59,6 +64,12 @@ export function HalalPage() {
   const galleryRef = useRef<HTMLInputElement>(null);
 
   const [discussing, setDiscussing] = useState(false);
+  const [showMadhabModal, setShowMadhabModal] = useState(false);
+  const [historyList, setHistoryList] = useState<HalalResult[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState<'all' | Verdict>('all');
+  const [isSaved, setIsSaved] = useState(false);
+
+  const currentMadhhab: Madhhab = user?.madhhab ?? 'none';
 
   // Global scan state & operations preserved across route changes
   const {
@@ -72,7 +83,6 @@ export function HalalPage() {
     setBusy,
     result,
     setResult,
-    lastCached,
     progress,
     activeStep,
     elapsed,
@@ -80,11 +90,54 @@ export function HalalPage() {
     reset,
   } = useScan();
 
+  // Load history on mount
+  useEffect(() => {
+    void idbGet<HalalResult[]>(HALAL_HISTORY_KEY).then((items) => {
+      if (items && Array.isArray(items)) {
+        setHistoryList(items);
+      }
+    });
+  }, []);
+
+  // Save scan result to history whenever a new result arrives
+  const saveScanToHistory = useCallback(async (scanResult: HalalResult) => {
+    try {
+      const existing = (await idbGet<HalalResult[]>(HALAL_HISTORY_KEY)) || [];
+      const filtered = existing.filter((item) => item.id !== scanResult.id);
+      const updated = [scanResult, ...filtered].slice(0, 30);
+      setHistoryList(updated);
+      await idbSet(HALAL_HISTORY_KEY, updated);
+      setIsSaved(true);
+    } catch {
+      // Storage silently ignored if full
+    }
+  }, []);
+
+  useEffect(() => {
+    if (result) {
+      void saveScanToHistory(result);
+    }
+  }, [result, saveScanToHistory]);
+
   // Instant local rule pre-screening for manual text
   const quickInsight = useMemo(() => {
     if (!text || text.trim().length < 3) return null;
     return quickScreenText(text);
   }, [text]);
+
+  // Distinct verdict types in history (for conditional filter pills)
+  const distinctVerdicts = useMemo(() => {
+    const set = new Set<Verdict>();
+    for (const item of historyList) {
+      set.add(item.verdict);
+    }
+    return Array.from(set);
+  }, [historyList]);
+
+  const filteredHistory = useMemo(() => {
+    if (selectedFilter === 'all') return historyList;
+    return historyList.filter((item) => item.verdict === selectedFilter);
+  }, [historyList, selectedFilter]);
 
   const pickFile = async (file?: File) => {
     if (!file) return;
@@ -92,13 +145,47 @@ export function HalalPage() {
       const prepared = await prepareImage(file);
       setImage(prepared);
       setTyping(false);
+      setIsSaved(false);
       haptic(HAPTIC.tap);
-      // Auto-trigger scan immediately upon capture/selection
       void runScan(prepared, text, lang);
     } catch (error) {
       const code = (error as Error).message;
       show(code === 'too_large' ? t('errors.payload_too_large') : t('errors.validation_failed'), 'danger');
     }
+  };
+
+  const handleMadhhabChange = async (madhhab: Madhhab) => {
+    try {
+      if (role === 'guest') {
+        await updateGuestSettings({ madhhab });
+      } else {
+        await patchUser({ madhhab });
+      }
+      setShowMadhabModal(false);
+      haptic(HAPTIC.tap);
+      show(t('common.saved', 'تم الحفظ'), 'info');
+    } catch {
+      show(t('errors.generic'), 'danger');
+    }
+  };
+
+  const handleDoctorCheck = () => {
+    if (!result) return;
+    if (image) setDoctorImage(image);
+    const summary = result.product
+      ? `${result.product} (${result.ingredients.map((i) => i.name).join('، ')})`
+      : result.reason;
+    setDoctorText(summary);
+    haptic(HAPTIC.tap);
+    navigate('/doctor');
+  };
+
+  const handleSaveResult = async () => {
+    if (!result) return;
+    await saveScanToHistory(result);
+    setIsSaved(true);
+    haptic(HAPTIC.tap);
+    show(t('halal.saved', 'تم الحفظ في الفحوصات السابقة'), 'info');
   };
 
   const discuss = async () => {
@@ -116,18 +203,24 @@ export function HalalPage() {
           ? 'Халяль'
           : result.verdict === 'haram'
             ? 'Харам'
-            : 'Сомнительно (машбух)'
+            : result.verdict === 'inconclusive'
+              ? 'Неопределенно'
+              : 'Сомнительно (машбух)'
         : isEn
           ? result.verdict === 'halal'
             ? 'Halal'
             : result.verdict === 'haram'
               ? 'Haram'
-              : 'Doubtful (Mashbooh)'
+              : result.verdict === 'inconclusive'
+                ? 'Inconclusive'
+                : 'Doubtful (Mashbooh)'
           : result.verdict === 'halal'
             ? 'حلال'
             : result.verdict === 'haram'
               ? 'حرام'
-              : 'مشتبه به';
+              : result.verdict === 'inconclusive'
+                ? 'غير حاسم'
+                : 'مشتبه به';
 
       const seedParts = isRu
         ? [
@@ -165,25 +258,49 @@ export function HalalPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-5 pb-8">
-      <PageHeader title={t('home.salam')} subtitle={t('home.salamSub')} />
+      {/* 1. Header with Clickable Madhab Quick Switcher */}
+      <PageHeader
+        title={
+          <div className="flex items-center gap-3">
+            <SheikhAvatar size="md" className="shrink-0" />
+            <span>{t('nav.halal', 'الحلال')}</span>
+          </div>
+        }
+        subtitle={t(
+          'halal.deskSubtitle',
+          'صوّر قائمة المكوّنات ليراجع المساعد حكمها وفق مذهبك الفقهي'
+        )}
+        action={
+          <button
+            type="button"
+            onClick={() => setShowMadhabModal(true)}
+            className="group flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-fg hover:border-accent hover:bg-accent-soft/30 transition-all cursor-pointer shadow-xs"
+          >
+            <span className="text-muted">{t('profile.madhhab', 'المذهب')}:</span>
+            <span className="text-accent font-bold">
+              {t(`profile.madhhabs.${currentMadhhab}`)}
+            </span>
+            <ChevronDown className="h-3.5 w-3.5 text-muted group-hover:text-accent transition-colors" />
+          </button>
+        }
+      />
 
       {/* =====================================================================
-          1. HERO SCAN STATION (Initial State)
+          2. COMPACT SCANNING STATION (Active or Ready)
           ===================================================================== */}
       {!result && !busy ? (
         <div className="space-y-4">
-          <div className="relative rounded-2xl border border-line bg-surface p-5 sm:p-7 shadow-e2 overflow-hidden">
+          <div className="surface-card p-5 sm:p-6">
             {image ? (
               /* Image Uploaded: Viewfinder Preview with Rescan Action */
               <div className="space-y-4">
-                <div className="relative rounded-xl border border-line/80 bg-black/40 p-4 flex items-center justify-center overflow-hidden min-h-[220px]">
-                  {/* Viewfinder corner brackets */}
+                <div className="relative rounded-xl border border-line/80 bg-black/40 p-4 flex items-center justify-center overflow-hidden min-h-[200px]">
                   <div className="absolute top-2.5 start-2.5 h-4 w-4 border-t-2 border-s-2 border-accent" />
                   <div className="absolute top-2.5 end-2.5 h-4 w-4 border-t-2 border-e-2 border-accent" />
                   <div className="absolute bottom-2.5 start-2.5 h-4 w-4 border-b-2 border-s-2 border-accent" />
                   <div className="absolute bottom-2.5 end-2.5 h-4 w-4 border-b-2 border-e-2 border-accent" />
 
-                  <img src={image.dataUrl} alt="" className="max-h-72 w-full object-contain mx-auto rounded" />
+                  <img src={image.dataUrl} alt="" className="max-h-64 w-full object-contain mx-auto rounded" />
                   <IconButton
                     label={t('common.clear')}
                     onClick={() => setImage(null)}
@@ -205,24 +322,16 @@ export function HalalPage() {
                 </Button>
               </div>
             ) : (
-              /* Welcoming Action Hub */
+              /* Compact Scan Action Card */
               <div className="flex flex-col items-center justify-center text-center gap-4 py-2">
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-accent border border-accent/20 shadow-xs">
-                  <ScanLine className="h-7 w-7" strokeWidth={1.8} />
-                </div>
-                <div className="space-y-1">
-                  <h2 className="font-display text-lg sm:text-xl font-bold text-fg">
-                    {t('landing.cap1Title')}
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted max-w-[42ch] mx-auto leading-relaxed">
-                    {t('landing.cap1Desc')}
-                  </p>
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-soft text-accent border border-accent/20 shadow-xs">
+                  <ScanLine className="h-6 w-6" strokeWidth={1.8} />
                 </div>
 
-                {/* Primary Action Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md pt-2">
+                {/* Main Action Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-sm">
                   <Button
-                    size="lg"
+                    size="md"
                     variant="primary"
                     onClick={() => {
                       if (isGuest) {
@@ -231,12 +340,12 @@ export function HalalPage() {
                       }
                       cameraRef.current?.click();
                     }}
-                    icon={<Camera className="h-5 w-5" />}
+                    icon={<Camera className="h-4 w-4" />}
                   >
-                    {t('home.cta')}
+                    {t('home.cta', 'تصوير المكوّنات')}
                   </Button>
                   <Button
-                    size="lg"
+                    size="md"
                     variant="secondary"
                     onClick={() => {
                       if (isGuest) {
@@ -245,9 +354,9 @@ export function HalalPage() {
                       }
                       galleryRef.current?.click();
                     }}
-                    icon={<ImageIcon className="h-5 w-5 text-muted" />}
+                    icon={<ImageIcon className="h-4 w-4 text-muted" />}
                   >
-                    {t('common.gallery')}
+                    {t('common.gallery', 'رفع من المعرض')}
                   </Button>
                 </div>
 
@@ -255,24 +364,24 @@ export function HalalPage() {
                 <button
                   type="button"
                   onClick={() => setTyping((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-fg pt-1 cursor-pointer transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-accent pt-0.5 cursor-pointer transition-colors"
                 >
                   <Type className="h-3.5 w-3.5" />
-                  <span>{typing ? t('common.close') : t('home.orText')}</span>
+                  <span>{typing ? t('common.close', 'إغلاق حقل الكتابة') : t('halal.typeIngredients', 'كتابة المكوّنات يدوياً')}</span>
                 </button>
 
-                {/* Optional Fast Text Entry Section */}
-                {typing ? (
+                {/* Inline Text Area Expansion without Jumping */}
+                {typing && (
                   <div className="w-full max-w-md mt-2 pt-3 border-t border-line/60 space-y-3 text-start">
                     <Textarea
-                      label={t('halal.placeholder')}
+                      label={t('halal.placeholder', 'اكتب المكوّنات أو الرموز هنا...')}
                       value={text}
                       maxLength={4000}
                       onChange={(event) => setText(event.target.value)}
                     />
 
                     {/* Instant Local Rule Insight Badge */}
-                    {quickInsight && quickInsight.matches.length > 0 ? (
+                    {quickInsight && quickInsight.matches.length > 0 && (
                       <div
                         className={
                           quickInsight.verdict === 'haram'
@@ -292,25 +401,25 @@ export function HalalPage() {
                           {quickInsight.matches[0][('reason' + lang) as 'reasonAr' | 'reasonRu' | 'reasonEn']}
                         </p>
                       </div>
-                    ) : null}
+                    )}
 
                     <Button
                       fullWidth
-                      size="lg"
+                      size="md"
                       variant="primary"
                       loading={busy}
                       disabled={text.trim().length < 3}
                       onClick={() => void runScan(null, text, lang)}
                     >
-                      {t('halal.scan')}
+                      {t('halal.scan', 'افحص الآن')}
                     </Button>
                   </div>
-                ) : null}
+                )}
               </div>
             )}
           </div>
 
-          {/* Hidden Native File Inputs */}
+          {/* Native Hidden Inputs */}
           <input
             ref={cameraRef}
             type="file"
@@ -327,61 +436,109 @@ export function HalalPage() {
             onChange={(event) => void pickFile(event.target.files?.[0])}
           />
 
-          {/* Contextual Recent Checks */}
-          {lastCached ? (
-            <div className="rounded-xl border border-line bg-surface p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted">
+          {/* ===================================================================
+              3. PREVIOUS CHECKS SECTION (Real stored checks only)
+              =================================================================== */}
+          {historyList.length > 0 && (
+            <div className="surface-card p-4 sm:p-5 space-y-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 text-sm font-bold text-fg">
                   <History className="h-4 w-4 text-accent" />
-                  <span>{t('halal.cached')}</span>
+                  <span>{t('halal.previousChecks', 'الفحوصات السابقة')}</span>
+                  <span className="text-xs font-normal text-muted">({historyList.length})</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setResult(lastCached)}
-                  className="text-xs font-bold text-accent hover:underline cursor-pointer"
-                >
-                  {t('common.all')}
-                </button>
+
+                {/* Filter Pills: Visible ONLY when more than 1 distinct verdict type exists */}
+                {distinctVerdicts.length > 1 && (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFilter('all')}
+                      className={`px-2.5 py-1 text-xs rounded-full transition-colors cursor-pointer ${
+                        selectedFilter === 'all'
+                          ? 'bg-accent text-accent-fg font-bold'
+                          : 'bg-surface2 text-muted hover:text-fg'
+                      }`}
+                    >
+                      {t('common.all', 'الكل')}
+                    </button>
+                    {distinctVerdicts.map((verd) => (
+                      <button
+                        key={verd}
+                        type="button"
+                        onClick={() => setSelectedFilter(verd)}
+                        className={`px-2.5 py-1 text-xs rounded-full transition-colors cursor-pointer ${
+                          selectedFilter === verd
+                            ? 'bg-accent text-accent-fg font-bold'
+                            : 'bg-surface2 text-muted hover:text-fg'
+                        }`}
+                      >
+                        {t(`halal.verdict.${verd}`)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              <div
-                onClick={() => setResult(lastCached)}
-                className="flex items-center justify-between p-3 rounded-lg border border-line bg-surface2/60 hover:bg-surface2 cursor-pointer transition-colors"
-              >
-                <div className="min-w-0 flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-accent-soft text-accent">
-                    <ShieldCheck className="h-5 w-5" />
+              {/* Items List */}
+              <div className="divide-y divide-line max-h-72 overflow-y-auto pe-1">
+                {filteredHistory.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      setResult(item);
+                      setIsSaved(true);
+                      haptic(HAPTIC.tap);
+                    }}
+                    className="flex items-center justify-between gap-3 py-3 hover:bg-surface2/60 px-2 rounded-lg cursor-pointer transition-colors"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-fg truncate">
+                          <bdi dir="auto">{item.product || t('halal.title')}</bdi>
+                        </p>
+                        <StatusBadge
+                          tone={
+                            item.verdict === 'halal'
+                              ? 'ok'
+                              : item.verdict === 'haram'
+                                ? 'danger'
+                                : item.verdict === 'mashbooh'
+                                  ? 'warn'
+                                  : 'neutral'
+                          }
+                        >
+                          {t(`halal.verdict.${item.verdict}`)}
+                        </StatusBadge>
+                      </div>
+                      <p className="text-xs text-muted line-clamp-1 mt-0.5">
+                        <bdi dir="auto">{item.reason}</bdi>
+                      </p>
+                    </div>
+
+                    <span className="text-[11px] text-muted shrink-0">
+                      {formatCalendarDate(item.createdAt.slice(0, 10), i18n.language)}
+                    </span>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-fg truncate">
-                      {lastCached.product ?? t('halal.title')}
-                    </p>
-                    <p className="text-xs text-muted truncate">{lastCached.reason}</p>
-                  </div>
-                </div>
-                <Badge tone={lastCached.verdict === 'halal' ? 'ok' : lastCached.verdict === 'haram' ? 'danger' : 'warn'}>
-                  {t(`halal.verdict.${lastCached.verdict}`)}
-                </Badge>
+                ))}
               </div>
             </div>
-          ) : null}
+          )}
         </div>
       ) : null}
 
       {/* =====================================================================
-          2. HIGH-PRECISION ACTIVE SCANNING RADAR (Replaces static spinner)
+          4. HIGH-PRECISION ACTIVE SCANNING RADAR
           ===================================================================== */}
       {busy ? (
-        <div className="rounded-2xl border border-line bg-surface p-5 sm:p-7 shadow-e2 space-y-5">
+        <div className="surface-card p-5 sm:p-7 space-y-5">
           {/* Laser Scanning Viewfinder */}
           <div className="relative rounded-xl border border-line/80 bg-black/40 p-4 flex flex-col items-center justify-center overflow-hidden min-h-[220px]">
-            {/* Viewfinder corner brackets */}
             <div className="absolute top-2.5 start-2.5 h-4 w-4 border-t-2 border-s-2 border-accent" />
             <div className="absolute top-2.5 end-2.5 h-4 w-4 border-t-2 border-e-2 border-accent" />
             <div className="absolute bottom-2.5 start-2.5 h-4 w-4 border-b-2 border-s-2 border-accent" />
             <div className="absolute bottom-2.5 end-2.5 h-4 w-4 border-b-2 border-e-2 border-accent" />
 
-            {/* Moving Laser Scan Line */}
             <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-accent to-transparent shadow-[0_0_12px_var(--accent)] animate-scan pointer-events-none" />
 
             {image ? (
@@ -403,7 +560,7 @@ export function HalalPage() {
             <div className="flex items-center justify-between text-xs font-bold text-fg">
               <div className="flex items-center gap-1.5 text-accent">
                 <Sparkles className="h-4 w-4" />
-                <span>فحص ذكي فوري عالي السرعة</span>
+                <span>{t('halal.fastScanHeader', 'فحص ذكي فوري للمكونات')}</span>
               </div>
               <div className="flex items-center gap-1 text-muted">
                 <Clock className="h-3.5 w-3.5" />
@@ -411,7 +568,6 @@ export function HalalPage() {
               </div>
             </div>
 
-            {/* Percentage Bar */}
             <div className="relative h-2 w-full overflow-hidden rounded-full bg-surface2">
               <div
                 className="h-full bg-accent transition-all duration-300 rounded-full"
@@ -451,7 +607,6 @@ export function HalalPage() {
             })}
           </div>
 
-          {/* Quick Cancel Button */}
           <div className="pt-1 text-center">
             <button
               type="button"
@@ -465,7 +620,7 @@ export function HalalPage() {
       ) : null}
 
       {/* =====================================================================
-          3. RESULT VERDICT MOMENT
+          5. RESULT VERDICT MOMENT
           ===================================================================== */}
       {result ? (
         <div className="space-y-4">
@@ -473,16 +628,70 @@ export function HalalPage() {
             result={result}
             imageUrl={image?.dataUrl ?? null}
             onDiscuss={() => void discuss()}
+            onDoctorCheck={handleDoctorCheck}
+            onSave={() => void handleSaveResult()}
+            onRescan={() => {
+              reset();
+              cameraRef.current?.click();
+            }}
             discussing={discussing}
+            saved={isSaved}
           />
-          <Button variant="secondary" fullWidth size="lg" onClick={reset}>
-            {t('halal.newScan')}
-          </Button>
-        </div>
-      ) : null}
 
-      {/* Result-Time Visible High-Contrast Disclaimer */}
-      <Disclaimer>{t('halal.disclaimer')}</Disclaimer>
+          <Button variant="secondary" fullWidth size="md" onClick={reset}>
+            {t('halal.newScan', 'فحص منتج جديد')}
+          </Button>
+
+          {/* Unified Disclaimer adjacent to the result */}
+          <Disclaimer>{t('halal.disclaimer', 'تحليل مساعد وليس فتوى. في الأمور الخلافية ارجع لأهل العلم.')}</Disclaimer>
+        </div>
+      ) : (
+        /* Disclaimer on the initial scan desk */
+        <Disclaimer>{t('halal.disclaimer', 'تحليل مساعد وليس فتوى. في الأمور الخلافية ارجع لأهل العلم.')}</Disclaimer>
+      )}
+
+      {/* =====================================================================
+          6. QUICK MADHHAB SELECTION MODAL
+          ===================================================================== */}
+      {showMadhabModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="surface-card w-full max-w-sm p-5 space-y-4 border border-line shadow-e3">
+            <div className="flex items-center justify-between pb-2 border-b border-line">
+              <h3 className="font-display text-base font-bold text-fg">
+                {t('halal.changeMadhab', 'تغيير المذهب الفقهي')}
+              </h3>
+              <IconButton label={t('common.close')} onClick={() => setShowMadhabModal(false)}>
+                <X className="h-4 w-4" />
+              </IconButton>
+            </div>
+
+            <p className="text-xs text-muted leading-relaxed">
+              {t(
+                'halal.madhabExplanation',
+                'يؤثر اختيار المذهب في ترجيح حكم المستحلبات الحيوانية، والذبح، وأحكام الأطعمة البحرية وغيرها.'
+              )}
+            </p>
+
+            <div className="space-y-2">
+              {MADHHABS.map((madh) => (
+                <button
+                  key={madh}
+                  type="button"
+                  onClick={() => void handleMadhhabChange(madh)}
+                  className={`w-full flex items-center justify-between p-3 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+                    currentMadhhab === madh
+                      ? 'border-accent bg-accent-soft/40 text-accent font-bold'
+                      : 'border-line bg-surface hover:bg-surface2 text-fg'
+                  }`}
+                >
+                  <span>{t(`profile.madhhabs.${madh}`)}</span>
+                  {currentMadhhab === madh && <CheckCircle2 className="h-4 w-4 text-accent" />}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
