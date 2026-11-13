@@ -1,8 +1,8 @@
 /** Money profile: spending mode, savings rates, income sources, fixed expenses. */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2 } from 'lucide-react';
+import { Check, Plus, Trash2 } from 'lucide-react';
 import type { FinanceProfile, IncomeSource, SpendLevel } from '../../shared/types';
 import { majorToMinor, minorToDecimalString } from '../../shared/money';
 import { FIXED_EXPENSE_PRESETS } from '../../shared/constants';
@@ -32,6 +32,11 @@ export function FinanceForm({ initial, onSaved }: { initial: FinanceProfile; onS
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
+  const financeRef = useRef(finance);
+  financeRef.current = finance;
+  const initialRef = useRef(initial);
+  const savedRef = useRef(false);
+
   const amountFor = (id: string, minor: number) => drafts[id] ?? minorToDecimalString(minor, currency);
   const setAmount = (id: string, raw: string, apply: (minor: number) => void) => {
     setDrafts((current) => ({ ...current, [id]: raw }));
@@ -55,6 +60,7 @@ export function FinanceForm({ initial, onSaved }: { initial: FinanceProfile; onS
     setSaving(true);
     try {
       await saveFinance({ ...finance, currency, updatedAt: new Date().toISOString() });
+      savedRef.current = true;
       show(t('common.saved'), 'success');
       onSaved?.();
     } catch {
@@ -63,6 +69,18 @@ export function FinanceForm({ initial, onSaved }: { initial: FinanceProfile; onS
       setSaving(false);
     }
   };
+
+  // Defensive auto-save on unmount if modified and not yet saved
+  useEffect(() => {
+    return () => {
+      if (savedRef.current) return;
+      const current = financeRef.current;
+      const init = initialRef.current;
+      if (JSON.stringify(current) !== JSON.stringify(init)) {
+        void saveFinance({ ...current, currency, updatedAt: new Date().toISOString() });
+      }
+    };
+  }, [currency, saveFinance]);
 
   return (
     <form
@@ -284,9 +302,12 @@ export function FinanceForm({ initial, onSaved }: { initial: FinanceProfile; onS
         </div>
       </div>
 
-      <Button type="submit" fullWidth size="lg" loading={saving}>
-        {t('common.save')}
-      </Button>
+      {/* Permanently visible sticky bottom save button */}
+      <div className="sticky bottom-0 -mx-5 -mb-4 mt-6 border-t border-line bg-surface/95 backdrop-blur-md px-5 py-3.5 shadow-e2 z-20">
+        <Button type="submit" fullWidth size="lg" loading={saving} icon={<Check className="h-4 w-4" />}>
+          {t('common.save')}
+        </Button>
+      </div>
     </form>
   );
 }

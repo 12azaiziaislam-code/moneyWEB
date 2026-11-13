@@ -40,7 +40,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   return (
-    <div ref={ref} className="flex min-h-0 flex-1 flex-col w-full">
+    <div ref={ref} className="flex min-h-0 flex-1 flex-col w-full h-full">
       {children}
     </div>
   );

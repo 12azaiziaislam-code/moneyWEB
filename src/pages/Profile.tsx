@@ -65,7 +65,7 @@ export function ProfilePage() {
   const steps = [
     { label: 'العمر', done: Boolean(health.age) },
     { label: 'الوزن والطول', done: Boolean(health.weightKg && health.heightCm) },
-    { label: 'الحالات الصحية', done: Boolean(health.conditions?.length || health.medications?.length) },
+    { label: 'الحالات الصحية', done: Boolean(health.conditions?.length || health.medications?.length || health.allergies?.length || health.sex) },
     { label: 'الدخل الشهري', done: Boolean(finance.incomes?.length) },
     { label: 'نمط الميزانية', done: Boolean(finance.level) },
   ];

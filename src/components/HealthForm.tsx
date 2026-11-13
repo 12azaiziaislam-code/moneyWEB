@@ -1,7 +1,8 @@
 /** Health profile form (onboarding + profile sheet). */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Check } from 'lucide-react';
 import type { HealthProfile } from '../../shared/types';
 import { Button } from './ui/Button';
 import { Input, Select, Textarea } from './ui/Field';
@@ -27,10 +28,16 @@ export function HealthForm({ initial, onSaved }: { initial: HealthProfile; onSav
   });
   const [saving, setSaving] = useState(false);
 
+  const formRef = useRef(form);
+  formRef.current = form;
+  const initialRef = useRef(initial);
+  const savedRef = useRef(false);
+
   const submit = async () => {
     setSaving(true);
     try {
       await saveHealth({ ...form, updatedAt: new Date().toISOString() });
+      savedRef.current = true;
       show(t('common.saved'), 'success');
       onSaved?.();
     } catch {
@@ -39,6 +46,28 @@ export function HealthForm({ initial, onSaved }: { initial: HealthProfile; onSav
       setSaving(false);
     }
   };
+
+  // Defensive auto-save on unmount if modified and not yet saved
+  useEffect(() => {
+    return () => {
+      if (savedRef.current) return;
+      const current = formRef.current;
+      const init = initialRef.current;
+      const hasAnyData = Boolean(
+        current.age ||
+        current.heightCm ||
+        current.weightKg ||
+        current.sex ||
+        current.conditions?.length ||
+        current.medications?.length ||
+        current.allergies?.length ||
+        current.notes?.trim(),
+      );
+      if (hasAnyData && JSON.stringify(current) !== JSON.stringify(init)) {
+        void saveHealth({ ...current, updatedAt: new Date().toISOString() });
+      }
+    };
+  }, [saveHealth]);
 
   return (
     <form
@@ -138,9 +167,12 @@ export function HealthForm({ initial, onSaved }: { initial: HealthProfile; onSav
         onChange={(event) => setForm({ ...form, notes: event.target.value })}
       />
 
-      <Button type="submit" fullWidth loading={saving}>
-        {t('common.save')}
-      </Button>
+      {/* Permanently visible sticky bottom save button */}
+      <div className="sticky bottom-0 -mx-5 -mb-4 mt-6 border-t border-line bg-surface/95 backdrop-blur-md px-5 py-3.5 shadow-e2 z-20">
+        <Button type="submit" fullWidth size="lg" loading={saving} icon={<Check className="h-4 w-4" />}>
+          {t('common.save')}
+        </Button>
+      </div>
     </form>
   );
 }

@@ -43,7 +43,7 @@ export function ChatDetailPage() {
     );
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col h-full">
       <header className="flex items-center gap-2.5 py-2.5 border-b border-line mb-2">
         <IconButton label={t('common.back')} onClick={() => navigate('/chats')}>
           <ChevronLeft className="flip-rtl h-5 w-5" aria-hidden />

@@ -53,7 +53,7 @@ const sortTx = (list: Transaction[]) =>
   [...list].sort((a, b) => (a.occurredAt < b.occurredAt ? 1 : a.occurredAt > b.occurredAt ? -1 : 0));
 
 export function useFinance(): FinanceController {
-  const { role, user, guestData, setGuestData } = useAuth();
+  const { role, user, guestData, setGuestData, applyUser } = useAuth();
   const isGuest = role === 'guest';
   const [plan, setPlan] = useState<PlanResult | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -116,14 +116,17 @@ export function useFinance(): FinanceController {
         }));
         return;
       }
-      const response = await apiFetch<{ plan: PlanResult }>('/api/balance', {
+      const response = await apiFetch<{ plan: PlanResult; user?: WebUser }>('/api/balance', {
         method: 'POST',
         body: { balanceMinor: minor },
       });
       setPlan(response.plan);
+      if (response?.user) {
+        applyUser(response.user);
+      }
       await load();
     },
-    [isGuest, load, mutateGuest],
+    [isGuest, load, mutateGuest, applyUser],
   );
 
   const saveFinance = useCallback(
@@ -140,8 +143,11 @@ export function useFinance(): FinanceController {
         body: finance,
       });
       setPlan(response.plan);
+      if (response?.user) {
+        applyUser(response.user);
+      }
     },
-    [isGuest, mutateGuest],
+    [isGuest, mutateGuest, applyUser],
   );
 
   const saveHealth = useCallback(
@@ -150,9 +156,12 @@ export function useFinance(): FinanceController {
         await mutateGuest((data) => ({ ...data, settings: { ...data.settings, health } }));
         return;
       }
-      await apiFetch<{ user: WebUser }>('/api/me', { method: 'PATCH', body: { health } });
+      const response = await apiFetch<{ user: WebUser }>('/api/me', { method: 'PATCH', body: { health } });
+      if (response?.user) {
+        applyUser(response.user);
+      }
     },
-    [isGuest, mutateGuest],
+    [isGuest, mutateGuest, applyUser],
   );
 
   const addTransaction = useCallback(

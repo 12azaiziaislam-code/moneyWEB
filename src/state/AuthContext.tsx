@@ -34,7 +34,7 @@ import {
   signInWithGoogle,
   watchAuth,
 } from '../lib/firebase';
-import { CacheKeys, idbGet } from '../lib/idb';
+import { CacheKeys, idbGet, idbSet } from '../lib/idb';
 import {
   clearGuestData,
   demoGuestData,
@@ -124,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(next);
     void changeLocale(next.locale);
     applyThemeMode(next.theme as ThemeMode);
+    void idbSet(CacheKeys.user, next);
   }, []);
 
   const applyGuest = useCallback((data: GuestData) => {

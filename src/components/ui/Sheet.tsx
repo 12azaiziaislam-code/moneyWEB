@@ -99,7 +99,7 @@ export function Sheet({
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 no-scrollbar">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 overscroll-contain">
           {children}
         </div>
 

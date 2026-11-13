@@ -194,7 +194,7 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
   const avatar = <PersonaAvatar kind={kind} size="sm" />;
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col h-full">
       <div className="flex-1 space-y-3 overflow-y-auto px-0.5 py-2">
         {/* Advisory Persona Profile Card */}
         <PersonaCard kind={kind} />

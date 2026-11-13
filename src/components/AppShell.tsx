@@ -63,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="relative min-h-[100dvh] w-full bg-bg text-fg flex flex-col lg:flex-row">
+    <div className="relative min-h-[100dvh] lg:h-[100dvh] lg:max-h-[100dvh] w-full bg-bg text-fg flex flex-col lg:flex-row lg:overflow-hidden">
       {/* Sovereign Sacred Geometry Backdrop (Zero Performance Drag) */}
       <IslamicPattern />
 
@@ -94,10 +94,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* =====================================================================
           DESKTOP SIDE NAVIGATION RAIL (>= 1024px)
+          Full-height, permanently anchored sovereign rail.
           ===================================================================== */}
       <aside
         aria-label="القائمة الجانبية"
-        className="hidden lg:flex w-64 xl:w-72 shrink-0 flex-col justify-between border-e border-line bg-surface/90 backdrop-blur-md z-30 sticky top-0 h-[100dvh] p-5 shadow-sm"
+        className="hidden lg:flex w-64 xl:w-72 shrink-0 flex-col justify-between border-e border-line bg-surface/95 backdrop-blur-md z-30 h-full p-5 shadow-sm overflow-y-auto no-scrollbar"
       >
         <div className="space-y-6">
           {/* Brand Identity */}
@@ -194,8 +195,16 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* =====================================================================
           MAIN CONTENT WORKSPACE
+          Desktop: strictly contained within viewport height.
+          Non-chat pages scroll vertically via independent container scroll.
+          Chat pages lock height and let messages scroll inside ChatView.
           ===================================================================== */}
-      <div className="relative z-[1] flex min-h-0 flex-1 flex-col w-full max-w-full lg:max-w-[calc(100vw-16rem)] xl:max-w-[calc(100vw-18rem)]">
+      <div
+        className={cn(
+          'relative z-[1] flex min-h-0 flex-1 flex-col w-full max-w-full lg:max-w-[calc(100vw-16rem)] xl:max-w-[calc(100vw-18rem)] lg:h-full',
+          isChatDetail ? 'lg:overflow-hidden' : 'lg:overflow-y-auto',
+        )}
+      >
         {/* Guest Banner on Mobile */}
         {role === 'guest' ? (
           <div className="lg:hidden mx-3 mt-3 flex items-center justify-between gap-3 rounded-lg border border-line bg-surface/90 px-3.5 py-2 shadow-sm">
@@ -219,7 +228,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main
           className={cn(
             'flex-1 flex flex-col w-full max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 lg:pb-12 safe-x',
-            isChatDetail ? 'pb-4' : 'pb-[calc(var(--nav-h)+2rem+var(--safe-bottom))]',
+            isChatDetail ? 'h-full min-h-0 pb-2 sm:pb-3' : 'pb-[calc(var(--nav-h)+2rem+var(--safe-bottom))]',
           )}
         >
           {children}
