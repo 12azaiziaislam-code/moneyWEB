@@ -1,0 +1,13 @@
+# SPA routing
+#
+# Cloudflare Pages serves /index.html for any path that does not match a static
+# asset (verified with `wrangler pages dev`), so deep links like /doctor or
+# /chats/<id> work out of the box once the Functions fallback is in place.
+#
+# That is why this file has no rewrite rule: `/*  /index.html  200` makes
+# wrangler log an "infinite loop" warning (it re-matches /index.html itself).
+#
+# If you later add a top-level `404.html`, Pages stops doing the automatic
+# fallback — then uncomment the rule below:
+#
+# /*    /index.html   200

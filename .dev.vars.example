@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Local secrets for `wrangler pages dev` (Cloudflare Pages Functions).
+# Copy to `.dev.vars` — it is git-ignored. In production set these with:
+#   wrangler pages secret put GATEWAY_API_KEY --project-name baraka
+# NEVER commit real values and NEVER expose them to Vite (no VITE_ prefix).
+# ---------------------------------------------------------------------------
+
+# Gateway key (from the Key pool). NOT the enrollment key (enroll_only_key -> 403).
+GATEWAY_API_KEY=gwk_put_your_real_gateway_key_here
+
+# Firebase project id — used to verify ID tokens (aud + iss).
+FIREBASE_PROJECT_ID=your-project
+
+# Public Firebase Web API key — used ONLY server-side to delete the Firebase user
+# when the account owner asks for a full account deletion (accounts:delete).
+FIREBASE_API_KEY=AIzaSy...your-public-web-api-key
+
+# Public origin of the deployed app (CORS allow-list). Comma separated.
+APP_ORIGIN=http://localhost:8788,https://baraka.pages.dev
+
+# Version header sent to the gateway (<= 30 chars, ascii).
+APP_VERSION=1.0.0
+
+# "true" to store images in R2 (binding BUCKET). "false" keeps compressed
+# thumbnails inside D1 (works fully on the free plan without R2).
+USE_R2=false
+
+# Abuse protection (per user uid)
+RATE_LIMIT_PER_HOUR=30
+RATE_LIMIT_PER_DAY=200
+MAX_BODY_BYTES=6000000
+MAX_IMAGE_BYTES=1200000
+
+# Optional override (must stay the documented gateway)
+GATEWAY_BASE_URL=https://gemma-gateway.pages.dev/v1
+
+# ---------------------------------------------------------------------------
+# Guest mode (anonymous, 24h token). OFF unless GUEST_MODE_ENABLED=true
+# AND GUEST_JWT_SECRET is at least 32 characters.
+# Turn it off before launch by simply removing/blanking GUEST_MODE_ENABLED.
+# ---------------------------------------------------------------------------
+GUEST_MODE_ENABLED=true
+# openssl rand -base64 48
+GUEST_JWT_SECRET=replace_with_a_random_48_byte_secret_at_least_32_chars
+# AI limits per guest token
+GUEST_LIMIT_PER_HOUR=4
+GUEST_LIMIT_PER_DAY=10
+# AI limits per network (hashed IP, never stored raw)
+GUEST_IP_LIMIT_PER_DAY=30
+# How many guest tokens one network may obtain per hour
+GUEST_TOKENS_PER_IP_HOUR=6
+# Guests send compressed photos inline, so the cap is smaller than MAX_IMAGE_BYTES
+GUEST_MAX_IMAGE_BYTES=700000
+# Optional Cloudflare Turnstile (recommended in production):
+# TURNSTILE_SECRET=0x4AAA...
+# and set VITE_TURNSTILE_SITE_KEY for the client widget.

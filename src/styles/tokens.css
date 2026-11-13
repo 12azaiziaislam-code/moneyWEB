@@ -1,0 +1,379 @@
+/* ==========================================================================
+   Baraka — design tokens (single source of truth)
+   Grid: 4px. Radii, shadows, motion and every page identity live here.
+   Themes are switched by [data-theme] on <html>; accent by [data-accent].
+   All colour pairs are verified against WCAG AA in tests/design.test.ts.
+   ========================================================================== */
+
+:root {
+  /* ---- spacing (4px grid) ---- */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ---- radii ---- */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --radius-2xl: 34px;
+  --radius-full: 999px;
+
+  /* ---- elevation ---- */
+  --shadow-1: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.06);
+  --shadow-2: 0 2px 6px rgb(16 24 40 / 0.06), 0 12px 28px -14px rgb(16 24 40 / 0.22);
+  --shadow-3: 0 8px 18px rgb(16 24 40 / 0.1), 0 32px 64px -28px rgb(16 24 40 / 0.35);
+  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.06);
+
+  /* ---- motion ---- */
+  --dur-fast: 130ms;
+  --dur-mid: 230ms;
+  --dur-slow: 420ms;
+  --dur-slower: 700ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* ---- layout ---- */
+  --app-max: 480px;
+  --nav-h: 66px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ---- typography ---- */
+  --font-display: 'Readex Pro', 'Manrope', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans Arabic', 'Inter', system-ui, 'Segoe UI', sans-serif;
+  --font-latin: 'Manrope', 'Inter', system-ui, sans-serif;
+  --font-num: 'Inter', ui-monospace, 'SF Mono', monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 17px;
+  --text-xl: 21px;
+  --text-2xl: 26px;
+  --text-3xl: 32px;
+  --text-4xl: 40px;
+
+  /* ---- semantic defaults (overridden per theme) ---- */
+  --bg: #f7f5f0;
+  --bg-2: #efeae1;
+  --surface: #ffffff;
+  --surface-2: #f1ece3;
+  --border: #e3dccf;
+  --fg: #1b1917;
+  --muted: #655d52;
+  --accent: #0f766e;
+  --accent-fg: #ffffff;
+  --accent-soft: #d8efe9;
+  --accent-2: #c2a25a;
+  --ring: #0f766e;
+
+  --ok: #15803d;
+  --ok-soft: #dcfce7;
+  --warn: #a16207;
+  --warn-soft: #fef3c7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --info: #0e7490;
+  --info-soft: #d9f2f8;
+
+  /* risk ramp (accountant) */
+  --risk-green: #15803d;
+  --risk-green-fg: #ffffff;
+  --risk-green-soft: #dcfce7;
+  --risk-yellow: #a16207;
+  --risk-yellow-fg: #ffffff;
+  --risk-yellow-soft: #fef3c7;
+  --risk-orange: #c2410c;
+  --risk-orange-fg: #ffffff;
+  --risk-orange-soft: #ffedd5;
+  --risk-red: #b91c1c;
+  --risk-red-fg: #ffffff;
+  --risk-red-soft: #fee2e2;
+
+  /* channel colours (chats) */
+  --ch-sheikh: #0e6b52;
+  --ch-doctor: #0e7490;
+  --ch-accountant: #b45309;
+
+  /* decorative */
+  --pattern-ink: #0e6b52;
+  --pattern-opacity: 0.05;
+  --hero-grad-a: #0f766e;
+  --hero-grad-b: #064e3b;
+  --glass: rgb(255 255 255 / 0.82);
+  --glass-border: rgb(255 255 255 / 0.55);
+  --overlay: rgb(20 24 28 / 0.45);
+}
+
+.dark {
+  --bg: #0a0e0f;
+  --bg-2: #101617;
+  --surface: #141a1b;
+  --surface-2: #1b2324;
+  --border: #253031;
+  --fg: #f1efea;
+  --muted: #a9a49b;
+  --accent: #5ed4ab;
+  --accent-fg: #04170f;
+  --accent-soft: #10312a;
+  --accent-2: #d8bb7d;
+  --ring: #5ed4ab;
+
+  --ok: #4ade80;
+  --ok-soft: #062e17;
+  --warn: #fbbf24;
+  --warn-soft: #2c2205;
+  --danger: #f87171;
+  --danger-soft: #2f0d0d;
+  --info: #67d3ea;
+  --info-soft: #07262d;
+
+  --risk-green: #4ade80;
+  --risk-green-fg: #05240f;
+  --risk-green-soft: #062e17;
+  --risk-yellow: #fbbf24;
+  --risk-yellow-fg: #2a1a00;
+  --risk-yellow-soft: #2c2205;
+  --risk-orange: #fb923c;
+  --risk-orange-fg: #2a1200;
+  --risk-orange-soft: #2e1607;
+  --risk-red: #f87171;
+  --risk-red-fg: #2a0808;
+  --risk-red-soft: #2f0d0d;
+
+  --ch-sheikh: #5ed4ab;
+  --ch-doctor: #67d3ea;
+  --ch-accountant: #fbbf24;
+
+  --pattern-ink: #d8bb7d;
+  --pattern-opacity: 0.07;
+  --hero-grad-a: #0f766e;
+  --hero-grad-b: #04120f;
+  --glass: rgb(12 18 19 / 0.78);
+  --glass-border: rgb(255 255 255 / 0.08);
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5);
+  --shadow-2: 0 2px 8px rgb(0 0 0 / 0.45), 0 18px 40px -22px rgb(0 0 0 / 0.8);
+  --shadow-3: 0 10px 24px rgb(0 0 0 / 0.5), 0 40px 80px -30px rgb(0 0 0 / 0.9);
+
+/* ======================= PAGE IDENTITIES (light) ========================== */
+
+/* 1) Halal — stillness, emerald + ivory + faint gold */
+[data-theme='halal'] {
+  --bg: #f7f5ec;
+  --bg-2: #efebdc;
+  --surface: #fffdf6;
+  --surface-2: #f2eddf;
+  --border: #e4dcc6;
+  --fg: #1d2a23;
+  --muted: #5f6b60;
+  --accent: #0e6b52;
+  --accent-fg: #ffffff;
+  --accent-soft: #dcece1;
+  --accent-2: #b08d3f;
+  --ring: #0e6b52;
+  --pattern-ink: #0e6b52;
+  --pattern-opacity: 0.05;
+  --hero-grad-a: #0e6b52;
+  --hero-grad-b: #06251b;
+  --glass: rgb(255 253 246 / 0.84);
+}
+
+/* 2) Chats — the archive: warm stone, coffee, teal */
+[data-theme='chats'] {
+  --bg: #f6f2ea;
+  --bg-2: #ece5d8;
+  --surface: #fffdf8;
+  --surface-2: #f0e9dc;
+  --border: #ded4c3;
+  --fg: #241f19;
+  --muted: #6d6252;
+  --accent: #6f5334;
+  --accent-fg: #ffffff;
+  --accent-soft: #efe3d1;
+  --accent-2: #0e7490;
+  --pattern-ink: #6f5334;
+  --pattern-opacity: 0.045;
+  --hero-grad-a: #7a5c3e;
+  --hero-grad-b: #2b1f14;
+  --glass: rgb(255 253 248 / 0.84);
+}
+
+/* 3) Doctor — clean clinical teal */
+[data-theme='doctor'] {
+  --bg: #f1f8f8;
+  --bg-2: #e4f0f0;
+  --surface: #ffffff;
+  --surface-2: #e8f3f3;
+  --border: #d2e6e6;
+  --fg: #0f262b;
+  --muted: #536b70;
+  --accent: #0e7490;
+  --accent-fg: #ffffff;
+  --accent-soft: #d3eef2;
+  --accent-2: #10b981;
+  --pattern-ink: #0e7490;
+  --pattern-opacity: 0.045;
+  --hero-grad-a: #0e7490;
+  --hero-grad-b: #062a33;
+  --glass: rgb(255 255 255 / 0.86);
+}
+
+/* 4) Accountant — fintech night + gold */
+[data-theme='accountant'] {
+  --bg: #f3f5fa;
+  --bg-2: #e7ecf5;
+  --surface: #ffffff;
+  --surface-2: #eaf0f8;
+  --border: #d6e0ee;
+  --fg: #0e1729;
+  --muted: #55617a;
+  --accent: #1e3a8a;
+  --accent-fg: #ffffff;
+  --accent-soft: #dde6f7;
+  --accent-2: #a9812b;
+  --pattern-ink: #1e3a8a;
+  --pattern-opacity: 0.045;
+  --hero-grad-a: #1e3a8a;
+  --hero-grad-b: #0a1430;
+  --glass: rgb(255 255 255 / 0.86);
+}
+
+/* 5) Profile — quiet, user-tinted (accent chosen by the user) */
+[data-theme='profile'] {
+  --bg: #f6f4f1;
+  --bg-2: #ede9e3;
+  --surface: #ffffff;
+  --surface-2: #f1ece5;
+  --border: #e0d9cf;
+  --fg: #1c1a17;
+  --muted: #665f55;
+  --accent: #0f766e;
+  --accent-fg: #ffffff;
+  --accent-soft: #d9efea;
+  --pattern-ink: #0f766e;
+  --pattern-opacity: 0.04;
+  --glass: rgb(255 255 255 / 0.84);
+}
+
+/* ======================= PAGE IDENTITIES (dark) =========================== */
+
+.dark[data-theme='halal'] {
+  --bg: #071310;
+  --bg-2: #0b1a15;
+  --surface: #0d1f19;
+  --surface-2: #12271f;
+  --border: #1d3529;
+  --fg: #eef3ee;
+  --muted: #a2b5a8;
+  --accent: #63d6a8;
+  --accent-fg: #04170f;
+  --accent-soft: #123528;
+  --accent-2: #d8bb7d;
+  --ring: #63d6a8;
+  --pattern-ink: #d8bb7d;
+  --pattern-opacity: 0.07;
+  --hero-grad-a: #0b3d2c;
+  --hero-grad-b: #04100c;
+  --glass: rgb(10 22 17 / 0.8);
+}
+
+.dark[data-theme='chats'] {
+  --bg: #12100d;
+  --bg-2: #17140f;
+  --surface: #1a1712;
+  --surface-2: #221e17;
+  --border: #322a20;
+  --fg: #f3eee6;
+  --muted: #b1a494;
+  --accent: #d9b78d;
+  --accent-fg: #1b1207;
+  --accent-soft: #2e251b;
+  --accent-2: #5ecfdc;
+  --pattern-ink: #d9b78d;
+  --pattern-opacity: 0.06;
+  --hero-grad-a: #4a3623;
+  --hero-grad-b: #100c08;
+  --glass: rgb(22 18 13 / 0.8);
+}
+
+.dark[data-theme='doctor'] {
+  --bg: #06141a;
+  --bg-2: #081a20;
+  --surface: #0b1f26;
+  --surface-2: #102a33;
+  --border: #17383f;
+  --fg: #e9f6f7;
+  --muted: #98b3b8;
+  --accent: #5ecbe2;
+  --accent-fg: #04181b;
+  --accent-soft: #0f2f36;
+  --accent-2: #6ee7b7;
+  --pattern-ink: #5ecbe2;
+  --pattern-opacity: 0.06;
+  --hero-grad-a: #0b4a5c;
+  --hero-grad-b: #03141a;
+  --glass: rgb(8 24 30 / 0.8);
+}
+
+.dark[data-theme='accountant'] {
+  --bg: #060a13;
+  --bg-2: #0a1020;
+  --surface: #0d1424;
+  --surface-2: #131c30;
+  --border: #1e2a42;
+  --fg: #eef2fa;
+  --muted: #98a5ba;
+  --accent: #e6c86e;
+  --accent-fg: #14110a;
+  --accent-soft: #1d2438;
+  --accent-2: #7dd3fc;
+  --pattern-ink: #e6c86e;
+  --pattern-opacity: 0.06;
+  --hero-grad-a: #16224a;
+  --hero-grad-b: #050914;
+  --glass: rgb(9 14 25 / 0.82);
+}
+
+.dark[data-theme='profile'] {
+  --bg: #0c0b0a;
+  --bg-2: #121110;
+  --surface: #171514;
+  --surface-2: #1f1d1b;
+  --border: #2c2926;
+  --fg: #f2efec;
+  --muted: #a9a29a;
+  --accent: #5ed4ab;
+  --accent-fg: #04170f;
+  --accent-soft: #10312a;
+  --pattern-ink: #5ed4ab;
+  --pattern-opacity: 0.05;
+  --glass: rgb(18 17 16 / 0.8);
+}
+
+/* ============================ ACCENTS (profile) =========================== */
+[data-accent='teal'] { --accent: #0f766e; --accent-fg: #ffffff; --accent-soft: #d9efea; --ring: #0f766e; }
+[data-accent='rose'] { --accent: #be123c; --accent-fg: #ffffff; --accent-soft: #fde3e9; --ring: #be123c; }
+[data-accent='violet'] { --accent: #6d28d9; --accent-fg: #ffffff; --accent-soft: #ece4fb; --ring: #6d28d9; }
+[data-accent='amber'] { --accent: #a16207; --accent-fg: #ffffff; --accent-soft: #fdf0cd; --ring: #a16207; }
+[data-accent='cobalt'] { --accent: #1d4ed8; --accent-fg: #ffffff; --accent-soft: #dbe4fd; --ring: #1d4ed8; }
+[data-accent='emerald'] { --accent: #047857; --accent-fg: #ffffff; --accent-soft: #d3f0e3; --ring: #047857; }
+
+.dark[data-accent='teal'] { --accent: #5ed4ab; --accent-fg: #04170f; --accent-soft: #10312a; --ring: #5ed4ab; }
+.dark[data-accent='rose'] { --accent: #fb7185; --accent-fg: #2b0710; --accent-soft: #3b121b; --ring: #fb7185; }
+.dark[data-accent='violet'] { --accent: #c4b5fd; --accent-fg: #1a0f38; --accent-soft: #241a44; --ring: #c4b5fd; }
+.dark[data-accent='amber'] { --accent: #fcd34d; --accent-fg: #2a1f00; --accent-soft: #2e2506; --ring: #fcd34d; }
+.dark[data-accent='cobalt'] { --accent: #93b4fd; --accent-fg: #0a1533; --accent-soft: #16203f; --ring: #93b4fd; }
+.dark[data-accent='emerald'] { --accent: #6ee7b7; --accent-fg: #04170f; --accent-soft: #0b2c22; --ring: #6ee7b7; }
+
+}

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+    <title>بركة | Baraka</title>
+    <meta
+      name="description"
+      content="Baraka — Halal food checker, AI doctor and smart accountant. بركة — فحص الحلال، طبيب ذكي ومحاسب ذكي."
+    />
+    <meta name="theme-color" content="#064e3b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)" />
+    <meta name="color-scheme" content="light dark" />
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
+
+    <!-- iOS / Safari PWA meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Baraka" />
+    <meta name="application-name" content="Baraka" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Privacy: never leak the referrer to third parties -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+  </head>
+  <body class="bg-sand-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div id="root"></div>
+    <noscript>
+      <div style="padding: 24px; font-family: system-ui; text-align: center">
+        Baraka needs JavaScript to run. / Для работы Baraka нужен JavaScript. / Baraka requires JavaScript.
+      </div>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

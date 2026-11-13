@@ -1,0 +1,57 @@
+{
+  "name": "baraka",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Baraka | بركة — Halal food scanner, AI doctor and smart accountant PWA (RU/AR/EN) on Cloudflare Pages",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "icons": "node scripts/generate-icons.mjs",
+    "start": "node scripts/run.mjs",
+    "start:fast": "node scripts/run.mjs --fast",
+    "smoke": "node scripts/run.mjs --smoke-only",
+    "dev": "vite",
+    "build": "npm run icons && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.functions.json --noEmit && vite build",
+    "build:fast": "vite build",
+    "preview": "vite preview --port 4173",
+    "preview:cf": "wrangler pages dev dist --port 8788 --d1=DB --r2=BUCKET --compatibility-date=2024-11-01",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "db:migrate:local": "wrangler d1 migrations apply baraka-db --local",
+    "db:migrate": "wrangler d1 migrations apply baraka-db --remote",
+    "db:create": "wrangler d1 create baraka-db",
+    "r2:create": "wrangler r2 bucket create baraka-media",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.functions.json --noEmit"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-sans-arabic": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0",
+    "@fontsource/readex-pro": "^5.3.0",
+    "firebase": "^10.14.1",
+    "i18next": "^23.16.4",
+    "lucide-react": "^1.66.0",
+    "motion": "^14.9.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^15.1.0",
+    "react-router-dom": "^6.27.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241022.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4",
+    "wrangler": "^3.90.0"
+  }
+}
