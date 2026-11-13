@@ -96,6 +96,26 @@ export async function createChat(ctx: RequestContext): Promise<Response> {
     .bind(id, ctx.auth.uid, input.kind, title, input.imageId ?? null, ts, ts)
     .run();
 
+  let userMessage: ChatMessage | null = null;
+  if (input.initialUserMessage && input.initialUserMessage.trim()) {
+    const userMsgId = randomId('msg');
+    const userTs = new Date(Date.now() - 1000).toISOString();
+    await ctx.env.DB.prepare(
+      `INSERT INTO messages (id, chat_id, uid, role, content, image_id, meta_json, created_at)
+       VALUES (?, ?, ?, 'user', ?, NULL, NULL, ?)`,
+    )
+      .bind(userMsgId, id, ctx.auth.uid, input.initialUserMessage.slice(0, 4000), userTs)
+      .run();
+    userMessage = {
+      id: userMsgId,
+      chatId: id,
+      role: 'user',
+      content: input.initialUserMessage.slice(0, 4000),
+      imageId: null,
+      createdAt: userTs,
+    };
+  }
+
   let seedMessage: ChatMessage | null = null;
   if (input.seedText && input.seedText.trim()) {
     const messageId = randomId('msg');
@@ -119,15 +139,25 @@ export async function createChat(ctx: RequestContext): Promise<Response> {
       .run();
   }
 
+  const messages: ChatMessage[] = [];
+  if (userMessage) messages.push(userMessage);
+  if (seedMessage) messages.push(seedMessage);
+
+  const preview = seedMessage
+    ? seedMessage.content.slice(0, 140)
+    : userMessage
+      ? userMessage.content.slice(0, 140)
+      : '';
+
   const chat: ChatDetail = {
     id,
     kind: input.kind,
     title,
-    preview: seedMessage ? seedMessage.content.slice(0, 140) : '',
+    preview,
     imageId: input.imageId ?? null,
     createdAt: ts,
     updatedAt: ts,
-    messages: seedMessage ? [seedMessage] : [],
+    messages,
   };
   return jsonResponse({ chat }, ctx.request, ctx.config, 201);
 }

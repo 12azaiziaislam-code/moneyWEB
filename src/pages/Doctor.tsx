@@ -6,7 +6,7 @@
 import { useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Camera, Phone, X, ShieldAlert, Activity, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Camera, Phone, X, ShieldAlert, Activity, Sparkles, CheckCircle2, MessagesSquare } from 'lucide-react';
 import { bmi, isEmergencyText, isHealthProfileComplete } from '../../shared/health';
 import { PageHeader } from '../components/AppShell';
 import { Button, IconButton } from '../components/ui/Button';
@@ -40,6 +40,8 @@ export function DoctorPage() {
     setText,
     busy,
     result,
+    chatId,
+    setChatId,
     runAnalysis,
   } = useDoctorScan();
 
@@ -61,10 +63,32 @@ export function DoctorPage() {
     const outcome = await runAnalysis(image, text, profileReady);
     if (outcome && outcome.redirect) {
       navigate(outcome.redirect);
+      return;
+    }
+    if (outcome?.chatId) {
+      setChatId(outcome.chatId);
+    } else if (role === 'guest' && outcome?.result) {
+      const chatTitle =
+        outcome.result.medicine?.name ||
+        (text.trim() ? text.trim().slice(0, 75) : '') ||
+        'استشارة طبية وصحية';
+      const guestChat = await createChat({
+        kind: 'doctor',
+        title: chatTitle,
+        initialUserMessage: text.trim() || undefined,
+        seedText: outcome.result.summary,
+      });
+      if (guestChat) {
+        setChatId(guestChat.id);
+      }
     }
   };
 
   const discuss = async () => {
+    if (chatId) {
+      navigate(`/chats/${chatId}`);
+      return;
+    }
     if (role === 'guest') {
       show(t('guest.aiRequiresAuth'), 'warning');
       return;
@@ -89,9 +113,17 @@ export function DoctorPage() {
             `🩺 **استشارة طبية وصحية:** ${typeLabel}`,
             `• **ملخص التقييم:** ${result.summary}`,
           ].join('\n\n');
-    const chatTitle = result.medicine?.name || typeLabel;
-    const chat = await createChat({ kind: 'doctor', title: chatTitle, seedText: seed });
-    if (chat) navigate(`/chats/${chat.id}`);
+    const chatTitle = result.medicine?.name || (text.trim() ? text.trim().slice(0, 75) : '') || typeLabel;
+    const chat = await createChat({
+      kind: 'doctor',
+      title: chatTitle,
+      initialUserMessage: text.trim() || undefined,
+      seedText: seed,
+    });
+    if (chat) {
+      setChatId(chat.id);
+      navigate(`/chats/${chat.id}`);
+    }
   };
 
   const calculatedBmi = health.weightKg && health.heightCm ? bmi(health.weightKg, health.heightCm) : null;
@@ -262,16 +294,33 @@ export function DoctorPage() {
       {/* 4. RESULT CARD MOMENT */}
       {result ? (
         <div className="rounded-2xl border border-line bg-surface p-5 sm:p-6 space-y-4 shadow-e2">
-          <div className="flex items-center justify-between border-b border-line/60 pb-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-line/60 pb-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-muted">نتيجة التقييم الصحي</p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-bold uppercase tracking-wide text-muted">نتيجة التقييم الصحي</p>
+                <Badge tone="ok" className="text-[11px] gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  محفوظة في المحادثات
+                </Badge>
+              </div>
               <h3 className="font-display text-lg sm:text-xl font-bold text-fg pt-0.5">
-                {result.medicine?.name || t(`doctor.types.${result.type}`, 'استشارة وتقييم صحي')}
+                {result.medicine?.name || (text.trim() ? text.trim().slice(0, 60) : t(`doctor.types.${result.type}`, 'استشارة وتقييم صحي'))}
               </h3>
             </div>
-            <Button size="sm" variant="gold" onClick={() => void discuss()}>
-              {t('doctor.discuss')}
-            </Button>
+            {chatId ? (
+              <Button
+                size="sm"
+                variant="gold"
+                icon={<MessagesSquare className="h-4 w-4" />}
+                onClick={() => navigate(`/chats/${chatId}`)}
+              >
+                متابعة المحادثة مع الطبيب
+              </Button>
+            ) : (
+              <Button size="sm" variant="gold" onClick={() => void discuss()}>
+                {t('doctor.discuss')}
+              </Button>
+            )}
           </div>
           <p className="text-sm leading-relaxed text-fg whitespace-pre-wrap font-normal">{result.summary}</p>
         </div>

@@ -104,6 +104,7 @@ export const chatCreateSchema = z.object({
   title: z.string().trim().max(80).optional(),
   imageId: idSchema.optional(),
   seedText: z.string().max(4000).optional(),
+  initialUserMessage: z.string().max(4000).optional(),
 });
 
 export const ownKeySchema = z.object({

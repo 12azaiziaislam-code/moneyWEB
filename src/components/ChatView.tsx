@@ -65,6 +65,12 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
   }, [chatId]);
 
   useEffect(() => {
+    if (initialMessages) {
+      setMessages(initialMessages);
+    }
+  }, [initialMessages]);
+
+  useEffect(() => {
     if (!chatId || initialMessages || isGuest) {
       setLoading(false);
       return;

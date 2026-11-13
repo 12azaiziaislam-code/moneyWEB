@@ -25,11 +25,13 @@ interface DoctorScanContextValue {
   busy: boolean;
   result: DoctorResult | null;
   setResult: (res: DoctorResult | null) => void;
+  chatId: string | null;
+  setChatId: (id: string | null) => void;
   runAnalysis: (
     targetImage: PreparedImage | null,
     targetText: string,
     profileReady: boolean,
-  ) => Promise<{ redirect?: string } | void>;
+  ) => Promise<{ redirect?: string; result?: DoctorResult; chatId?: string } | void>;
   reset: () => void;
 }
 
@@ -43,11 +45,13 @@ export function DoctorScanProvider({ children }: { children: ReactNode }) {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<DoctorResult | null>(null);
+  const [chatId, setChatId] = useState<string | null>(null);
 
   const reset = useCallback(() => {
     setImage(null);
     setText('');
     setResult(null);
+    setChatId(null);
   }, []);
 
   const runAnalysis = useCallback(
@@ -71,6 +75,7 @@ export function DoctorScanProvider({ children }: { children: ReactNode }) {
 
       setBusy(true);
       setResult(null);
+      setChatId(null);
 
       try {
         const body: Record<string, unknown> = {
@@ -79,7 +84,7 @@ export function DoctorScanProvider({ children }: { children: ReactNode }) {
           imageDataUrl: targetImage?.dataUrl,
         };
 
-        const response = await apiFetch<{ result: DoctorResult; redirect?: string }>(
+        const response = await apiFetch<{ result: DoctorResult; chatId?: string; redirect?: string }>(
           '/api/doctor/analyze',
           {
             method: 'POST',
@@ -88,8 +93,11 @@ export function DoctorScanProvider({ children }: { children: ReactNode }) {
         );
 
         setResult(response.result);
+        if (response.chatId) {
+          setChatId(response.chatId);
+        }
         haptic(response.result.emergency ? HAPTIC.danger : HAPTIC.success);
-        return { redirect: response.redirect };
+        return { redirect: response.redirect, result: response.result, chatId: response.chatId };
       } catch (cause) {
         if (cause instanceof ApiError && cause.code === 'forbidden') {
           show('أكمل ملفك الصحي أولاً ليعطيك الطبيب إجابة مناسبة لحالتك', 'warning');
@@ -113,6 +121,8 @@ export function DoctorScanProvider({ children }: { children: ReactNode }) {
         busy,
         result,
         setResult,
+        chatId,
+        setChatId,
         runAnalysis,
         reset,
       }}

@@ -119,27 +119,53 @@ export function useChatMutations() {
   const isGuest = role === 'guest';
 
   const createChat = useCallback(
-    async (input: { kind: ChatKind; title: string; seedText?: string }): Promise<ChatDetail | null> => {
+    async (input: {
+      kind: ChatKind;
+      title: string;
+      seedText?: string;
+      initialUserMessage?: string;
+    }): Promise<ChatDetail | null> => {
       if (isGuest) {
         if (!guestData) return null;
         const now = new Date().toISOString();
+        const past = new Date(Date.now() - 1000).toISOString();
+        const messages: GuestMessage[] = [];
+        if (input.initialUserMessage) {
+          messages.push({
+            id: `m-${Date.now()}-u`,
+            role: 'user',
+            content: input.initialUserMessage,
+            createdAt: past,
+          });
+        }
+        if (input.seedText) {
+          messages.push({
+            id: `m-${Date.now()}-a`,
+            role: 'assistant',
+            content: input.seedText,
+            createdAt: now,
+          });
+        }
         const chat: GuestChat = {
           id: `g-${Date.now()}`,
           kind: input.kind,
           title: input.title.slice(0, 80),
-          preview: (input.seedText ?? '').slice(0, 140),
+          preview: (input.seedText ?? input.initialUserMessage ?? '').slice(0, 140),
           createdAt: now,
           updatedAt: now,
-          messages: input.seedText
-            ? [{ id: `m-${Date.now()}`, role: 'assistant', content: input.seedText, createdAt: now }]
-            : [],
+          messages,
         };
         await setGuestData({ ...guestData, chats: [chat, ...guestData.chats] });
         return { ...toSummary(chat), messages: toMessages(chat) };
       }
       const response = await apiFetch<{ chat: ChatDetail }>('/api/chats', {
         method: 'POST',
-        body: { kind: input.kind, title: input.title, seedText: input.seedText },
+        body: {
+          kind: input.kind,
+          title: input.title,
+          seedText: input.seedText,
+          initialUserMessage: input.initialUserMessage,
+        },
       });
       return response.chat;
     },

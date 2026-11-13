@@ -13,6 +13,9 @@ import {
   Trash2,
   MessagesSquare,
   Clock,
+  Activity,
+  CreditCard,
+  Sparkles,
 } from 'lucide-react';
 import type { ChatKind } from '../../shared/types';
 import { PageHeader } from '../components/AppShell';
@@ -97,23 +100,91 @@ export function ChatsPage() {
           ))}
         </div>
       ) : empty ? (
-        /* Empty State with Line-Art Icon */
+        /* Empty State with Role-Tailored Guidance & Direct CTA */
         <div className="rounded-2xl border border-line bg-surface p-8 text-center shadow-e1">
-          <EmptyState
-            icon={<MessagesSquare className="h-12 w-12 text-accent" strokeWidth={1.5} />}
-            title={t('chats.empty')}
-            body={t('chats.emptyHint')}
-            action={
-              <Button
-                variant="primary"
-                icon={<ShieldCheck className="h-4 w-4" />}
-                onClick={() => navigate('/')}
-                className="mt-2"
-              >
-                {t('home.cta')}
-              </Button>
-            }
-          />
+          {filter === 'doctor' ? (
+            <EmptyState
+              icon={<Activity className="h-12 w-12 text-accent" strokeWidth={1.5} />}
+              title={t('chats.emptyDoctor')}
+              body={t('chats.emptyDoctorHint')}
+              action={
+                <Button
+                  variant="primary"
+                  icon={<Activity className="h-4 w-4" />}
+                  onClick={() => navigate('/doctor')}
+                  className="mt-2"
+                >
+                  {t('chats.ctaDoctor')}
+                </Button>
+              }
+            />
+          ) : filter === 'accountant' ? (
+            <EmptyState
+              icon={<CreditCard className="h-12 w-12 text-accent" strokeWidth={1.5} />}
+              title={t('chats.emptyAccountant')}
+              body={t('chats.emptyAccountantHint')}
+              action={
+                <Button
+                  variant="primary"
+                  icon={<Sparkles className="h-4 w-4" />}
+                  onClick={() => navigate('/accountant')}
+                  className="mt-2"
+                >
+                  {t('chats.ctaAccountant')}
+                </Button>
+              }
+            />
+          ) : filter === 'shaykh' ? (
+            <EmptyState
+              icon={<ShieldCheck className="h-12 w-12 text-accent" strokeWidth={1.5} />}
+              title={t('chats.emptyShaykh')}
+              body={t('chats.emptyShaykhHint')}
+              action={
+                <Button
+                  variant="primary"
+                  icon={<ShieldCheck className="h-4 w-4" />}
+                  onClick={() => navigate('/')}
+                  className="mt-2"
+                >
+                  {t('chats.ctaShaykh')}
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={<MessagesSquare className="h-12 w-12 text-accent" strokeWidth={1.5} />}
+              title={t('chats.empty')}
+              body={t('chats.emptyHint')}
+              action={
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={<Activity className="h-3.5 w-3.5" />}
+                    onClick={() => navigate('/doctor')}
+                  >
+                    {t('chats.ctaDoctor')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<ShieldCheck className="h-3.5 w-3.5" />}
+                    onClick={() => navigate('/')}
+                  >
+                    {t('chats.ctaShaykh')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    icon={<CreditCard className="h-3.5 w-3.5" />}
+                    onClick={() => navigate('/accountant')}
+                  >
+                    {t('chats.ctaAccountant')}
+                  </Button>
+                </div>
+              }
+            />
+          )}
         </div>
       ) : (
         /* Conversations List */

@@ -294,7 +294,59 @@ export async function doctorAnalyze(ctx: RequestContext): Promise<Response> {
     emergency: data.emergency || isEmergencyText(input.text ?? ''),
     createdAt: nowISO(),
   };
-  return jsonResponse({ result }, ctx.request, ctx.config);
+
+  let chatId: string | undefined;
+  if (!guest) {
+    try {
+      chatId = randomId('chat');
+      const chatTitle = (
+        data.medicine?.name ||
+        (input.text?.trim() ? input.text.trim().slice(0, 75) : '') ||
+        (locale.startsWith('ru')
+          ? 'Консультация врача'
+          : locale.startsWith('en')
+            ? 'Health Consultation'
+            : 'استشارة وتقييم صحي')
+      ).slice(0, 80);
+      const ts = nowISO();
+      const userTs = new Date(Date.now() - 1000).toISOString();
+
+      await ctx.env.DB.prepare(
+        `INSERT INTO chats (id, uid, kind, title, preview, image_id, created_at, updated_at)
+         VALUES (?, ?, 'doctor', ?, ?, ?, ?, ?)`,
+      )
+        .bind(
+          chatId,
+          ctx.auth.uid,
+          chatTitle,
+          data.summary.slice(0, 140),
+          image ? (input.assetId ?? null) : null,
+          ts,
+          ts,
+        )
+        .run();
+
+      if (input.text && input.text.trim()) {
+        await ctx.env.DB.prepare(
+          `INSERT INTO messages (id, chat_id, uid, role, content, image_id, meta_json, created_at)
+           VALUES (?, ?, ?, 'user', ?, NULL, NULL, ?)`,
+        )
+          .bind(randomId('msg'), chatId, ctx.auth.uid, input.text.trim().slice(0, 4000), userTs)
+          .run();
+      }
+
+      await ctx.env.DB.prepare(
+        `INSERT INTO messages (id, chat_id, uid, role, content, image_id, meta_json, created_at)
+         VALUES (?, ?, ?, 'assistant', ?, NULL, ?, ?)`,
+      )
+        .bind(randomId('msg'), chatId, ctx.auth.uid, data.summary.slice(0, 4000), JSON.stringify({ seed: true }), ts)
+        .run();
+    } catch {
+      // Non-fatal if chat archiving fails; analysis still returns cleanly.
+    }
+  }
+
+  return jsonResponse({ result, chatId }, ctx.request, ctx.config);
 }
 
 // ---------------------------------------------------------------------------
