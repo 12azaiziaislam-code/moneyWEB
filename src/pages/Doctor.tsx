@@ -21,7 +21,7 @@ import { useToast } from '../state/ToastContext';
 import { usePageTheme } from '../lib/theme';
 
 export function DoctorPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { show } = useToast();
   const { role } = useAuth();
@@ -58,7 +58,22 @@ export function DoctorPage() {
       return;
     }
     if (!result) return;
-    const seed = [`Type: ${result.type}`, `Summary: ${result.summary}`].join('\n');
+    const isRu = i18n.language.startsWith('ru');
+    const isEn = i18n.language.startsWith('en');
+    const seed = isRu
+      ? [
+          `🩺 **Медицинская консультация:** ${result.type}`,
+          `• **Сводка анализа:** ${result.summary}`,
+        ].join('\n\n')
+      : isEn
+        ? [
+            `🩺 **Health Consultation:** ${result.type}`,
+            `• **Clinical Summary:** ${result.summary}`,
+          ].join('\n\n')
+        : [
+            `🩺 **استشارة طبية وغذائية:** ${result.type}`,
+            `• **ملخص التقييم الأولي:** ${result.summary}`,
+          ].join('\n\n');
     const chat = await createChat({ kind: 'doctor', title: result.medicine?.name ?? result.type, seedText: seed });
     if (chat) navigate(`/chats/${chat.id}`);
   };

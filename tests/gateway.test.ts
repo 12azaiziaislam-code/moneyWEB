@@ -56,7 +56,7 @@ describe('gateway: headers contract', () => {
 });
 
 describe('gateway: fallback to the fast model', () => {
-  it('retries and degrades from the slow model to gemma-4-26b-a4b-it', async () => {
+  it('retries and degrades from the slow model to the fast model', async () => {
     const { impl, calls } = makeFetch((call) =>
       call === 1 ? jsonError(500, { error: { message: 'boom' } }) : sseResponse('hello'),
     );

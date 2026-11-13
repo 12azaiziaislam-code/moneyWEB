@@ -127,3 +127,4 @@ export function useDoctorScan(): DoctorScanContextValue {
   if (!ctx) throw new Error('useDoctorScan must be used inside <DoctorScanProvider>');
   return ctx;
 }
+

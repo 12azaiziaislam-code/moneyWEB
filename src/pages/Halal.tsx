@@ -109,15 +109,51 @@ export function HalalPage() {
     if (!result) return;
     setDiscussing(true);
     try {
-      const seed = [
-        result.product ? `Product: ${result.product}` : null,
-        `Verdict: ${result.verdict} (${Math.round(result.confidence * 100)}%)`,
-        `Reason: ${result.reason}`,
-        result.concerns.length ? `Concerns: ${result.concerns.join('; ')}` : null,
-        result.needed.length ? `Needed: ${result.needed.join('; ')}` : null,
-      ]
-        .filter(Boolean)
-        .join('\n');
+      const isRu = lang === 'Ru';
+      const isEn = lang === 'En';
+      const verdictLabel = isRu
+        ? result.verdict === 'halal'
+          ? 'Халяль'
+          : result.verdict === 'haram'
+            ? 'Харам'
+            : 'Сомнительно (машбух)'
+        : isEn
+          ? result.verdict === 'halal'
+            ? 'Halal'
+            : result.verdict === 'haram'
+              ? 'Haram'
+              : 'Doubtful (Mashbooh)'
+          : result.verdict === 'halal'
+            ? 'حلال'
+            : result.verdict === 'haram'
+              ? 'حرام'
+              : 'مشتبه به';
+
+      const seedParts = isRu
+        ? [
+            `📦 **Проверка продукта:** ${result.product || 'Продукт'}`,
+            `• **Предварительное заключение:** ${verdictLabel} (${Math.round(result.confidence * 100)}%)`,
+            `• **Причина:** ${result.reason}`,
+            result.concerns.length ? `• **Сомнительные моменты:** ${result.concerns.join('; ')}` : null,
+            result.needed.length ? `• **Необходимо для подтверждения:** ${result.needed.join('; ')}` : null,
+          ]
+        : isEn
+          ? [
+              `📦 **Product Inspection:** ${result.product || 'Product'}`,
+              `• **Initial Verdict:** ${verdictLabel} (${Math.round(result.confidence * 100)}%)`,
+              `• **Reason:** ${result.reason}`,
+              result.concerns.length ? `• **Concerns:** ${result.concerns.join('; ')}` : null,
+              result.needed.length ? `• **Needed to Confirm:** ${result.needed.join('; ')}` : null,
+            ]
+          : [
+              `📦 **فحص المكونات:** ${result.product || 'منتج غذائي'}`,
+              `• **الحكم المبدئي:** ${verdictLabel} (نسبة التقدير: ${Math.round(result.confidence * 100)}%)`,
+              `• **بيان العلة:** ${result.reason}`,
+              result.concerns.length ? `• **مواضع التحفظ والشبهة:** ${result.concerns.join('؛ ')}` : null,
+              result.needed.length ? `• **المطلوب للحسم:** ${result.needed.join('؛ ')}` : null,
+            ];
+
+      const seed = seedParts.filter(Boolean).join('\n\n');
       const chat = await createChat({ kind: 'shaykh', title: result.product ?? t('halal.title'), seedText: seed });
       if (chat) navigate(`/chats/${chat.id}`);
     } catch {

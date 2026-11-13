@@ -9,13 +9,13 @@
 import { maskSecret } from '../redact';
 
 export const MODELS = {
-  /** default, fast, good for chat */
-  fast: 'gemma-4-26b-a4b-it',
+  /** default, ultra-fast, low-latency for chat */
+  fast: 'gemini-2.5-flash-lite',
   /** fast vision (images, OCR of labels / receipts) */
   vision: 'gemini-2.5-flash-lite',
   /** balanced reasoning */
   balanced: 'gemini-2.5-flash',
-  /** deep analysis — very slow (11-60s), deep reasoning only */
+  /** deep analysis — deep reasoning only */
   deep: 'gemma-4-31b-it',
 } as const;
 

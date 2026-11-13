@@ -236,11 +236,38 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
         ) : null}
 
         {streaming && !draft ? (
-          <div className="flex items-center gap-1.5 px-2 text-[12px] text-muted">
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent [animation-delay:.15s]" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-accent [animation-delay:.3s]" />
-            {t('chats.thinking')}
+          <div className="flex items-end gap-2 animate-in fade-in duration-fast">
+            <div className="mb-0.5 shrink-0">{avatar}</div>
+            <div className="max-w-[85%] rounded-2xl rounded-es-md border border-line bg-surface/90 px-4 py-3 shadow-xs space-y-2">
+              <div className="flex items-center gap-2.5">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
+                </span>
+                <p className="text-xs font-semibold text-fg/80">
+                  {kind === 'shaykh'
+                    ? (i18n.language.startsWith('ru')
+                        ? 'Шейх анализирует вопрос и нормы Шариата…'
+                        : i18n.language.startsWith('en')
+                          ? 'The Sheikh is reviewing Sharia principles…'
+                          : 'الشيخ يستحضر الضوابط الفقهية ويصيغ الجواب…')
+                    : kind === 'doctor'
+                      ? (i18n.language.startsWith('ru')
+                          ? 'Врач сверяет данные с медицинским профилем…'
+                          : i18n.language.startsWith('en')
+                            ? 'Doctor is checking your health profile…'
+                            : 'الطبيب يراجع ملفك الصحي والبيانات الطبية…')
+                      : (i18n.language.startsWith('ru')
+                          ? 'Бухгалтер рассчитывает бюджет и финансовый план…'
+                          : i18n.language.startsWith('en')
+                            ? 'Accountant is calculating your budget…'
+                            : 'المحاسب يحلل الميزانية وسقف الصرف…')}
+                </p>
+              </div>
+              <div className="h-1 w-32 overflow-hidden rounded-full bg-surface2">
+                <div className="h-full w-2/3 animate-pulse rounded-full bg-accent" />
+              </div>
+            </div>
           </div>
         ) : null}
 
