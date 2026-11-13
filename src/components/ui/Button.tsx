@@ -2,26 +2,35 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from './cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold' | 'soft';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'gold' | 'soft' | 'outline';
 type Size = 'sm' | 'md' | 'lg';
 
 const base =
-  'relative inline-flex select-none items-center justify-center gap-2 font-semibold transition-[transform,background-color,border-color,box-shadow,color] duration-mid ease-out active:scale-[.97] disabled:pointer-events-none disabled:opacity-45 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]';
+  'relative inline-flex select-none items-center justify-center gap-2.5 font-bold transition-all duration-fast ease-out ' +
+  'active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ' +
+  'disabled:pointer-events-none disabled:bg-surface2 disabled:text-muted-soft disabled:border-border-subtle disabled:shadow-none cursor-pointer';
 
 const sizes: Record<Size, string> = {
-  sm: 'min-h-[40px] rounded-md px-3 text-sm',
-  md: 'min-h-[46px] rounded-lg px-4 text-[15px]',
-  lg: 'min-h-[54px] rounded-xl px-5 text-base',
+  sm: 'min-h-[38px] rounded-sm px-3 text-xs sm:text-sm',
+  md: 'min-h-[46px] rounded-md px-4 text-sm sm:text-base',
+  lg: 'min-h-[52px] rounded-lg px-6 text-base tracking-tight',
 };
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-accent-fg shadow-e2 hover:brightness-110 active:brightness-95',
+  primary:
+    'bg-accent text-accent-fg border border-accent shadow-e1 hover:opacity-95 active:opacity-90',
   secondary:
-    'bg-surface text-fg border border-line shadow-e1 hover:bg-surface2 active:bg-surface2',
-  soft: 'bg-accent-soft text-accent hover:brightness-[0.97]',
-  ghost: 'bg-transparent text-accent hover:bg-accent-soft/70',
-  danger: 'bg-danger text-white shadow-e2 hover:brightness-110',
-  gold: 'bg-[var(--accent-2)] text-[#1b1207] shadow-e2 hover:brightness-105',
+    'bg-surface text-fg border border-line shadow-e1 hover:bg-surface2 hover:border-line/80 active:bg-surface2',
+  outline:
+    'bg-transparent text-fg border border-line hover:bg-surface2 hover:border-fg/30 active:bg-surface2',
+  soft:
+    'bg-accent-soft text-accent border border-transparent hover:brightness-95 active:brightness-90',
+  ghost:
+    'bg-transparent text-muted hover:text-fg hover:bg-surface2 active:bg-surface2',
+  danger:
+    'bg-danger text-danger-fg border border-danger shadow-e1 hover:opacity-95 active:opacity-90',
+  gold:
+    'bg-[var(--accent-2)] text-[oklch(0.18_0.02_165)] border border-[var(--accent-2)] shadow-e1 hover:opacity-95 active:opacity-90',
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -53,7 +62,7 @@ export function Button({
       aria-busy={loading || undefined}
       className={cn(base, sizes[size], variants[variant], fullWidth && 'w-full', className)}
     >
-      {loading ? <Loader2 className="h-[18px] w-[18px] animate-spin" aria-hidden /> : icon}
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : icon}
       {children}
       {trailing}
     </button>
@@ -73,7 +82,7 @@ export function IconButton({
       aria-label={label}
       title={label}
       className={cn(
-        'inline-flex h-10 w-10 items-center justify-center rounded-md border border-transparent text-fg transition-colors duration-fast hover:bg-surface2 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
+        'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-transparent text-muted transition-colors duration-fast hover:text-fg hover:bg-surface2 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring cursor-pointer',
         className,
       )}
     >
@@ -92,7 +101,7 @@ export function LinkButton({
       type="button"
       {...rest}
       className={cn(
-        'inline-flex min-h-[36px] items-center gap-1 text-sm font-semibold text-accent underline-offset-4 hover:underline',
+        'inline-flex min-h-[36px] items-center gap-1 text-sm font-semibold text-accent underline-offset-4 hover:underline cursor-pointer',
         className,
       )}
     >

@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
     <title>بركة | Baraka</title>
     <meta
       name="description"
-      content="Baraka — Halal food checker, AI doctor and smart accountant. بركة — فحص الحلال، طبيب ذكي ومحاسب ذكي."
+      content="بركة (Baraka) — المنظومة الأخلاقية للغذاء الحلال، وتنظيم الميزانية الشخصية، والتوجيه الصحي."
     />
-    <meta name="theme-color" content="#0C1117" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#0D1117" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#FBF9F5" media="(prefers-color-scheme: light)" />
     <meta name="color-scheme" content="light dark" />
 
@@ -24,10 +24,9 @@
     <meta name="apple-mobile-web-app-title" content="Baraka" />
     <meta name="application-name" content="Baraka" />
     <meta name="format-detection" content="telephone=no" />
-
     <meta name="referrer" content="strict-origin-when-cross-origin" />
 
-    <!-- Instant Theme Initializer: Prevents FOUC and defaults to Sovereign Obsidian Dark -->
+    <!-- Instant Theme Initializer: Prevents FOUC and defaults to Sovereign Dark -->
     <script>
       (function () {
         try {
@@ -39,11 +38,11 @@
       })();
     </script>
   </head>
-  <body class="bg-bg text-fg antialiased selection:bg-accent selection:text-accent-fg">
-    <div id="root"></div>
+  <body class="bg-bg text-fg min-h-[100dvh] antialiased selection:bg-accent selection:text-accent-fg">
+    <div id="root" class="min-h-[100dvh] flex flex-col bg-bg text-fg"></div>
     <noscript>
       <div style="padding: 24px; font-family: system-ui; text-align: center">
-        Baraka needs JavaScript to run. / Для работы Baraka нужен JavaScript. / Baraka requires JavaScript.
+        Baraka needs JavaScript to run. / Для работы Baraka нужен JavaScript. / تتطلب منصة بركة تفعيل الجافاسكربت.
       </div>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

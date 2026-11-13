@@ -1,20 +1,29 @@
 /**
- * First-run Sovereign Walkthrough: Three institutional capability seals,
- * followed by sovereign data privacy & consent agreement.
+ * Baraka v2 — First-Run Walkthrough & Privacy Consent
+ * 3 Capability Seals (Halal Audit, Health & Dietary Safety, Disciplined Budgeting),
+ * followed by sovereign data privacy and consent protocol.
  */
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, ArrowLeft, Check, ShieldCheck, Lock, Database, Sun, Moon } from 'lucide-react';
+import {
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  ShieldCheck,
+  Lock,
+  Database,
+  Sun,
+  Moon,
+  Stethoscope,
+  Wallet,
+} from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
 import { Button } from '../components/ui/Button';
 import { Checkbox } from '../components/ui/Field';
 import { cn } from '../components/ui';
 import { IslamicPattern } from '../components/ui/IslamicPattern';
-import { Sheikh } from '../components/characters/Sheikh';
-import { DoctorChar } from '../components/characters/DoctorChar';
-import { AccountantChar } from '../components/characters/AccountantChar';
 import { usePageTheme, systemPrefersDark } from '../lib/theme';
 import { haptic, HAPTIC } from '../lib/haptics';
 
@@ -29,7 +38,7 @@ export function guestIntroSeen(): boolean {
 }
 
 export function OnboardingPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { role, patchUser, fillDemoData, themeMode, setThemeMode } = useAuth();
   const { show } = useToast();
   const [step, setStep] = useState(0);
@@ -40,8 +49,7 @@ export function OnboardingPage() {
 
   const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark());
   const toggleTheme = () => {
-    const next = isDark ? 'light' : 'dark';
-    setThemeMode(next);
+    setThemeMode(isDark ? 'light' : 'dark');
     haptic(HAPTIC.tap);
   };
 
@@ -50,35 +58,20 @@ export function OnboardingPage() {
 
   const slides = [
     {
-      pillar:
-        i18n.language === 'ar'
-          ? 'الركن الأول: الفحص الشرعي'
-          : i18n.language === 'ru'
-            ? 'Первый столп: Халяль-аудит'
-            : 'First Pillar: Halal Verification',
-      art: <Sheikh size={140} />,
+      pillar: t('onboarding.pillar1'),
+      icon: <ShieldCheck className="h-16 w-16 text-accent" strokeWidth={1.8} />,
       title: t('onboarding2.slide1Title'),
       body: t('onboarding2.slide1Body'),
     },
     {
-      pillar:
-        i18n.language === 'ar'
-          ? 'الركن الثاني: السلامة الصحية والغذائية'
-          : i18n.language === 'ru'
-            ? 'Второй столп: Здоровье и безопасность'
-            : 'Second Pillar: Health & Dietary Safety',
-      art: <DoctorChar size={140} />,
+      pillar: t('onboarding.pillar2'),
+      icon: <Stethoscope className="h-16 w-16 text-accent" strokeWidth={1.8} />,
       title: t('onboarding2.slide2Title'),
       body: t('onboarding2.slide2Body'),
     },
     {
-      pillar:
-        i18n.language === 'ar'
-          ? 'الركن الثالث: الميزانية الشخصية'
-          : i18n.language === 'ru'
-            ? 'Третий столп: Личный бюджет'
-            : 'Third Pillar: Disciplined Budgeting',
-      art: <AccountantChar size={140} />,
+      pillar: t('onboarding.pillar3'),
+      icon: <Wallet className="h-16 w-16 text-accent" strokeWidth={1.8} />,
       title: t('onboarding2.slide3Title'),
       body: t('onboarding2.slide3Body'),
     },
@@ -127,17 +120,13 @@ export function OnboardingPage() {
   const isSlides = step < 3;
 
   return (
-    <div className="relative min-h-[100dvh] w-full bg-bg text-fg font-body selection:bg-accent selection:text-accent-fg flex flex-col justify-center items-center px-4 py-8 sm:px-6">
-      {/* Sovereign Sacred Geometry Backdrop & Ambient Illumination */}
+    <div className="relative min-h-[100dvh] w-full bg-bg text-fg flex flex-col justify-center items-center px-4 py-8 sm:px-6">
       <IslamicPattern />
 
-      {/* Main Luxury Showcase Card */}
-      <div className="relative z-10 w-full max-w-xl surface-card p-6 sm:p-10 rounded-2xl border border-line shadow-2xl backdrop-blur-md overflow-hidden flex flex-col justify-between">
-        {/* Golden Hairline Top Accent */}
-        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent opacity-85" />
-
-        {/* Card Header: Stepper Progress & Skip */}
-        <div className="flex items-center justify-between pb-6 border-b border-line/60">
+      {/* Main Card */}
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-line bg-surface p-6 sm:p-9 shadow-e3 flex flex-col justify-between overflow-hidden">
+        {/* Header: Progress Stepper & Actions */}
+        <div className="flex items-center justify-between pb-5 border-b border-line/60">
           <div className="flex items-center gap-2" aria-label={`Step ${step + 1} of ${total}`}>
             {Array.from({ length: total }).map((_, index) => (
               <span
@@ -145,10 +134,10 @@ export function OnboardingPage() {
                 className={cn(
                   'h-1.5 rounded-full transition-all duration-300',
                   index === step
-                    ? 'w-10 bg-gradient-to-r from-[#B88E3E] to-[#D4AF37] shadow-sm'
+                    ? 'w-8 bg-accent'
                     : index < step
-                      ? 'w-4 bg-[#B88E3E]/60 dark:bg-[#D4AF37]/60'
-                      : 'w-3 bg-line/80',
+                      ? 'w-3.5 bg-accent/50'
+                      : 'w-2.5 bg-border',
                 )}
               />
             ))}
@@ -158,21 +147,16 @@ export function OnboardingPage() {
             <button
               type="button"
               onClick={toggleTheme}
-              aria-label={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
-              title={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-line bg-surface text-muted hover:text-fg hover:bg-surface2 shadow-sm transition-colors"
+              aria-label="تبديل السمة"
+              className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface2 text-muted hover:text-fg transition-colors cursor-pointer"
             >
-              {isDark ? (
-                <Sun className="h-3.5 w-3.5 text-[#D4AF37]" aria-hidden="true" />
-              ) : (
-                <Moon className="h-3.5 w-3.5 text-[#45392B]" aria-hidden="true" />
-              )}
+              {isDark ? <Sun className="h-4 w-4 text-[var(--accent-2)]" /> : <Moon className="h-4 w-4 text-accent" />}
             </button>
 
             <button
               type="button"
               onClick={() => (isGuest ? void finishGuest(false) : next())}
-              className="text-xs font-semibold text-muted hover:text-fg transition-colors px-2.5 py-1 rounded hover:bg-surface2"
+              className="text-xs font-bold text-muted hover:text-fg px-2.5 py-1 rounded-md hover:bg-surface2 cursor-pointer transition-colors"
             >
               {t('onboarding2.skip')}
             </button>
@@ -182,78 +166,72 @@ export function OnboardingPage() {
         {/* Content Arena */}
         <div className="py-6 sm:py-8 flex flex-col items-center text-center">
           {isSlides ? (
-            <div className="flex flex-col items-center w-full">
+            <div className="flex flex-col items-center w-full space-y-4">
               {/* Pillar Badge */}
-              <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-[#B88E3E]/30 bg-[#B88E3E]/10 px-3 py-1 text-xs font-semibold text-[#B88E3E] dark:text-[#D4AF37]">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent-soft px-3.5 py-1 text-xs font-bold text-accent">
                 <span>{slides[step].pillar}</span>
               </div>
 
-              {/* Handcrafted Sovereign Emblem Showcase */}
-              <div className="my-3 relative flex items-center justify-center">
-                {slides[step].art}
+              {/* Icon Emblem Showcase */}
+              <div className="my-2 flex h-24 w-24 items-center justify-center rounded-2xl bg-surface2 border border-line/80 shadow-e1">
+                {slides[step].icon}
               </div>
 
               {/* Title & Body */}
-              <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-fg mt-4">
-                {slides[step].title}
-              </h1>
-              <p className="mt-3 max-w-[42ch] text-sm sm:text-base leading-relaxed text-muted">
-                {slides[step].body}
-              </p>
+              <div className="space-y-2">
+                <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-fg">
+                  {slides[step].title}
+                </h1>
+                <p className="max-w-[40ch] mx-auto text-xs sm:text-sm leading-relaxed text-muted font-normal">
+                  {slides[step].body}
+                </p>
+              </div>
             </div>
           ) : (
             /* Step 4: Data Governance & Privacy Consent */
-            <div className="w-full text-start space-y-6">
+            <div className="w-full text-start space-y-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#B88E3E]/30 bg-[#B88E3E]/10 text-[#B88E3E] dark:text-[#D4AF37]">
-                  <ShieldCheck className="h-6 w-6" aria-hidden="true" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent border border-accent/20">
+                  <ShieldCheck className="h-6 w-6" />
                 </div>
                 <div>
-                  <h1 className="font-display text-xl sm:text-2xl font-bold text-fg">
+                  <h1 className="font-display text-lg sm:text-xl font-bold text-fg">
                     {t('onboarding2.consentTitle')}
                   </h1>
-                  <p className="text-xs sm:text-sm text-muted">
+                  <p className="text-xs text-muted leading-relaxed">
                     {t('onboarding2.consentBody')}
                   </p>
                 </div>
               </div>
 
               {/* Privacy Guarantees Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <div className="p-3 rounded-lg border border-line bg-surface2/60 flex items-start gap-2.5">
-                  <Lock className="h-4 w-4 text-[#B88E3E] dark:text-[#D4AF37] shrink-0 mt-0.5" aria-hidden="true" />
-                  <p className="text-xs text-muted leading-snug">
-                    {i18n.language === 'ar'
-                      ? 'تشفير كامل للبيانات ولا مشاركة مع أي جهة خارجية.'
-                      : i18n.language === 'ru'
-                        ? '100% сквозное шифрование, без передачи третьим лицам.'
-                        : '100% end-to-end encryption, zero third-party selling.'}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <div className="p-3 rounded-xl border border-line bg-surface2/60 flex items-start gap-2.5">
+                  <Lock className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted leading-relaxed">
+                    {t('onboarding.encryption')}
                   </p>
                 </div>
-                <div className="p-3 rounded-lg border border-line bg-surface2/60 flex items-start gap-2.5">
-                  <Database className="h-4 w-4 text-[#B88E3E] dark:text-[#D4AF37] shrink-0 mt-0.5" aria-hidden="true" />
-                  <p className="text-xs text-muted leading-snug">
-                    {i18n.language === 'ar'
-                      ? 'تخزين آمن ومحمي خاضع لسيطرتك الكاملة.'
-                      : i18n.language === 'ru'
-                        ? 'Локальное и защищенное хранение под вашим контролем.'
-                        : 'Secure storage strictly under your sovereign control.'}
+                <div className="p-3 rounded-xl border border-line bg-surface2/60 flex items-start gap-2.5">
+                  <Database className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted leading-relaxed">
+                    {t('onboarding.localStorage')}
                   </p>
                 </div>
               </div>
 
               {isGuest ? (
-                <div className="space-y-3 pt-4 border-t border-line/60">
-                  <div className="rounded-lg border border-line bg-surface2/50 p-3 text-xs text-muted leading-relaxed">
+                <div className="space-y-3 pt-3 border-t border-line/60">
+                  <div className="rounded-xl border border-line bg-surface2/50 p-3 text-xs text-muted leading-relaxed">
                     {t('guest.localOnly')}
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
                     <Button
                       fullWidth
                       size="lg"
+                      variant="primary"
                       loading={busy}
                       onClick={() => void finishGuest(true)}
-                      className="bg-[#164E3F] hover:bg-[#1D5E4C] text-white border border-[#277D64]/30"
                     >
                       {t('guest.demo')}
                     </Button>
@@ -268,8 +246,8 @@ export function OnboardingPage() {
                   </div>
                 </div>
               ) : (
-                <div className="space-y-4 pt-4 border-t border-line/60">
-                  <div className="space-y-3">
+                <div className="space-y-4 pt-3 border-t border-line/60">
+                  <div className="space-y-2">
                     <Checkbox
                       label={t('consent.health')}
                       checked={consent}
@@ -281,22 +259,19 @@ export function OnboardingPage() {
                   </div>
 
                   <div className="pt-2">
-                    <button
-                      type="button"
+                    <Button
+                      fullWidth
+                      size="lg"
+                      variant="primary"
                       disabled={!consent || busy}
+                      loading={busy}
                       onClick={() => void finishUser()}
-                      className={cn(
-                        'w-full inline-flex items-center justify-center gap-2 rounded-lg font-bold px-6 py-3.5 text-sm shadow-md transition-all active:scale-[0.99] border',
-                        consent
-                          ? 'bg-[#164E3F] hover:bg-[#1D5E4C] text-white border-[#277D64]/40 cursor-pointer'
-                          : 'bg-surface2 text-muted border-line cursor-not-allowed opacity-60',
-                      )}
                     >
-                      <Check className="h-4 w-4 text-[#D4AF37]" aria-hidden="true" />
-                      <span>{busy ? t('common.loading') : t('consent.accept')}</span>
-                    </button>
+                      <Check className="h-4 w-4 me-1.5" />
+                      <span>{t('consent.accept')}</span>
+                    </Button>
                     {!consent ? (
-                      <p className="text-center text-[11px] text-[#B88E3E] dark:text-[#D4AF37] font-semibold mt-2">
+                      <p className="text-center text-xs text-warn font-semibold mt-2">
                         {t('consent.mustAccept')}
                       </p>
                     ) : null}
@@ -307,30 +282,25 @@ export function OnboardingPage() {
           )}
         </div>
 
-        {/* Footer Navigation Controls */}
+        {/* Footer Navigation */}
         {isSlides && (
-          <div className="pt-6 border-t border-line/60 flex items-center justify-between gap-4">
+          <div className="pt-5 border-t border-line/60 flex items-center justify-between gap-4">
             {step > 0 ? (
-              <button
-                type="button"
-                onClick={prev}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-muted hover:text-fg transition-colors rounded-lg hover:bg-surface2"
-              >
-                <ArrowLeft className="flip-rtl h-3.5 w-3.5" aria-hidden="true" />
-                <span>{t('common.back')}</span>
-              </button>
+              <Button size="sm" variant="ghost" onClick={prev} icon={<ArrowLeft className="flip-rtl h-4 w-4" />}>
+                {t('common.back')}
+              </Button>
             ) : (
               <div />
             )}
 
-            <button
-              type="button"
+            <Button
+              size="md"
+              variant="primary"
               onClick={next}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#164E3F] hover:bg-[#1D5E4C] text-white font-bold px-6 py-3 text-sm shadow-md transition-all active:scale-[0.99] border border-[#277D64]/40"
+              trailing={<ArrowRight className="flip-rtl h-4 w-4" />}
             >
-              <span>{t('onboarding2.next')}</span>
-              <ArrowRight className="flip-rtl h-4 w-4 text-[#D4AF37]" aria-hidden="true" />
-            </button>
+              {t('onboarding2.next')}
+            </Button>
           </div>
         )}
       </div>

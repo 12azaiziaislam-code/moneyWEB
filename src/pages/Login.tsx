@@ -1,27 +1,28 @@
+/**
+ * Baraka v2 — Focused Authentication Portal
+ * Quiet, elegant entry point for credentials, Google OAuth, and local guest mode.
+ * Replaces noisy landing page layout with a dignified, studio-grade aesthetic.
+ */
+
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ArrowRight,
-  CheckCircle2,
-  Globe,
   Lock,
   Mail,
-  Moon,
-  ShieldCheck,
-  Sun,
   User as UserIcon,
-  Wallet,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '../state/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Field';
 import { cn } from '../components/ui';
-import { LOCALE_LABEL, SUPPORTED_LOCALES } from '../../shared/constants';
-import { changeLocale, type Locale } from '../i18n';
+import { SUPPORTED_LOCALES } from '../../shared/constants';
+import { changeLocale } from '../i18n';
 import { usePageTheme, systemPrefersDark } from '../lib/theme';
 import { haptic, HAPTIC } from '../lib/haptics';
 import { Logo } from '../components/characters/Logo';
-import { IslamicPattern } from '../components/ui';
+import { IslamicPattern } from '../components/ui/IslamicPattern';
 
 function GoogleMark() {
   return (
@@ -50,8 +51,7 @@ export function LoginPage() {
 
   const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark());
   const toggleTheme = () => {
-    const next = isDark ? 'light' : 'dark';
-    setThemeMode(next);
+    setThemeMode(isDark ? 'light' : 'dark');
     haptic(HAPTIC.tap);
   };
 
@@ -136,320 +136,208 @@ export function LoginPage() {
           : t('auth.error')
       : null);
 
-
-
   return (
-    <div className="relative min-h-[100dvh] w-full bg-bg text-fg font-body selection:bg-accent selection:text-accent-fg">
-      {/* Sovereign Islamic Architectural Backdrop & Ambient Illumination */}
+    <div className="relative min-h-[100dvh] w-full bg-bg text-fg flex flex-col justify-between p-4 sm:p-6">
+      {/* Background Pattern */}
       <IslamicPattern />
 
-      <div className="relative z-10 mx-auto min-h-[100dvh] max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col justify-between">
-        {/* Navigation Bar */}
-        <header className="flex items-center justify-between pb-4 border-b border-line">
-          <div className="flex items-center gap-3.5">
-            <Logo size={42} />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-display text-2xl font-bold tracking-tight text-fg">
-                  {t('app.name')}
-                </span>
-                <span className="hidden sm:inline-flex rounded-full border border-[#B88E3E]/30 bg-[#B88E3E]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#B88E3E] dark:text-[#D4AF37]">
-                  {t('landing.badge')}
-                </span>
-              </div>
-              <p className="text-[12px] text-muted hidden sm:block">
-                {t('app.tagline')}
-              </p>
-            </div>
+      {/* Top Header: Brand & Utilities */}
+      <header className="relative z-10 flex items-center justify-between max-w-md mx-auto w-full pt-2">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-fg shadow-e1">
+            <Logo size={24} />
+          </div>
+          <span className="font-display text-lg font-bold tracking-tight text-fg">
+            {t('app.name')}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Language Switch */}
+          <div className="flex rounded-lg border border-line bg-surface p-0.5">
+            {SUPPORTED_LOCALES.map((loc) => (
+              <button
+                key={loc}
+                type="button"
+                onClick={() => {
+                  void changeLocale(loc);
+                  haptic(HAPTIC.tap);
+                }}
+                className={cn(
+                  'px-2.5 py-1 text-xs font-bold rounded-md transition-colors cursor-pointer',
+                  i18n.language === loc ? 'bg-accent text-accent-fg' : 'text-muted hover:text-fg',
+                )}
+              >
+                {loc === 'ar' ? 'العربية' : loc === 'ru' ? 'RU' : 'EN'}
+              </button>
+            ))}
           </div>
 
-          {/* Controls: Theme Toggle & Clean Segmented Language Switcher */}
-          <div className="flex items-center gap-2">
+          {/* Theme Toggle */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label="تبديل السمة"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-muted hover:text-fg cursor-pointer transition-colors"
+          >
+            {isDark ? <Sun className="h-4 w-4 text-[var(--accent-2)]" /> : <Moon className="h-4 w-4 text-accent" />}
+          </button>
+        </div>
+      </header>
+
+      {/* Main Authentication Box (Focused & Quiet) */}
+      <main className="relative z-10 my-auto py-8 max-w-md mx-auto w-full">
+        <div className="rounded-2xl border border-line bg-surface p-6 sm:p-8 shadow-e2 space-y-6">
+          <div className="text-center space-y-1">
+            <h1 className="font-display text-2xl font-bold text-fg">
+              {tab === 'signin' ? t('auth.title') : t('auth.registerTab')}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted leading-relaxed">
+              {t('auth.subtitle')}
+            </p>
+          </div>
+
+          {/* Tab Selector */}
+          <div className="grid grid-cols-2 gap-1 rounded-xl border border-line bg-surface2 p-1">
             <button
               type="button"
-              onClick={toggleTheme}
-              aria-label={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
-              title={isDark ? t('profile.themes.light') : t('profile.themes.dark')}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-line bg-surface text-muted hover:text-fg hover:bg-surface2 shadow-sm transition-colors"
-            >
-              {isDark ? (
-                <Sun className="h-4 w-4 text-[#D4AF37]" aria-hidden="true" />
-              ) : (
-                <Moon className="h-4 w-4 text-[#45392B]" aria-hidden="true" />
+              onClick={() => {
+                setTab('signin');
+                setLocalError(null);
+              }}
+              className={cn(
+                'py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer',
+                tab === 'signin'
+                  ? 'bg-surface text-fg shadow-e1 border border-line/60'
+                  : 'text-muted hover:text-fg',
               )}
+            >
+              {t('auth.signInTab')}
             </button>
-
-            <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-1 shadow-sm">
-              <Globe className="ms-1.5 me-0.5 h-3.5 w-3.5 text-muted" aria-hidden="true" />
-              {SUPPORTED_LOCALES.map((locale: Locale) => (
-                <button
-                  key={locale}
-                  type="button"
-                  onClick={() => void changeLocale(locale)}
-                  aria-pressed={i18n.language === locale}
-                  className={cn(
-                    'rounded px-2.5 py-1 text-xs font-semibold transition-colors duration-fast',
-                    i18n.language === locale
-                      ? 'bg-surface2 text-fg font-bold border border-line shadow-sm'
-                      : 'text-muted hover:text-fg hover:bg-surface2',
-                  )}
-                >
-                  {LOCALE_LABEL[locale]}
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setTab('register');
+                setLocalError(null);
+              }}
+              className={cn(
+                'py-2 text-xs sm:text-sm font-bold rounded-lg transition-all cursor-pointer',
+                tab === 'register'
+                  ? 'bg-surface text-fg shadow-e1 border border-line/60'
+                  : 'text-muted hover:text-fg',
+              )}
+            >
+              {t('auth.registerTab')}
+            </button>
           </div>
-        </header>
 
-        {/* Main Split Layout */}
-        <main className="my-auto py-8 sm:py-12 grid gap-10 lg:grid-cols-12 lg:items-center">
-          {/* Left Column: Brand Mission & Capabilities (7 cols) */}
-          <section className="lg:col-span-7 flex flex-col justify-center space-y-6 text-start">
-            <div className="space-y-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#B88E3E]/30 bg-[#B88E3E]/10 px-3 py-1 text-xs font-semibold text-[#B88E3E] dark:text-[#D4AF37]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#B88E3E] dark:bg-[#D4AF37]" />
-                {t('landing.badge')}
-              </span>
-              <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-fg leading-snug">
-                {t('landing.headline')}
-              </h1>
-              <p className="max-w-xl text-sm sm:text-base leading-relaxed text-muted font-normal">
-                {t('landing.description')}
+          {/* Error Message */}
+          {errorMessage ? (
+            <div className="rounded-xl border border-danger/40 bg-danger-soft/60 p-3 text-xs font-semibold text-danger leading-relaxed">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          {/* Credentials Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {tab === 'register' ? (
+              <Input
+                label={t('auth.username')}
+                value={usernameInput}
+                autoComplete="username"
+                onChange={(e) => setUsernameInput(e.target.value)}
+                suffix={<UserIcon className="h-4 w-4 text-muted" />}
+              />
+            ) : null}
+
+            {tab === 'register' ? (
+              <Input
+                label={t('auth.email')}
+                type="email"
+                value={emailInput}
+                autoComplete="email"
+                onChange={(e) => setEmailInput(e.target.value)}
+                suffix={<Mail className="h-4 w-4 text-muted" />}
+              />
+            ) : (
+              <Input
+                label={t('auth.loginOrEmail')}
+                value={loginInput}
+                autoComplete="username"
+                onChange={(e) => setLoginInput(e.target.value)}
+                suffix={<UserIcon className="h-4 w-4 text-muted" />}
+              />
+            )}
+
+            <Input
+              label={t('auth.password')}
+              type="password"
+              value={passwordInput}
+              autoComplete={tab === 'signin' ? 'current-password' : 'new-password'}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              suffix={<Lock className="h-4 w-4 text-muted" />}
+              hint={tab === 'register' ? t('auth.passwordHint') : undefined}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              size="lg"
+              variant="primary"
+              loading={busy === 'credentials'}
+            >
+              {tab === 'signin' ? t('auth.submitSignIn') : t('auth.submitRegister')}
+            </Button>
+          </form>
+
+          {/* Google OAuth (if configured) */}
+          {configured ? (
+            <Button
+              fullWidth
+              size="md"
+              variant="secondary"
+              loading={busy === 'google'}
+              onClick={runGoogle}
+              icon={<GoogleMark />}
+            >
+              {t('auth.google')}
+            </Button>
+          ) : null}
+
+          {/* Divider */}
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-line/60" />
+            </div>
+            <span className="relative bg-surface px-3 text-[11px] font-bold text-muted uppercase">
+              {t('auth.or')}
+            </span>
+          </div>
+
+          {/* Guest Access Button */}
+          {guestEnabled ? (
+            <div className="space-y-2">
+              <Button
+                fullWidth
+                size="md"
+                variant="outline"
+                loading={busy === 'guest'}
+                onClick={runGuest}
+              >
+                {t('guest.cta')}
+              </Button>
+              <p className="text-center text-[11.5px] text-muted leading-relaxed">
+                تصفح ميزات التطبيق محلياً على جهازك؛ تتطلب خدمات الذكاء الاصطناعي إنشاء حساب مجاني.
               </p>
             </div>
+          ) : null}
+        </div>
+      </main>
 
-            {/* Core Pillars */}
-            <div className="space-y-3.5 pt-1">
-              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface/80 p-4 shadow-sm backdrop-blur-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#B88E3E]/30 bg-[#B88E3E]/10 text-[#B88E3E] dark:text-[#D4AF37]">
-                  <ShieldCheck className="h-5 w-5" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <h2 className="font-display text-sm font-bold text-fg mb-0.5">{t('landing.cap1Title')}</h2>
-                  <p className="text-xs leading-relaxed text-muted">{t('landing.cap1Desc')}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3.5 rounded-lg border border-line bg-surface/80 p-4 shadow-sm backdrop-blur-sm">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#B88E3E]/30 bg-[#B88E3E]/10 text-[#B88E3E] dark:text-[#D4AF37]">
-                  <Wallet className="h-5 w-5" strokeWidth={1.8} />
-                </div>
-                <div>
-                  <h2 className="font-display text-sm font-bold text-fg mb-0.5">{t('landing.cap2Title')}</h2>
-                  <p className="text-xs leading-relaxed text-muted">{t('landing.cap2Desc')}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Trust Assurance (Honest & Verified) */}
-            <div className="flex flex-wrap items-center gap-y-2 gap-x-3.5 pt-1 text-[11px] text-muted">
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-[#B88E3E] dark:text-[#D4AF37]" />
-                {t('landing.trustPrivacy')}
-              </span>
-              <span className="text-muted/40">•</span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-[#B88E3E] dark:text-[#D4AF37]" />
-                {t('landing.trustSecurity')}
-              </span>
-              <span className="text-muted/40">•</span>
-              <span className="inline-flex items-center gap-1.5">
-                <CheckCircle2 className="h-3.5 w-3.5 text-[#B88E3E] dark:text-[#D4AF37]" />
-                {t('landing.trustStandards')}
-              </span>
-            </div>
-          </section>
-
-          {/* Right Column: Authentication Card (5 cols) */}
-          <section className="lg:col-span-5 w-full max-w-md mx-auto lg:max-w-none">
-            <div className="surface-card p-6 sm:p-8 relative overflow-hidden backdrop-blur-sm">
-              <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-[#C5A059] to-transparent opacity-80" />
-              {/* Tab Selector */}
-              <div className="mb-6">
-                <div className="flex rounded-md border border-line bg-surface2 p-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTab('signin');
-                      setLocalError(null);
-                    }}
-                    className={cn(
-                      'flex-1 rounded py-2 text-xs sm:text-sm font-semibold transition-colors duration-fast',
-                      tab === 'signin'
-                        ? 'bg-surface text-fg font-bold shadow-sm'
-                        : 'text-muted hover:text-fg',
-                    )}
-                  >
-                    {t('auth.signInTab')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTab('register');
-                      setLocalError(null);
-                    }}
-                    className={cn(
-                      'flex-1 rounded py-2 text-xs sm:text-sm font-semibold transition-colors duration-fast',
-                      tab === 'register'
-                        ? 'bg-surface text-fg font-bold shadow-sm'
-                        : 'text-muted hover:text-fg',
-                    )}
-                  >
-                    {t('auth.registerTab')}
-                  </button>
-                </div>
-              </div>
-
-              {errorMessage ? (
-                <div
-                  className="mb-5 rounded-md border border-danger/30 bg-dangerSoft p-3 text-xs font-medium text-danger"
-                  role="alert"
-                >
-                  {errorMessage}
-                </div>
-              ) : null}
-
-              <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
-                {tab === 'signin' ? (
-                  <>
-                    <Input
-                      label={t('auth.loginOrEmail')}
-                      value={loginInput}
-                      onChange={(e) => setLoginInput(e.target.value)}
-                      autoComplete="username"
-                      required
-                      suffix={<UserIcon className="h-4 w-4 text-muted" />}
-                    />
-                    <Input
-                      label={t('auth.password')}
-                      type="password"
-                      value={passwordInput}
-                      onChange={(e) => setPasswordInput(e.target.value)}
-                      autoComplete="current-password"
-                      required
-                      suffix={<Lock className="h-4 w-4 text-muted" />}
-                    />
-                    <Button
-                      fullWidth
-                      size="lg"
-                      type="submit"
-                      loading={busy === 'credentials'}
-                      disabled={busy !== null}
-                      className="mt-2 h-11 bg-[#164E3F] hover:bg-[#1C5C4A] text-white font-bold border border-[#277D64]/30 shadow-sm"
-                    >
-                      {t('auth.submitSignIn')}
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Input
-                      label={t('auth.username')}
-                      value={usernameInput}
-                      onChange={(e) => setUsernameInput(e.target.value)}
-                      autoComplete="username"
-                      required
-                      suffix={<UserIcon className="h-4 w-4 text-muted" />}
-                    />
-                    <Input
-                      label={t('auth.email')}
-                      type="email"
-                      value={emailInput}
-                      onChange={(e) => setEmailInput(e.target.value)}
-                      autoComplete="email"
-                      required
-                      suffix={<Mail className="h-4 w-4 text-muted" />}
-                    />
-                    <Input
-                      label={t('auth.password')}
-                      type="password"
-                      value={passwordInput}
-                      onChange={(e) => setPasswordInput(e.target.value)}
-                      hint={t('auth.passwordHint')}
-                      autoComplete="new-password"
-                      required
-                      suffix={<Lock className="h-4 w-4 text-muted" />}
-                    />
-                    <Button
-                      fullWidth
-                      size="lg"
-                      type="submit"
-                      loading={busy === 'credentials'}
-                      disabled={busy !== null}
-                      className="mt-2 h-11 bg-[#164E3F] hover:bg-[#1C5C4A] text-white font-bold border border-[#277D64]/30 shadow-sm"
-                    >
-                      {t('auth.submitRegister')}
-                    </Button>
-                  </>
-                )}
-              </form>
-
-              {/* Divider */}
-              <div className="relative my-5 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-line" />
-                </div>
-                <span className="relative bg-surface px-3 text-[11px] font-semibold text-muted">
-                  {t('auth.or')}
-                </span>
-              </div>
-
-              {/* Secondary Options */}
-              <div className="space-y-2.5">
-                {configured ? (
-                  <Button
-                    fullWidth
-                    variant="secondary"
-                    size="md"
-                    loading={busy === 'google'}
-                    disabled={busy !== null}
-                    onClick={() => void runGoogle()}
-                    icon={<GoogleMark />}
-                    className="h-10"
-                  >
-                    {busy === 'google' ? t('auth.signingIn') : t('auth.google')}
-                  </Button>
-                ) : null}
-
-                {guestEnabled ? (
-                  <button
-                    type="button"
-                    disabled={busy !== null}
-                    onClick={() => void runGuest()}
-                    className="w-full group flex items-center justify-between rounded-md border border-line bg-surface hover:bg-surface2 px-4 py-2.5 text-xs sm:text-sm font-semibold text-fg hover:border-[#B88E3E]/50 transition-colors shadow-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-[#B88E3E] dark:text-[#D4AF37]" />
-                      <span>{t('guest.try')}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] text-muted group-hover:text-fg">
-                      <span>{t('landing.instantDemo')}</span>
-                      <ArrowRight className="flip-rtl h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5" />
-                    </div>
-                  </button>
-                ) : null}
-              </div>
-
-              {/* Consent Note */}
-              <div className="mt-5 border-t border-line/60 pt-3 text-[11px] leading-relaxed text-muted">
-                <p>{t('onboarding2.guestNote')}</p>
-                <p className="mt-1 text-[10px] text-muted/80">{t('consent.body')}</p>
-              </div>
-            </div>
-          </section>
-        </main>
-
-        {/* Footer (100% Multilingual & Localized) */}
-        <footer className="py-4 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted">
-          <p>{t('landing.footerCopyright', { year: new Date().getFullYear() })}</p>
-          <div className="flex items-center gap-3 text-[11px]">
-            <span>{t('landing.footerHalal')}</span>
-            <span>•</span>
-            <span>{t('landing.footerBudget')}</span>
-            <span>•</span>
-            <span>{t('landing.footerHealth')}</span>
-          </div>
-        </footer>
-      </div>
+      {/* Quiet Footer */}
+      <footer className="relative z-10 text-center text-xs text-muted-soft max-w-md mx-auto w-full pb-2">
+        <span>تشفير تام عبر HTTPS · خصوصية وحفظ محلي</span>
+      </footer>
     </div>
   );
 }

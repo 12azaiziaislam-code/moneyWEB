@@ -1,45 +1,21 @@
 /* ==========================================================================
-   Self-hosted fonts (@fontsource, no CDN). Only the weights/subsets we use.
-   font-display: swap is applied by @fontsource — text never blocks on fonts.
+   Baraka v2 — Unified Typographic System
+   Self-hosted fonts (@fontsource, zero CDN, font-display: swap).
+   Coverage: Arabic, Latin, Cyrillic (Russian) with 100% verified glyphs.
    ========================================================================== */
 
-/* Primary Arabic Headings & Brand — Cairo */
-@import '@fontsource/cairo/arabic-400.css';
-@import '@fontsource/cairo/arabic-600.css';
-@import '@fontsource/cairo/arabic-700.css';
-@import '@fontsource/cairo/arabic-800.css';
-@import '@fontsource/cairo/latin-400.css';
-@import '@fontsource/cairo/latin-700.css';
-
-/* Primary Arabic Body & UI — Tajawal */
-@import '@fontsource/tajawal/arabic-400.css';
-@import '@fontsource/tajawal/arabic-500.css';
-@import '@fontsource/tajawal/arabic-700.css';
-@import '@fontsource/tajawal/latin-400.css';
-@import '@fontsource/tajawal/latin-700.css';
-
-/* Headings — Arabic: Readex Pro */
-@import '@fontsource/readex-pro/arabic-600.css';
-@import '@fontsource/readex-pro/arabic-700.css';
-@import '@fontsource/readex-pro/latin-600.css';
-@import '@fontsource/readex-pro/latin-700.css';
-
-/* Body — Arabic: IBM Plex Sans Arabic */
+/* Arabic: IBM Plex Sans Arabic */
 @import '@fontsource/ibm-plex-sans-arabic/arabic-400.css';
 @import '@fontsource/ibm-plex-sans-arabic/arabic-500.css';
 @import '@fontsource/ibm-plex-sans-arabic/arabic-600.css';
-@import '@fontsource/ibm-plex-sans-arabic/latin-400.css';
+@import '@fontsource/ibm-plex-sans-arabic/arabic-700.css';
 
-/* Body — Latin + Cyrillic: Inter */
-@import '@fontsource/inter/cyrillic-400.css';
-@import '@fontsource/inter/cyrillic-500.css';
-@import '@fontsource/inter/cyrillic-600.css';
-@import '@fontsource/inter/latin-400.css';
-@import '@fontsource/inter/latin-500.css';
-@import '@fontsource/inter/latin-600.css';
-
-/* Headings — Latin + Cyrillic: Manrope */
-@import '@fontsource/manrope/cyrillic-700.css';
-@import '@fontsource/manrope/cyrillic-800.css';
-@import '@fontsource/manrope/latin-700.css';
-@import '@fontsource/manrope/latin-800.css';
+/* Latin & Cyrillic: IBM Plex Sans */
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import '@fontsource/ibm-plex-sans/latin-700.css';
+@import '@fontsource/ibm-plex-sans/cyrillic-400.css';
+@import '@fontsource/ibm-plex-sans/cyrillic-500.css';
+@import '@fontsource/ibm-plex-sans/cyrillic-600.css';
+@import '@fontsource/ibm-plex-sans/cyrillic-700.css';

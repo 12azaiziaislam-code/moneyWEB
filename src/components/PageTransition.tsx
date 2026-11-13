@@ -1,7 +1,7 @@
 /**
- * Route transition: uses the View Transitions API when available (and not
- * reduced-motion), otherwise a 220ms fade/rise that follows the reading
- * direction. Only transform/opacity are animated.
+ * Baraka v2 — Fluid Page Transitions
+ * Uses View Transitions API when available, with a GPU-accelerated fallback.
+ * Cleans up transform styles on animation completion so fixed children remain unaffected.
  */
 
 import { useEffect, useRef, type ReactNode } from 'react';
@@ -20,18 +20,27 @@ export function PageTransition({ children }: { children: ReactNode }) {
       element.style.transform = 'none';
       return;
     }
-    // CSS-driven fallback: cheap, GPU friendly, RTL agnostic.
-    element.animate?.(
+
+    const anim = element.animate?.(
       [
-        { opacity: 0, transform: 'translate3d(0, 10px, 0)' },
+        { opacity: 0, transform: 'translate3d(0, 6px, 0)' },
         { opacity: 1, transform: 'translate3d(0, 0, 0)' },
       ],
-      { duration: 230, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'both' },
+      { duration: 200, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
     );
+
+    if (anim) {
+      anim.onfinish = () => {
+        if (ref.current) {
+          ref.current.style.transform = '';
+          ref.current.style.opacity = '';
+        }
+      };
+    }
   }, [pathname]);
 
   return (
-    <div ref={ref} className="flex min-h-0 flex-1 flex-col">
+    <div ref={ref} className="flex min-h-0 flex-1 flex-col w-full">
       {children}
     </div>
   );

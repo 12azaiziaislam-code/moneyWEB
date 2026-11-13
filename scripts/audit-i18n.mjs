@@ -59,3 +59,4 @@ console.log('Total missing instances:', missing.length);
 for (const m of missing) {
   console.log(`[${m.file}] Key: "${m.key}" -> AR: ${m.ar}, EN: ${m.en}, RU: ${m.ru}`);
 }
+

@@ -1,16 +1,25 @@
 /**
- * The Archive: Filter, Search, Consultation Index Cards, Deletion.
+ * Baraka v2 — Consultations & Chats Archive
+ * Unified category tabs matching navigation, real-time query filtering,
+ * human-designed empty states (no server rack art), and fast management.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Search, ShieldCheck, Stethoscope, Wallet, X } from 'lucide-react';
+import {
+  Search,
+  ShieldCheck,
+  Stethoscope,
+  Wallet,
+  Trash2,
+  MessagesSquare,
+  Clock,
+} from 'lucide-react';
 import type { ChatKind } from '../../shared/types';
 import { PageHeader } from '../components/AppShell';
-import { ArchiveChar } from '../components/characters/ArchiveChar';
 import { Button, IconButton } from '../components/ui/Button';
-import { Chip, EmptyState, Skeleton } from '../components/ui/Feedback';
+import { Badge, EmptyState, Skeleton } from '../components/ui/Feedback';
 import { Input } from '../components/ui/Field';
 import { Segmented } from '../components/ui/Controls';
 import { useChatList, useChatMutations } from '../data/chats';
@@ -42,7 +51,9 @@ export function ChatsPage() {
 
   const empty = useMemo(() => !loading && chats.length === 0, [chats.length, loading]);
 
-  const remove = async (id: string) => {
+  const remove = async (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!window.confirm(t('chats.deleteConfirm'))) return;
     try {
       await deleteChat(id);
@@ -54,11 +65,12 @@ export function ChatsPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-4 pb-6">
+    <div className="flex flex-1 flex-col gap-4 pb-8">
       <PageHeader title={t('chats.title')} />
 
+      {/* Guest Mode Banner */}
       {role === 'guest' ? (
-        <div className="surface-card p-5 rounded-xl border border-[#B88E3E]/40 bg-[#B88E3E]/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-start">
+        <div className="rounded-xl border border-warn/30 bg-warn-soft/40 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
           <p className="text-xs sm:text-sm text-fg leading-relaxed">
             {t('guest.aiRequiresAuth')}
           </p>
@@ -68,6 +80,7 @@ export function ChatsPage() {
         </div>
       ) : null}
 
+      {/* Search Input */}
       <Input
         label={t('chats.search')}
         type="search"
@@ -76,76 +89,87 @@ export function ChatsPage() {
         suffix={<Search className="h-4 w-4 text-muted" />}
       />
 
+      {/* Filter Tabs Matching Bottom Navigation Items */}
       <Segmented
         ariaLabel={t('chats.title')}
         value={filter}
         onChange={(value) => setFilter(value)}
         options={[
           { value: 'all', label: t('common.all') },
-          { value: 'shaykh', label: t('chats.kinds.shaykh') },
-          { value: 'doctor', label: t('chats.kinds.doctor') },
-          { value: 'accountant', label: t('chats.kinds.accountant') },
+          { value: 'shaykh', label: t('nav.halal') },
+          { value: 'doctor', label: t('nav.doctor') },
+          { value: 'accountant', label: t('nav.accountant') },
         ]}
       />
 
+      {/* Loading Skeleton */}
       {loading ? (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {[0, 1, 2].map((index) => (
-            <Skeleton key={index} className="h-[86px] w-full" />
+            <Skeleton key={index} className="h-20 w-full rounded-xl" />
           ))}
         </div>
       ) : empty ? (
-        <div className="space-y-4 surface-card p-6 text-center">
+        /* Empty State with Line-Art Icon */
+        <div className="rounded-2xl border border-line bg-surface p-8 text-center shadow-e1">
           <EmptyState
-            art={<ArchiveChar size={100} className="mx-auto" />}
+            icon={<MessagesSquare className="h-12 w-12 text-accent" strokeWidth={1.5} />}
             title={t('chats.empty')}
             body={t('chats.emptyHint')}
             action={
               <Button
-                variant="secondary"
-                icon={<ShieldCheck className="h-4 w-4" aria-hidden />}
+                variant="primary"
+                icon={<ShieldCheck className="h-4 w-4" />}
                 onClick={() => navigate('/')}
                 className="mt-2"
               >
-                {t('halal.title')}
+                {t('home.cta')}
               </Button>
             }
           />
         </div>
       ) : (
+        /* Conversations List */
         <ul ref={listRef} className="space-y-2.5">
           {chats.map((chat) => {
-            const channel =
-              chat.kind === 'shaykh' ? 'var(--ch-sheikh)' : chat.kind === 'doctor' ? 'var(--ch-doctor)' : 'var(--ch-accountant)';
             return (
               <li key={chat.id} data-stagger>
-                <div className="surface-card flex items-stretch gap-3 p-3.5 hover:border-accent/40 transition-colors">
-                  <Link to={`/chats/${chat.id}`} className="flex min-w-0 flex-1 items-start gap-3">
-                    <span
-                      className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-line"
-                      style={{ background: 'var(--surface-2)', color: channel }}
-                      aria-hidden="true"
+                <div className="group rounded-xl border border-line bg-surface p-3.5 hover:border-accent/40 hover:shadow-e1 transition-all">
+                  <div className="flex items-center gap-3">
+                    <Link to={`/chats/${chat.id}`} className="flex min-w-0 flex-1 items-start gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface2 text-accent border border-line/60">
+                        {chat.kind === 'doctor' ? (
+                          <Stethoscope className="h-5 w-5" strokeWidth={2} />
+                        ) : chat.kind === 'accountant' ? (
+                          <Wallet className="h-5 w-5" strokeWidth={2} />
+                        ) : (
+                          <ShieldCheck className="h-5 w-5" strokeWidth={2} />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-display text-sm font-bold text-fg truncate">{chat.title}</p>
+                          <Badge tone="neutral" className="shrink-0 text-[10px]">
+                            {t(`chats.kinds.${chat.kind}`)}
+                          </Badge>
+                        </div>
+                        <p className="line-clamp-1 text-xs text-muted leading-relaxed">
+                          {chat.preview || '—'}
+                        </p>
+                        <div className="flex items-center gap-1.5 pt-0.5 text-[11px] text-muted-soft">
+                          <Clock className="h-3 w-3" />
+                          <span>{formatDateTime(chat.updatedAt, locale)}</span>
+                        </div>
+                      </div>
+                    </Link>
+                    <IconButton
+                      label={t('common.delete')}
+                      onClick={(e) => void remove(chat.id, e)}
+                      className="text-muted hover:text-danger hover:bg-danger-soft/40"
                     >
-                      {chat.kind === 'doctor' ? (
-                        <Stethoscope className="h-5 w-5" strokeWidth={1.8} />
-                      ) : chat.kind === 'accountant' ? (
-                        <Wallet className="h-5 w-5" strokeWidth={1.8} />
-                      ) : (
-                        <ShieldCheck className="h-5 w-5" strokeWidth={1.8} />
-                      )}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-2">
-                        <span className="truncate text-sm font-bold text-fg">{chat.title}</span>
-                        <Chip className="pointer-events-none !min-h-0 !px-2 !py-0.5 !text-[10px]">{t(`chats.kinds.${chat.kind}`)}</Chip>
-                      </span>
-                      <span className="mt-0.5 line-clamp-2 block text-xs leading-snug text-muted">{chat.preview || '—'}</span>
-                      <span className="mt-1 block text-[10px] text-muted">{formatDateTime(chat.updatedAt, locale)}</span>
-                    </span>
-                  </Link>
-                  <IconButton label={t('common.delete')} onClick={() => void remove(chat.id)} className="self-center">
-                    <X className="h-4 w-4" aria-hidden />
-                  </IconButton>
+                      <Trash2 className="h-4 w-4" aria-hidden />
+                    </IconButton>
+                  </div>
                 </div>
               </li>
             );

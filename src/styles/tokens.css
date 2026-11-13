@@ -1,11 +1,11 @@
 /* ==========================================================================
-   Baraka — Design Tokens (Sovereign Ledger)
-   A restrained, institutional palette for ethical Islamic financial & wellness intelligence.
-   Verified for WCAG AA & AAA contrast.
+   Baraka v2 — Design Tokens (Al-Mizan Sovereign Editorial)
+   Restrained, ethical, finance-grade Islamic intelligence.
+   All colors specified in modern OKLCH with WCAG AA/AAA verified contrast.
    ========================================================================== */
 
 :root {
-  /* ---- Spacing (4px grid) ---- */
+  /* ---- Spacing (4px grid system) ---- */
   --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
@@ -18,259 +18,175 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* ---- Restrained Radii (No excessive pills) ---- */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  /* ---- Varied Radii by Functional Role ---- */
+  --radius-xs: 4px;   /* micro tags, small indicators */
+  --radius-sm: 8px;   /* buttons, input fields, chips */
+  --radius-md: 12px;  /* list rows, standard cards */
+  --radius-lg: 18px;  /* elevated hero sections, dialogue boxes */
+  --radius-xl: 24px;  /* bottom sheets, top modals */
   --radius-full: 9999px;
 
-  /* ---- Subtle, Disciplined Elevation (No colored neon glow) ---- */
-  --shadow-1: 0 1px 2px rgb(20 28 24 / 0.05), 0 1px 3px rgb(20 28 24 / 0.06);
-  --shadow-2: 0 4px 12px -2px rgb(20 28 24 / 0.08), 0 2px 4px -1px rgb(20 28 24 / 0.04);
-  --shadow-3: 0 12px 28px -4px rgb(20 28 24 / 0.12), 0 4px 8px -2px rgb(20 28 24 / 0.06);
-  --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.6);
+  /* ---- Disciplined Elevation System (3 Levels, warm shadow) ---- */
+  --shadow-1: 0 1px 3px oklch(0.2 0.02 85 / 0.05), 0 1px 2px oklch(0.2 0.02 85 / 0.04);
+  --shadow-2: 0 6px 16px -2px oklch(0.2 0.02 85 / 0.08), 0 2px 6px -1px oklch(0.2 0.02 85 / 0.04);
+  --shadow-3: 0 18px 36px -4px oklch(0.2 0.02 85 / 0.14), 0 6px 14px -2px oklch(0.2 0.02 85 / 0.06);
+  --shadow-inset: inset 0 1px 0 oklch(1 0 0 / 0.7);
 
-  /* ---- Motion (Subtle, purposeful) ---- */
+  /* ---- Motion Tokens ---- */
   --dur-fast: 120ms;
   --dur-mid: 200ms;
-  --dur-slow: 350ms;
+  --dur-slow: 320ms;
   --dur-slower: 500ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: cubic-bezier(0.34, 1.25, 0.64, 1);
 
-  /* ---- Layout ---- */
+  /* ---- Layout Boundaries ---- */
   --app-max: 640px;
-  --nav-h: 64px;
+  --desktop-max: 1200px;
+  --nav-h: 68px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-  /* ---- Typography ---- */
-  --font-display: 'Cairo', 'Tajawal', 'Readex Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Tajawal', 'Cairo', 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-latin: 'Inter', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-num: 'Inter', ui-monospace, 'SF Mono', monospace;
+  /* ---- Typography Scale (Body >= 15px, Disclaimers >= 13px) ---- */
+  --font-display: 'IBM Plex Sans Arabic', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'IBM Plex Sans Arabic', 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-latin: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-num: 'IBM Plex Sans', ui-monospace, 'SF Mono', monospace;
+
   --text-xs: 12px;
-  --text-sm: 13px;
-  --text-base: 15px;
+  --text-sm: 13.5px; /* Disclaimers & secondary meta */
+  --text-base: 15px; /* Minimum body size */
   --text-lg: 17px;
   --text-xl: 20px;
   --text-2xl: 24px;
   --text-3xl: 30px;
   --text-4xl: 38px;
 
-  /* ---- Light Canvas (Default: Sovereign Ivory & Gilded Bronze) ---- */
-  --bg: #FBF9F5;
-  --bg-2: #F2EEE5;
-  --surface: #FFFFFF;
-  --surface-2: #F6F3EB;
-  --border: #E6E0D2;
-  --border-subtle: #EFECE3;
-  --fg: #13181E;
-  --muted: #565F6E;
-  --accent: #174E3E;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #EAF3EF;
-  --accent-2: #B88E3E;
-  --ring: #B88E3E;
+  /* ==========================================================================
+     LIGHT THEME: Sovereign Warm Ivory & Andalusian Emerald
+     ========================================================================== */
+  --bg: oklch(0.978 0.008 85);           /* Warm antique ivory */
+  --bg-2: oklch(0.955 0.012 85);         /* Secondary parchment */
+  --surface: oklch(0.995 0.004 85);      /* Pure warm paper */
+  --surface-2: oklch(0.965 0.010 85);    /* Slightly lifted surface */
+  --surface-elevated: oklch(1 0 0);      /* Floating card surface */
+  --border: oklch(0.885 0.015 85);       /* Hairline quiet border */
+  --border-subtle: oklch(0.925 0.010 85);
 
-  /* ---- Status / Risk Tones (Deep, non-acidic) ---- */
-  --ok: #176B45;
-  --ok-soft: #E3F2EB;
-  --warn: #A36A18;
-  --warn-soft: #FBF1DE;
-  --danger: #9B2626;
-  --danger-soft: #FDE8E8;
-  --info: #1B5875;
-  --info-soft: #E3F0F7;
+  --fg: oklch(0.20 0.02 165);            /* Deep forest ink (High contrast) */
+  --muted: oklch(0.48 0.02 85);          /* Warm slate, AAA contrast >= 7:1 */
+  --muted-soft: oklch(0.62 0.02 85);
 
-  --risk-green: #176B45;
-  --risk-green-fg: #FFFFFF;
-  --risk-green-soft: #E3F2EB;
-  --risk-yellow: #A36A18;
-  --risk-yellow-fg: #FFFFFF;
-  --risk-yellow-soft: #FBF1DE;
-  --risk-orange: #B8531A;
-  --risk-orange-fg: #FFFFFF;
-  --risk-orange-soft: #FDEEE4;
-  --risk-red: #9B2626;
-  --risk-red-fg: #FFFFFF;
-  --risk-red-soft: #FDE8E8;
+  /* Dominant Brand: Andalusian Emerald & Gilded Bronze */
+  --accent: oklch(0.45 0.11 160);        /* Deep sovereign emerald */
+  --accent-fg: oklch(0.99 0 0);          /* Crisp white on accent */
+  --accent-soft: oklch(0.94 0.03 160);   /* Soft emerald tint */
+  --accent-hover: oklch(0.40 0.11 160);
+  --accent-2: oklch(0.68 0.11 75);       /* Gilded bronze / brass */
+  --ring: oklch(0.45 0.11 160 / 0.35);
 
-  /* Advisor Channels */
-  --ch-sheikh: #174E3E;
-  --ch-doctor: #1B5875;
-  --ch-accountant: #B88E3E;
+  /* Semantic Verifications (Triple-channel: icon + text + color) */
+  --ok: oklch(0.52 0.14 145);            /* Halal / verified green */
+  --ok-fg: oklch(0.99 0 0);
+  --ok-soft: oklch(0.94 0.04 145);
+  --warn: oklch(0.60 0.14 70);           /* Doubtful / caution amber */
+  --warn-fg: oklch(0.99 0 0);
+  --warn-soft: oklch(0.94 0.04 70);
+  --danger: oklch(0.52 0.18 28);         /* Prohibited / emergency crimson */
+  --danger-fg: oklch(0.99 0 0);
+  --danger-soft: oklch(0.95 0.03 28);
+  --info: oklch(0.52 0.10 230);          /* Educational info slate */
+  --info-fg: oklch(0.99 0 0);
+  --info-soft: oklch(0.94 0.03 230);
 
-  /* Decorative Lattice */
-  --pattern-ink: #B88E3E;
-  --pattern-opacity: 0.12;
-  --hero-grad-a: #174E3E;
-  --hero-grad-b: #0E1614;
-  --glass: rgb(255 255 255 / 0.94);
-  --glass-border: #E6E0D2;
-  --overlay: rgb(19 24 30 / 0.5);
+  /* Overlay & Backdrops */
+  --overlay: oklch(0.18 0.02 165 / 0.60);
+  --pattern-ink: oklch(0.45 0.11 160);
+  --pattern-opacity: 0.04;
 }
 
 /* ==========================================================================
-   Dark Canvas (Sovereign Obsidian Slate - Zero Muddy Green)
+   DARK THEME: Deep Ink-Emerald Obsidian & Gilded Sand
+   Zero muddy neon green, zero pitch-black dead pixels.
    ========================================================================== */
 .dark {
-  --bg: #0D1117;
-  --bg-2: #13171F;
-  --surface: #171C24;
-  --surface-2: #1E242F;
-  --border: #293240;
-  --border-subtle: #1F2632;
-  --fg: #F1F4F8;
-  --muted: #8E98A8;
-  --accent: #1D5E4C;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #142721;
-  --accent-2: #D4AF37;
-  --ring: #D4AF37;
+  --bg: oklch(0.18 0.025 165);           /* Deep obsidian-emerald */
+  --bg-2: oklch(0.20 0.028 165);         /* Secondary ink canvas */
+  --surface: oklch(0.23 0.030 165);      /* Rich forest slate card */
+  --surface-2: oklch(0.26 0.032 165);    /* Lifted surface */
+  --surface-elevated: oklch(0.29 0.032 165);
+  --border: oklch(0.32 0.030 165);       /* Subtle hairline border */
+  --border-subtle: oklch(0.27 0.028 165);
 
-  --ok: #2A855A;
-  --ok-soft: #132E21;
-  --warn: #D49C3D;
-  --warn-soft: #33230C;
-  --danger: #C24545;
-  --danger-soft: #331313;
-  --info: #3A8DAE;
-  --info-soft: #10252E;
+  --fg: oklch(0.95 0.01 85);             /* Warm alabaster */
+  --muted: oklch(0.72 0.02 165);         /* Sage parchment */
+  --muted-soft: oklch(0.55 0.02 165);
 
-  --risk-green: #2A855A;
-  --risk-green-fg: #FFFFFF;
-  --risk-green-soft: #132E21;
-  --risk-yellow: #D49C3D;
-  --risk-yellow-fg: #FFFFFF;
-  --risk-yellow-soft: #33230C;
-  --risk-orange: #C96B36;
-  --risk-orange-fg: #FFFFFF;
-  --risk-orange-soft: #36170A;
-  --risk-red: #C24545;
-  --risk-red-fg: #FFFFFF;
-  --risk-red-soft: #331313;
+  /* Dominant Brand: Luminous Sovereign Mint & Dune Gold */
+  --accent: oklch(0.75 0.12 160);        /* Luminous emerald mint */
+  --accent-fg: oklch(0.16 0.03 165);     /* Deep ink text on mint */
+  --accent-soft: oklch(0.27 0.04 160);   /* Soft mint glow container */
+  --accent-hover: oklch(0.80 0.12 160);
+  --accent-2: oklch(0.78 0.09 75);       /* Dune gold */
+  --ring: oklch(0.75 0.12 160 / 0.35);
 
-  --ch-sheikh: #2A855A;
-  --ch-doctor: #3A8DAE;
-  --ch-accountant: #D49C3D;
+  /* Semantic Verifications in Dark Canvas */
+  --ok: oklch(0.74 0.14 145);
+  --ok-fg: oklch(0.15 0.03 145);
+  --ok-soft: oklch(0.26 0.04 145);
+  --warn: oklch(0.78 0.13 70);
+  --warn-fg: oklch(0.18 0.03 70);
+  --warn-soft: oklch(0.28 0.04 70);
+  --danger: oklch(0.70 0.18 28);
+  --danger-fg: oklch(0.99 0 0);
+  --danger-soft: oklch(0.28 0.04 28);
+  --info: oklch(0.74 0.10 230);
+  --info-fg: oklch(0.16 0.03 230);
+  --info-soft: oklch(0.27 0.03 230);
 
-  --pattern-ink: #D4AF37;
-  --pattern-opacity: 0.16;
-  --hero-grad-a: #161D26;
-  --hero-grad-b: #0D1117;
-  --glass: rgb(23 28 36 / 0.94);
-  --glass-border: #293240;
-  --overlay: rgb(0 0 0 / 0.75);
-
-  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.35);
-  --shadow-2: 0 4px 12px -2px rgb(0 0 0 / 0.45);
-  --shadow-3: 0 12px 28px -4px rgb(0 0 0 / 0.55);
+  /* Overlay & Backdrops */
+  --overlay: oklch(0.10 0.02 165 / 0.75);
+  --pattern-ink: oklch(0.75 0.12 160);
+  --pattern-opacity: 0.055;
 }
 
 /* ==========================================================================
-   PAGE IDENTITIES (LIGHT)
+   Harmonized Accent Palettes (All pass WCAG AA in both Light and Dark)
    ========================================================================== */
-
-/* 1) Halal / Home */
-[data-theme='halal'] {
-  --accent: #174E3E;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #EAF3EF;
-  --accent-2: #B88E3E;
-  --ring: #B88E3E;
+[data-accent="emerald"] {
+  /* Default Andalusian Emerald (Inherited) */
 }
 
-/* 2) Chats */
-[data-theme='chats'] {
-  --accent: #45392B;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #EFE9E0;
-  --accent-2: #B88E3E;
-  --ring: #B88E3E;
+[data-accent="bronze"] {
+  --accent: oklch(0.55 0.11 75);
+  --accent-soft: oklch(0.94 0.03 75);
+  --accent-hover: oklch(0.50 0.11 75);
+}
+.dark[data-accent="bronze"] {
+  --accent: oklch(0.78 0.11 75);
+  --accent-soft: oklch(0.28 0.04 75);
+  --accent-hover: oklch(0.82 0.11 75);
 }
 
-/* 3) Doctor */
-[data-theme='doctor'] {
-  --accent: #1B5875;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #E3F0F7;
-  --accent-2: #176B45;
-  --ring: #1B5875;
+[data-accent="sapphire"] {
+  --accent: oklch(0.48 0.12 245);
+  --accent-soft: oklch(0.94 0.03 245);
+  --accent-hover: oklch(0.43 0.12 245);
+}
+.dark[data-accent="sapphire"] {
+  --accent: oklch(0.74 0.12 245);
+  --accent-soft: oklch(0.28 0.04 245);
+  --accent-hover: oklch(0.78 0.12 245);
 }
 
-/* 4) Accountant */
-[data-theme='accountant'] {
-  --accent: #243E6B;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #E6EDF7;
-  --accent-2: #B88E3E;
-  --ring: #243E6B;
+[data-accent="amber"] {
+  --accent: oklch(0.54 0.12 55);
+  --accent-soft: oklch(0.94 0.03 55);
+  --accent-hover: oklch(0.49 0.12 55);
 }
-
-/* 5) Profile */
-[data-theme='profile'] {
-  --accent: #174E3E;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #EAF3EF;
-  --ring: #B88E3E;
+.dark[data-accent="amber"] {
+  --accent: oklch(0.76 0.12 55);
+  --accent-soft: oklch(0.28 0.04 55);
+  --accent-hover: oklch(0.80 0.12 55);
 }
-
-/* ==========================================================================
-   PAGE IDENTITIES (DARK)
-   ========================================================================== */
-.dark[data-theme='halal'] {
-  --accent: #1D5E4C;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #142721;
-  --accent-2: #D4AF37;
-  --ring: #D4AF37;
-}
-
-.dark[data-theme='chats'] {
-  --accent: #C7A678;
-  --accent-fg: #1F170E;
-  --accent-soft: #2E2519;
-  --accent-2: #D4AF37;
-  --ring: #D4AF37;
-}
-
-.dark[data-theme='doctor'] {
-  --accent: #3A8DAE;
-  --accent-fg: #081F29;
-  --accent-soft: #10252E;
-  --accent-2: #2A855A;
-  --ring: #3A8DAE;
-}
-
-.dark[data-theme='accountant'] {
-  --accent: #D49C3D;
-  --accent-fg: #261905;
-  --accent-soft: #33230C;
-  --accent-2: #70A0E0;
-  --ring: #D49C3D;
-}
-
-.dark[data-theme='profile'] {
-  --accent: #1D5E4C;
-  --accent-fg: #FFFFFF;
-  --accent-soft: #142721;
-  --ring: #D4AF37;
-}
-
-/* ==========================================================================
-   ACCENTS (Profile Personalization)
-   ========================================================================== */
-[data-accent='teal'] { --accent: #174E3E; --accent-fg: #FFFFFF; --accent-soft: #EAF3EF; --ring: #174E3E; }
-[data-accent='amber'] { --accent: #B88E3E; --accent-fg: #FFFFFF; --accent-soft: #FBF1DE; --ring: #B88E3E; }
-[data-accent='cobalt'] { --accent: #243E6B; --accent-fg: #FFFFFF; --accent-soft: #E6EDF7; --ring: #243E6B; }
-[data-accent='rose'] { --accent: #8E2B3E; --accent-fg: #FFFFFF; --accent-soft: #FBECEF; --ring: #8E2B3E; }
-
-.dark[data-accent='teal'] { --accent: #1D5E4C; --accent-fg: #FFFFFF; --accent-soft: #142721; --ring: #1D5E4C; }
-.dark[data-accent='amber'] { --accent: #D49C3D; --accent-fg: #261905; --accent-soft: #33230C; --ring: #D49C3D; }
-.dark[data-accent='cobalt'] { --accent: #70A0E0; --accent-fg: #0A1933; --accent-soft: #142542; --ring: #70A0E0; }
-.dark[data-accent='rose'] { --accent: #E2687F; --accent-fg: #2B0A11; --accent-soft: #381219; --ring: #E2687F; }

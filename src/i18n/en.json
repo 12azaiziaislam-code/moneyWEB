@@ -48,7 +48,8 @@
     "min": "min",
     "deleteConfirm": "Are you sure?",
     "camera": "Camera",
-    "gallery": "Gallery"
+    "gallery": "Gallery",
+    "added": "Added"
   },
   "auth": {
     "title": "Welcome to Baraka",
@@ -69,7 +70,8 @@
     "blocked": "The browser blocked the sign-in window. Allow pop-ups and retry.",
     "logout": "Sign out",
     "logoutConfirm": "Sign out of your account?",
-    "notConfigured": "Google sign-in is not configured. You can register with email or try as a guest."
+    "notConfigured": "Google sign-in is not configured. You can register with email or try as a guest.",
+    "signOut": "Sign out"
   },
   "consent": {
     "title": "Consent to data processing",
@@ -87,7 +89,12 @@
     "languageTitle": "App language",
     "finish": "Start using Baraka",
     "skip": "Skip for now",
-    "done": "Ready"
+    "done": "Ready",
+    "pillar1": "First Pillar: Halal Verification",
+    "pillar2": "Second Pillar: Health & Dietary Safety",
+    "pillar3": "Third Pillar: Disciplined Budgeting",
+    "encryption": "100% end-to-end encryption, zero third-party selling.",
+    "localStorage": "Secure storage strictly under your sovereign control."
   },
   "health": {
     "age": "Age",
@@ -296,7 +303,12 @@
     "deleted": "Account deleted",
     "legal": "Privacy & terms",
     "about": "About",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "darkMode": "Dark mode",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "deleteWarning": "Warning: All your data, check history, and budget records will be permanently deleted. This cannot be undone.",
+    "deleteConfirm": "Permanently delete account"
   },
   "legal": {
     "privacyTitle": "Privacy policy",
@@ -369,6 +381,7 @@
     "mg": "mg"
   },
   "guest": {
+    "cta": "Try as guest",
     "try": "Try as guest",
     "badge": "Guest mode",
     "localOnly": "Your data stays on this device only",
@@ -433,6 +446,7 @@
     "bmi": "BMI",
     "complete": "Profile complete",
     "incomplete": "Incomplete",
+    "incompleteTip": "Add height, weight, and chronic conditions to enable precise dosage guidance.",
     "edit": "Edit"
   },
   "chef": {
@@ -508,5 +522,10 @@
     "footerBudget": "Personal Budget",
     "footerHealth": "Food Safety",
     "instantDemo": "Instant Demo"
+  },
+  "theme": {
+    "system": "System default",
+    "light": "Warm Ivory Light",
+    "dark": "Obsidian Emerald Dark"
   }
 }

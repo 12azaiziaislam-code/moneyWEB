@@ -1,6 +1,12 @@
-/** Bottom sheet with backdrop, drag-to-dismiss and escape handling. */
+/**
+ * Baraka v2 — Sovereign Bottom Sheet & Modal
+ * Rendered via createPortal to document.body:
+ * 100% immune to transform containing-block trapping and stacking context bugs.
+ * Never overlapped by bottom navigation.
+ */
 
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { animate } from 'motion';
 import { cn } from './cn';
@@ -31,60 +37,82 @@ export function Sheet({
       if (event.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKey);
-    const previous = document.body.style.overflow;
+
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     if (!prefersReducedMotion()) {
       if (panelRef.current) {
         animate(
           panelRef.current,
-          { transform: ['translateY(26px)', 'translateY(0px)'], opacity: [0, 1] },
-          { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
+          { transform: ['translateY(100%)', 'translateY(0%)'], opacity: [0.6, 1] },
+          { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
         );
       }
       if (backdropRef.current) {
-        animate(backdropRef.current, { opacity: [0, 1] }, { duration: 0.24 });
+        animate(backdropRef.current, { opacity: [0, 1] }, { duration: 0.22 });
       }
     }
 
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = previous;
+      document.body.style.overflow = prevOverflow;
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
-  return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center p-0 sm:p-4">
+      {/* Backdrop */}
       <button
         ref={backdropRef}
         type="button"
-        aria-label="close"
+        aria-label="إغلاق النافذة"
         tabIndex={-1}
-        className="absolute inset-0 bg-[var(--overlay)]"
+        className="fixed inset-0 bg-overlay backdrop-blur-[2px] transition-opacity cursor-pointer border-0"
         onClick={onClose}
       />
+
+      {/* Sheet Panel */}
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}
         className={cn(
-          'relative z-10 w-full max-w-app overflow-y-auto rounded-t-2xl border border-line bg-surface px-4 pb-[calc(1rem+var(--safe-bottom))] pt-2 shadow-e3',
-          size === 'tall' ? 'max-h-[92dvh]' : 'max-h-[86dvh]',
+          'relative z-10 flex flex-col w-full max-w-lg overflow-hidden',
+          'rounded-t-2xl sm:rounded-2xl border border-line bg-surface shadow-e3',
+          'transition-all duration-mid',
+          size === 'tall' ? 'max-h-[90dvh] h-[90dvh]' : 'max-h-[85dvh]',
         )}
       >
-        <div className="mx-auto mb-2 h-1.5 w-11 rounded-full bg-line" aria-hidden="true" />
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-lg font-bold">{title}</h2>
-          <IconButton label="close" onClick={onClose}>
+        {/* Drag handle pill */}
+        <div className="mx-auto mt-2.5 h-1.5 w-12 shrink-0 rounded-full bg-border" aria-hidden="true" />
+
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line/60 px-5 py-3">
+          <h2 className="font-display text-lg font-bold text-fg">{title}</h2>
+          <IconButton label="إغلاق" onClick={onClose} className="text-muted hover:text-fg hover:bg-surface2">
             <X className="h-5 w-5" aria-hidden />
           </IconButton>
         </div>
-        <div className="space-y-3">{children}</div>
-        {footer ? <div className="mt-4 space-y-2">{footer}</div> : null}
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4 no-scrollbar">
+          {children}
+        </div>
+
+        {/* Footer (Always visible above safe-area) */}
+        {footer ? (
+          <div className="shrink-0 border-t border-line/60 bg-surface2/60 px-5 py-3 pb-[calc(0.75rem+var(--safe-bottom))]">
+            {footer}
+          </div>
+        ) : (
+          <div className="h-[var(--safe-bottom)] shrink-0" />
+        )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

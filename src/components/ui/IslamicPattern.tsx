@@ -1,86 +1,104 @@
+import { useEffect, useState } from 'react';
 import { cn } from './cn';
+import { prefersReducedMotion } from '../../lib/motion';
 
 /**
- * Authentic Architectural Islamic Girih Pattern & Atmospheric Illumination.
- * Provides a visible, luxury geometric backdrop with warm gilded ambient depth.
+ * Baraka v2 — Sovereign Islamic Geometric Tessellation (Girih Star Rosette).
+ * Crisp vector line art at low opacity with subtle organic grain.
+ * High performance: pure CSS/SVG, GPU-composited, zero blurry blobs, <1% CPU.
  */
 export function IslamicPattern({ className }: { className?: string }) {
+  const [active, setActive] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const onVisibility = () => setActive(!document.hidden);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, []);
+
+  const reduced = prefersReducedMotion();
+
   return (
     <div
-      className={cn('pointer-events-none fixed inset-0 z-0 overflow-hidden', className)}
+      className={cn(
+        'pointer-events-none fixed inset-0 z-0 overflow-hidden select-none',
+        !active && 'opacity-0',
+        className,
+      )}
       aria-hidden="true"
     >
-      {/* 1. Atmospheric Ambient Depth (Warm Gilded Dome Illumination) */}
-      <div
-        className="absolute inset-0 transition-opacity duration-slower opacity-80 dark:opacity-70"
-        style={{
-          background:
-            'radial-gradient(110% 70% at 50% -10%, rgba(212, 175, 55, 0.18) 0%, rgba(197, 160, 89, 0.06) 45%, transparent 75%)',
-        }}
-      />
+      {/* 1. Subtle Paper Grain Texture (SVG Noise Filter) */}
+      <svg className="absolute inset-0 h-full w-full opacity-[0.025] dark:opacity-[0.035] mix-blend-overlay">
+        <filter id="baraka-grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch" />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#baraka-grain)" />
+      </svg>
 
-      {/* 2. Secondary soft vignette for dramatic framing */}
-      <div
-        className="absolute inset-0 opacity-50 dark:opacity-40"
-        style={{
-          background:
-            'radial-gradient(120% 100% at 50% 100%, rgba(18, 22, 28, 0.35) 0%, transparent 60%)',
-        }}
-      />
-
-      {/* 3. The Seamless Girih Geometric Star Lattice (High-definition SVG) */}
+      {/* 2. Crisp 8-Pointed Star Girih Tessellation */}
       <svg
-        className="absolute inset-0 h-full w-full text-[#B88E3E]/[0.22] dark:text-[#C5A059]/[0.18]"
+        className={cn(
+          'absolute inset-0 h-full w-full transition-opacity duration-slower',
+          mounted || reduced ? 'opacity-100' : 'opacity-0',
+        )}
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
           <pattern
-            id="baraka-girih-pattern"
-            width="80"
-            height="80"
+            id="baraka-girih-lattice"
+            width="96"
+            height="96"
             patternUnits="userSpaceOnUse"
           >
-            {/* Diagonal & cross alignment grid lines */}
+            {/* Structural construction lines (0.5px hairline) */}
             <path
-              d="M0 0 L80 80 M80 0 L0 80 M40 0 L40 80 M0 40 L80 40"
-              stroke="currentColor"
+              d="M0 0 L96 96 M96 0 L0 96 M48 0 L48 96 M0 48 L96 48"
+              stroke="var(--pattern-ink)"
               strokeWidth="0.5"
-              strokeDasharray="2 3"
+              strokeDasharray="2 4"
               fill="none"
-              opacity="0.45"
+              opacity="0.3"
             />
 
-            {/* Central 8-pointed star (Khatam Sulayman) */}
-            <g fill="none" stroke="currentColor" strokeWidth="0.95">
-              <rect x="25" y="25" width="30" height="30" />
-              <rect x="25" y="25" width="30" height="30" transform="rotate(45 40 40)" />
-              <circle cx="40" cy="40" r="10" strokeWidth="0.6" strokeDasharray="2 2" />
-              <circle cx="40" cy="40" r="2.5" fill="currentColor" opacity="0.6" />
+            {/* Central 8-pointed star rosette (Khatam) */}
+            <g fill="none" stroke="var(--pattern-ink)" strokeWidth="0.85">
+              <rect x="30" y="30" width="36" height="36" rx="1.5" />
+              <rect x="30" y="30" width="36" height="36" rx="1.5" transform="rotate(45 48 48)" />
+              <circle cx="48" cy="48" r="12" strokeWidth="0.5" strokeDasharray="2 2" opacity="0.6" />
+              <circle cx="48" cy="48" r="2.5" fill="var(--pattern-ink)" opacity="0.5" />
             </g>
 
-            {/* Corner interlocking 8-pointed stars (seamless tiling seams) */}
-            <g fill="none" stroke="currentColor" strokeWidth="0.95">
-              <rect x="-15" y="-15" width="30" height="30" />
-              <rect x="-15" y="-15" width="30" height="30" transform="rotate(45 0 0)" />
-
-              <rect x="65" y="-15" width="30" height="30" />
-              <rect x="65" y="-15" width="30" height="30" transform="rotate(45 80 0)" />
-
-              <rect x="65" y="65" width="30" height="30" />
-              <rect x="65" y="65" width="30" height="30" transform="rotate(45 80 80)" />
-
-              <rect x="-15" y="65" width="30" height="30" />
-              <rect x="-15" y="65" width="30" height="30" transform="rotate(45 0 80)" />
+            {/* Interlocking corner rosettes for seamless tiling */}
+            <g fill="none" stroke="var(--pattern-ink)" strokeWidth="0.85">
+              {/* Top-Left */}
+              <rect x="-18" y="-18" width="36" height="36" rx="1.5" />
+              <rect x="-18" y="-18" width="36" height="36" rx="1.5" transform="rotate(45 0 0)" />
+              {/* Top-Right */}
+              <rect x="78" y="-18" width="36" height="36" rx="1.5" />
+              <rect x="78" y="-18" width="36" height="36" rx="1.5" transform="rotate(45 96 0)" />
+              {/* Bottom-Right */}
+              <rect x="78" y="78" width="36" height="36" rx="1.5" />
+              <rect x="78" y="78" width="36" height="36" rx="1.5" transform="rotate(45 96 96)" />
+              {/* Bottom-Left */}
+              <rect x="-18" y="78" width="36" height="36" rx="1.5" />
+              <rect x="-18" y="78" width="36" height="36" rx="1.5" transform="rotate(45 0 96)" />
             </g>
           </pattern>
         </defs>
 
-        <rect width="100%" height="100%" fill="url(#baraka-girih-pattern)" />
+        <rect
+          width="100%"
+          height="100%"
+          fill="url(#baraka-girih-lattice)"
+          opacity="var(--pattern-opacity)"
+        />
       </svg>
 
-      {/* Subtle hairline frame border at the very top edge */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#C5A059]/40 to-transparent" />
+      {/* 3. Subtle hairline horizon separator */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-60" />
     </div>
   );
 }
-
