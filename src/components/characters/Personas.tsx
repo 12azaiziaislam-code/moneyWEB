@@ -21,296 +21,318 @@ const sizePx: Record<PersonaSize, number> = {
 };
 
 /* -------------------------------------------------------------------------- */
-/* 1. THE SHEIKH (الشيخ — المستشار الشرعي للأطعمة والمعاملات)               */
-/* Dignified scholar: White draped ghutrah, neat beard, gold glasses, bisht.   */
+/* Shared portrait construction                                               */
+/* All three characters share one drawing system (120×120 grid) so they read  */
+/* as a family: same head, same lighting, a tool-colored backdrop each.       */
 /* -------------------------------------------------------------------------- */
+
+interface PortraitProps {
+  size: PersonaSize;
+  className?: string;
+  label: string;
+  /** Backdrop gradient: light (top) → deep (bottom). */
+  bg: [string, string];
+  ring: string;
+  children: (uid: string) => ReactNode;
+}
+
+function Portrait({ size, className, label, bg, ring, children }: PortraitProps) {
+  const uid = useId().replace(/:/g, '');
+  const px = sizePx[size];
+  return (
+    <div
+      className={cn('relative inline-flex shrink-0 select-none items-center justify-center', className)}
+      style={{ width: px, height: px }}
+    >
+      <svg viewBox="0 0 120 120" width={px} height={px} className="h-full w-full" role="img" aria-label={label} fill="none">
+        <defs>
+          <radialGradient id={`${uid}bg`} cx="35%" cy="25%" r="85%">
+            <stop offset="0%" stopColor={bg[0]} />
+            <stop offset="100%" stopColor={bg[1]} />
+          </radialGradient>
+          <clipPath id={`${uid}clip`}>
+            <circle cx="60" cy="60" r="58" />
+          </clipPath>
+          <radialGradient id={`${uid}shine`} cx="30%" cy="15%" r="60%">
+            <stop offset="0%" stopColor="#fff" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="60" cy="60" r="58" fill={`url(#${uid}bg)`} />
+        <g clipPath={`url(#${uid}clip)`}>{children(uid)}</g>
+        <circle cx="60" cy="60" r="58" fill={`url(#${uid}shine)`} />
+        <circle cx="60" cy="60" r="57" stroke="#fff" strokeOpacity="0.28" strokeWidth="1.5" />
+        <circle cx="60" cy="60" r="59" stroke={ring} strokeWidth="2" />
+      </svg>
+    </div>
+  );
+}
+
+interface SkinTone {
+  light: string;
+  shade: string;
+  line: string;
+}
+
+/** Neck with jaw shadow. */
+function Neck({ skin }: { skin: SkinTone }) {
+  return (
+    <>
+      <path d="M50 68 L50 88 C50 94 70 94 70 88 L70 68 Z" fill={skin.shade} />
+      <path d="M50 70 C55 78 65 78 70 70 L70 66 L50 66 Z" fill={skin.line} opacity="0.35" />
+    </>
+  );
+}
+
+function Ears({ skin }: { skin: SkinTone }) {
+  return (
+    <>
+      <ellipse cx="41" cy="57" rx="4" ry="6.5" fill={skin.shade} />
+      <ellipse cx="79" cy="57" rx="4" ry="6.5" fill={skin.shade} />
+      <path d="M41.5 54 C40 56 40 59 41.5 61" stroke={skin.line} strokeWidth="1" strokeLinecap="round" opacity="0.6" />
+      <path d="M78.5 54 C80 56 80 59 78.5 61" stroke={skin.line} strokeWidth="1" strokeLinecap="round" opacity="0.6" />
+    </>
+  );
+}
+
+/** Head, eyes, brows, nose, cheeks. Mouth is drawn by each character (beards differ). */
+function Face({ uid, skin, brow }: { uid: string; skin: SkinTone; brow: string }) {
+  return (
+    <>
+      <defs>
+        <linearGradient id={`${uid}skin`} x1="60" y1="34" x2="60" y2="82" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={skin.light} />
+          <stop offset="100%" stopColor={skin.shade} />
+        </linearGradient>
+      </defs>
+      <path
+        d="M42 50 C42 35 78 35 78 50 L78 59 C78 72 70 81 60 81 C50 81 42 72 42 59 Z"
+        fill={`url(#${uid}skin)`}
+      />
+      {/* brows */}
+      <path d="M47.5 50 Q52 47.2 56.5 49.4" stroke={brow} strokeWidth="2" strokeLinecap="round" />
+      <path d="M63.5 49.4 Q68 47.2 72.5 50" stroke={brow} strokeWidth="2" strokeLinecap="round" />
+      {/* eyes */}
+      <ellipse cx="52" cy="56" rx="2.3" ry="2.7" fill="#1f1611" />
+      <ellipse cx="68" cy="56" rx="2.3" ry="2.7" fill="#1f1611" />
+      <circle cx="52.8" cy="55" r="0.8" fill="#fff" />
+      <circle cx="68.8" cy="55" r="0.8" fill="#fff" />
+      {/* nose */}
+      <path d="M60.5 57 Q58.4 63.5 61 64.6" stroke={skin.line} strokeWidth="1.4" strokeLinecap="round" />
+      {/* cheeks */}
+      <circle cx="48.5" cy="64.5" r="3.6" fill="#ef7f6b" opacity="0.22" />
+      <circle cx="71.5" cy="64.5" r="3.6" fill="#ef7f6b" opacity="0.22" />
+    </>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* 1. THE SHEIKH — مساعد الحلال                                                */
+/* White ghutrah with folds, black double agal, full greying beard,            */
+/* white thobe under a dark bisht with gold trim. Emerald backdrop + star.    */
+/* -------------------------------------------------------------------------- */
+const SHEIKH_SKIN: SkinTone = { light: '#E7B98F', shade: '#CF9A6D', line: '#9C6A45' };
+
 export function SheikhAvatar({ size = 'md', className }: { size?: PersonaSize; className?: string }) {
-  const uid = useId().replace(/:/g, '');
-  const px = sizePx[size];
   return (
-    <div
-      className={cn('relative inline-flex shrink-0 items-center justify-center select-none', className)}
-      style={{ width: px, height: px }}
-    >
-      <svg
-        viewBox="0 0 100 100"
-        width={px}
-        height={px}
-        className="w-full h-full drop-shadow-sm"
-        role="img"
-        aria-label="مساعد الحلال"
-        fill="none"
-      >
-        <defs>
-          <radialGradient id={`${uid}sh-bg`} cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#2A2416" />
-            <stop offset="60%" stopColor="#171510" />
-            <stop offset="100%" stopColor="#0D0C09" />
-          </radialGradient>
-          <linearGradient id={`${uid}sh-gold`} x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#F5DF9E" />
-            <stop offset="50%" stopColor="#C9983E" />
-            <stop offset="100%" stopColor="#8A631E" />
-          </linearGradient>
-          <linearGradient id={`${uid}sh-cloth`} x1="0" y1="20" x2="0" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FAF8F5" />
-            <stop offset="100%" stopColor="#D8D4CC" />
-          </linearGradient>
-          <linearGradient id={`${uid}sh-bisht`} x1="0" y1="50" x2="0" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#1E1C1A" />
-            <stop offset="100%" stopColor="#11100F" />
-          </linearGradient>
-          <linearGradient id={`${uid}sh-skin`} x1="0" y1="30" x2="0" y2="70" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#E8BF96" />
-            <stop offset="100%" stopColor="#C99B6D" />
-          </linearGradient>
-        </defs>
+    <Portrait size={size} className={className} label="مساعد الحلال" bg={['#2FB389', '#0B5640']} ring="#0B5640">
+      {(uid) => (
+        <>
+          <defs>
+            <linearGradient id={`${uid}cloth`} x1="60" y1="20" x2="60" y2="110" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="100%" stopColor="#DCD7CC" />
+            </linearGradient>
+            <linearGradient id={`${uid}bisht`} x1="0" y1="90" x2="0" y2="124" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#4A3523" />
+              <stop offset="100%" stopColor="#2A1D12" />
+            </linearGradient>
+          </defs>
 
-        {/* Circular portrait frame */}
-        <circle cx="50" cy="50" r="48" fill={`url(#${uid}sh-bg)`} stroke={`url(#${uid}sh-gold)`} strokeWidth="1.8" />
+          {/* eight-point star motif */}
+          <g stroke="#fff" strokeOpacity="0.16" strokeWidth="1.4">
+            <rect x="34" y="8" width="52" height="52" rx="3" />
+            <rect x="34" y="8" width="52" height="52" rx="3" transform="rotate(45 60 34)" />
+          </g>
 
-        {/* Bisht Cloak & Golden Collar Embroidery (Qasab) */}
-        <path d="M12 96 C16 72 32 64 50 64 C68 64 84 72 88 96 Z" fill={`url(#${uid}sh-bisht)`} />
-        {/* Golden bisht trim */}
-        <path d="M42 64 L42 96 L46 96 L46 64 Z" fill={`url(#${uid}sh-gold)`} opacity="0.9" />
-        <path d="M54 64 L54 96 L58 96 L58 64 Z" fill={`url(#${uid}sh-gold)`} opacity="0.9" />
-        <path d="M46 68 L50 74 L54 68 Z" fill={`url(#${uid}sh-gold)`} />
+          {/* thobe */}
+          <path d="M12 124 C16 98 36 88 60 88 C84 88 104 98 108 124 Z" fill={`url(#${uid}cloth)`} />
+          {/* bisht panels with gold trim */}
+          <path d="M12 124 C16 100 30 91 44 89 L52 124 Z" fill={`url(#${uid}bisht)`} />
+          <path d="M108 124 C104 100 90 91 76 89 L68 124 Z" fill={`url(#${uid}bisht)`} />
+          <path d="M44 89 L52 124" stroke="#E2B65C" strokeWidth="2.2" />
+          <path d="M76 89 L68 124" stroke="#E2B65C" strokeWidth="2.2" />
+          {/* thobe collar */}
+          <path d="M52 88 C55 94 65 94 68 88" stroke="#C9C3B6" strokeWidth="1.4" />
+          <circle cx="60" cy="98" r="1.2" fill="#C9C3B6" />
 
-        {/* Inner White Thobe Collar */}
-        <path d="M44 60 L50 70 L56 60 Z" fill="#F8F6F0" />
+          <Neck skin={SHEIKH_SKIN} />
+          <Face uid={uid} skin={SHEIKH_SKIN} brow="#4B4039" />
 
-        {/* Neck */}
-        <path d="M44 50 C44 58 56 58 56 50 Z" fill={`url(#${uid}sh-skin)`} />
+          {/* full beard with grey streaks */}
+          <path
+            d="M42 58 C42 77 50 88 60 88 C70 88 78 77 78 58 C76 66 72 70.5 66.5 71.5 C63.5 69.5 56.5 69.5 53.5 71.5 C48 70.5 44 66 42 58 Z"
+            fill="#3D312B"
+          />
+          <path d="M50 76 C52 80 54 82 56 83" stroke="#8C8079" strokeWidth="1.1" strokeLinecap="round" opacity="0.8" />
+          <path d="M64 83 C66 82 68 80 70 76" stroke="#8C8079" strokeWidth="1.1" strokeLinecap="round" opacity="0.8" />
+          <path d="M60 79 L60 86" stroke="#8C8079" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
+          {/* moustache + mouth */}
+          <path d="M52.5 67.5 C55.5 65 64.5 65 67.5 67.5 C64 69.2 56 69.2 52.5 67.5 Z" fill="#33281F" />
+          <path d="M56.5 71.6 Q60 73.6 63.5 71.6" stroke="#B5675A" strokeWidth="1.5" strokeLinecap="round" />
 
-        {/* Dignified Face Shape */}
-        <path d="M37 36 C37 25 63 25 63 36 C63 53 37 53 37 36 Z" fill={`url(#${uid}sh-skin)`} />
+          {/* ghutrah: frames the face and drapes to the shoulders */}
+          <path
+            d="M37 54 C35 33 46 25 60 25 C74 25 85 33 83 54 C85 70 90 88 98 106 L85 110 C80 92 78 72 78 56 C78 45 71 39 60 39 C49 39 42 45 42 56 C42 72 40 92 35 110 L22 106 C30 88 35 70 37 54 Z"
+            fill={`url(#${uid}cloth)`}
+          />
+          <path d="M44 41 C40 52 39 72 33 96" stroke="#CFC9BD" strokeWidth="1.2" strokeLinecap="round" />
+          <path d="M76 41 C80 52 81 72 87 96" stroke="#CFC9BD" strokeWidth="1.2" strokeLinecap="round" />
+          <path d="M42 56 C42 45 49 39 60 39 C71 39 78 45 78 56" stroke="#CFC9BD" strokeWidth="1" />
 
-        {/* Scholarly Trimmed Beard */}
-        <path
-          d="M37 40 C37 60 45 66 50 66 C55 66 63 60 63 40 C63 46 59 52 50 54 C41 52 37 46 37 40 Z"
-          fill="#42352B"
-        />
-        {/* Moustache */}
-        <path d="M43 47 C46 45 54 45 57 47 C55 49 45 49 43 47 Z" fill="#362B23" />
-
-        {/* Gentle Eyes */}
-        <ellipse cx="44" cy="38" rx="2" ry="1.4" fill="#29201A" />
-        <ellipse cx="56" cy="38" rx="2" ry="1.4" fill="#29201A" />
-
-        {/* Thin Gold Wireframe Spectacles */}
-        <circle cx="44" cy="38" r="5" stroke={`url(#${uid}sh-gold)`} strokeWidth="1" fill="none" />
-        <circle cx="56" cy="38" r="5" stroke={`url(#${uid}sh-gold)`} strokeWidth="1" fill="none" />
-        <path d="M49 38 L51 38" stroke={`url(#${uid}sh-gold)`} strokeWidth="1" />
-        <path d="M39 37 L35 36" stroke={`url(#${uid}sh-gold)`} strokeWidth="0.8" />
-        <path d="M61 37 L65 36" stroke={`url(#${uid}sh-gold)`} strokeWidth="0.8" />
-
-        {/* Pristine Draped Ghutrah (Headcloth) */}
-        <path
-          d="M30 26 C33 16 67 16 70 26 C73 34 76 50 78 72 C74 74 70 65 67 48 C67 30 33 30 33 48 C30 65 26 74 22 72 C24 50 27 34 30 26 Z"
-          fill={`url(#${uid}sh-cloth)`}
-        />
-        {/* Subtle drape shadow under ghutrah */}
-        <path d="M34 26 C42 22 58 22 66 26 C64 24 36 24 34 26 Z" fill="#C5C0B6" />
-
-        {/* Black Agal with Gold Accent Thread */}
-        <ellipse cx="50" cy="24" rx="19" ry="4.5" stroke="#161514" strokeWidth="3" fill="none" />
-        <ellipse cx="50" cy="22.5" rx="18.5" ry="4" stroke={`url(#${uid}sh-gold)`} strokeWidth="0.8" fill="none" opacity="0.85" />
-      </svg>
-    </div>
+          {/* double black agal */}
+          <ellipse cx="60" cy="33" rx="22" ry="5" stroke="#141414" strokeWidth="3.4" />
+          <ellipse cx="60" cy="29.6" rx="21" ry="4.6" stroke="#141414" strokeWidth="3" />
+          <ellipse cx="60" cy="29.6" rx="21" ry="4.6" stroke="#fff" strokeOpacity="0.18" strokeWidth="0.8" />
+        </>
+      )}
+    </Portrait>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* 2. THE DOCTOR (الطبيب — المستشار الطبي والتغذوي)                           */
-/* Professional physician: White lab coat, stethoscope, navy scrub, glasses.   */
+/* 2. THE DOCTOR — الطبيب                                                       */
+/* Modern short hair, white coat over teal scrubs, stethoscope, ID badge.      */
+/* Sky-teal backdrop with a soft medical cross.                                */
 /* -------------------------------------------------------------------------- */
+const DOCTOR_SKIN: SkinTone = { light: '#F3CFAE', shade: '#DEAD87', line: '#A87553' };
+
 export function DoctorAvatar({ size = 'md', className }: { size?: PersonaSize; className?: string }) {
-  const uid = useId().replace(/:/g, '');
-  const px = sizePx[size];
   return (
-    <div
-      className={cn('relative inline-flex shrink-0 items-center justify-center select-none', className)}
-      style={{ width: px, height: px }}
-    >
-      <svg
-        viewBox="0 0 100 100"
-        width={px}
-        height={px}
-        className="w-full h-full drop-shadow-sm"
-        role="img"
-        aria-label="المستشار الطبي (الطبيب)"
-        fill="none"
-      >
-        <defs>
-          <radialGradient id={`${uid}doc-bg`} cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#162638" />
-            <stop offset="60%" stopColor="#0F1824" />
-            <stop offset="100%" stopColor="#090E17" />
-          </radialGradient>
-          <linearGradient id={`${uid}doc-cyan`} x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#93C5FD" />
-            <stop offset="60%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#1D4ED8" />
-          </linearGradient>
-          <linearGradient id={`${uid}doc-coat`} x1="0" y1="45" x2="0" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="100%" stopColor="#E2E8F0" />
-          </linearGradient>
-          <linearGradient id={`${uid}doc-scrub`} x1="0" y1="55" x2="0" y2="85" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#1E3A5F" />
-            <stop offset="100%" stopColor="#0F1E33" />
-          </linearGradient>
-          <linearGradient id={`${uid}doc-skin`} x1="0" y1="28" x2="0" y2="65" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#F5D0B5" />
-            <stop offset="100%" stopColor="#DCAB89" />
-          </linearGradient>
-          <linearGradient id={`${uid}doc-hair`} x1="0" y1="12" x2="0" y2="35" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#332A24" />
-            <stop offset="100%" stopColor="#1E1712" />
-          </linearGradient>
-        </defs>
+    <Portrait size={size} className={className} label="الطبيب" bg={['#4CC3E3', '#0B5E7A']} ring="#0B5E7A">
+      {(uid) => (
+        <>
+          <defs>
+            <linearGradient id={`${uid}coat`} x1="0" y1="88" x2="0" y2="124" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#FFFFFF" />
+              <stop offset="100%" stopColor="#DCE6EE" />
+            </linearGradient>
+            <linearGradient id={`${uid}hair`} x1="60" y1="22" x2="60" y2="52" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#4A3426" />
+              <stop offset="100%" stopColor="#2A1D15" />
+            </linearGradient>
+          </defs>
 
-        {/* Circular portrait frame */}
-        <circle cx="50" cy="50" r="48" fill={`url(#${uid}doc-bg)`} stroke={`url(#${uid}doc-cyan)`} strokeWidth="1.8" />
+          {/* medical cross motif */}
+          <path d="M88 14 h8 v10 h10 v8 h-10 v10 h-8 v-10 h-10 v-8 h10 Z" fill="#fff" opacity="0.18" />
 
-        {/* Physician White Coat Shoulders */}
-        <path d="M12 96 C16 70 32 62 50 62 C68 62 84 70 88 96 Z" fill={`url(#${uid}doc-coat)`} />
+          {/* scrubs + coat */}
+          <path d="M12 124 C16 98 36 88 60 88 C84 88 104 98 108 124 Z" fill="#127C8C" />
+          <path d="M12 124 C16 99 32 90 48 88.5 L55 124 Z" fill={`url(#${uid}coat)`} />
+          <path d="M108 124 C104 99 88 90 72 88.5 L65 124 Z" fill={`url(#${uid}coat)`} />
+          <path d="M48 88.5 L58 106 L55 124" stroke="#C5D3DE" strokeWidth="1.3" />
+          <path d="M72 88.5 L62 106 L65 124" stroke="#C5D3DE" strokeWidth="1.3" />
+          {/* ID badge */}
+          <rect x="76" y="103" width="12" height="9" rx="1.8" fill="#E0F4FB" stroke="#9CC9DA" strokeWidth="0.8" />
+          <rect x="78" y="105.5" width="5" height="1.4" rx="0.7" fill="#0B5E7A" />
+          <rect x="78" y="108.2" width="8" height="1.2" rx="0.6" fill="#9CC9DA" />
 
-        {/* Inner Navy Medical Scrub (V-neck) */}
-        <path d="M40 62 L50 82 L60 62 Z" fill={`url(#${uid}doc-scrub)`} />
+          <Neck skin={DOCTOR_SKIN} />
 
-        {/* Coat Lapels */}
-        <path d="M34 62 L44 86 L36 96 L22 96 Z" fill="#F1F5F9" />
-        <path d="M66 62 L56 86 L64 96 L78 96 Z" fill="#E2E8F0" />
+          {/* stethoscope */}
+          <path d="M49 86 C42 98 46 112 60 112 C74 112 78 98 71 86" stroke="#2F3B4A" strokeWidth="2.6" strokeLinecap="round" />
+          <circle cx="60" cy="113" r="4.6" fill="#C9D3DC" stroke="#2F3B4A" strokeWidth="1.6" />
+          <circle cx="60" cy="113" r="1.8" fill="#4CC3E3" />
 
-        {/* Stethoscope Tubing and Bell */}
-        <path
-          d="M36 64 C36 78 44 88 50 88 C56 88 64 78 64 64"
-          stroke="#475569"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          fill="none"
-        />
-        {/* Chest piece / bell */}
-        <circle cx="50" cy="88" r="4" fill="#94A3B8" stroke="#334155" strokeWidth="1.2" />
-        <circle cx="50" cy="88" r="1.8" fill="#38BDF8" />
+          <Ears skin={DOCTOR_SKIN} />
+          <Face uid={uid} skin={DOCTOR_SKIN} brow="#3A291E" />
 
-        {/* Neck */}
-        <path d="M43 48 C43 57 57 57 57 48 Z" fill={`url(#${uid}doc-skin)`} />
+          {/* friendly smile */}
+          <path d="M54.5 69 Q60 74 65.5 69" stroke="#A4513F" strokeWidth="1.7" strokeLinecap="round" />
 
-        {/* Head / Face */}
-        <ellipse cx="50" cy="38" rx="14" ry="16" fill={`url(#${uid}doc-skin)`} />
-
-        {/* Professional Hair */}
-        <path
-          d="M34 32 C34 18 66 18 66 32 C66 22 60 16 50 16 C40 16 34 22 34 32 Z"
-          fill={`url(#${uid}doc-hair)`}
-        />
-        <path d="M34 32 C34 37 36 42 37 44 C35 40 35 34 36 32 Z" fill={`url(#${uid}doc-hair)`} />
-        <path d="M66 32 C66 37 64 42 63 44 C65 40 65 34 64 32 Z" fill={`url(#${uid}doc-hair)`} />
-
-        {/* Eyes & Warm Caring Smile */}
-        <ellipse cx="44" cy="38" rx="1.8" ry="1.2" fill="#1E293B" />
-        <ellipse cx="56" cy="38" rx="1.8" ry="1.2" fill="#1E293B" />
-        <path d="M46 46 C48 48 52 48 54 46" stroke="#B45309" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-
-        {/* Sleek Medical Eyewear */}
-        <rect x="38" y="33" width="11" height="9" rx="3" stroke="#38BDF8" strokeWidth="1.2" fill="none" opacity="0.9" />
-        <rect x="51" y="33" width="11" height="9" rx="3" stroke="#38BDF8" strokeWidth="1.2" fill="none" opacity="0.9" />
-        <path d="M49 37 L51 37" stroke="#38BDF8" strokeWidth="1.2" />
-      </svg>
-    </div>
+          {/* short modern hair with a soft quiff */}
+          <path
+            d="M40.5 54 C37 34 47 23 61 23.5 C75 24 84 33 79.5 54 C78.5 47 75.5 42.5 71 41 C66 43.5 55 43.5 49 41.5 C45 43 42 47.5 40.5 54 Z"
+            fill={`url(#${uid}hair)`}
+          />
+          <path d="M50 30 C56 26.5 66 26.5 72 31" stroke="#6B4C39" strokeWidth="1.4" strokeLinecap="round" opacity="0.8" />
+        </>
+      )}
+    </Portrait>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. THE ACCOUNTANT (المحاسب — المستشار المالي ومراقب الميزانية)             */
-/* Savvy wealth advisor: Charcoal tailored vest, gold tie pin, smart glasses.   */
+/* 3. THE ACCOUNTANT — المحاسب                                                  */
+/* Navy tailored suit, white shirt, gold tie + pocket square, rectangular      */
+/* glasses, side-parted hair and a neatly trimmed beard. Gold backdrop + chart. */
 /* -------------------------------------------------------------------------- */
+const ACCOUNTANT_SKIN: SkinTone = { light: '#E9BE97', shade: '#D19F76', line: '#9A6B48' };
+
 export function AccountantAvatar({ size = 'md', className }: { size?: PersonaSize; className?: string }) {
-  const uid = useId().replace(/:/g, '');
-  const px = sizePx[size];
   return (
-    <div
-      className={cn('relative inline-flex shrink-0 items-center justify-center select-none', className)}
-      style={{ width: px, height: px }}
-    >
-      <svg
-        viewBox="0 0 100 100"
-        width={px}
-        height={px}
-        className="w-full h-full drop-shadow-sm"
-        role="img"
-        aria-label="المستشار المالي (المحاسب)"
-        fill="none"
-      >
-        <defs>
-          <radialGradient id={`${uid}acc-bg`} cx="50%" cy="40%" r="60%">
-            <stop offset="0%" stopColor="#2D2114" />
-            <stop offset="60%" stopColor="#1C140C" />
-            <stop offset="100%" stopColor="#0E0905" />
-          </radialGradient>
-          <linearGradient id={`${uid}acc-amber`} x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FDE68A" />
-            <stop offset="50%" stopColor="#D97706" />
-            <stop offset="100%" stopColor="#92400E" />
-          </linearGradient>
-          <linearGradient id={`${uid}acc-suit`} x1="0" y1="50" x2="0" y2="100" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#26262B" />
-            <stop offset="100%" stopColor="#141417" />
-          </linearGradient>
-          <linearGradient id={`${uid}acc-skin`} x1="0" y1="28" x2="0" y2="65" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#F3D2B8" />
-            <stop offset="100%" stopColor="#D3A786" />
-          </linearGradient>
-          <linearGradient id={`${uid}acc-tie`} x1="0" y1="62" x2="0" y2="92" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#C9983E" />
-            <stop offset="100%" stopColor="#8A631E" />
-          </linearGradient>
-        </defs>
+    <Portrait size={size} className={className} label="المحاسب" bg={['#F2C766', '#9A6414']} ring="#8A5A12">
+      {(uid) => (
+        <>
+          <defs>
+            <linearGradient id={`${uid}suit`} x1="0" y1="88" x2="0" y2="124" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#2A3A5E" />
+              <stop offset="100%" stopColor="#16203A" />
+            </linearGradient>
+          </defs>
 
-        {/* Circular portrait frame */}
-        <circle cx="50" cy="50" r="48" fill={`url(#${uid}acc-bg)`} stroke={`url(#${uid}acc-amber)`} strokeWidth="1.8" />
+          {/* rising chart motif */}
+          <g opacity="0.22">
+            <rect x="14" y="40" width="7" height="16" rx="1.5" fill="#fff" />
+            <rect x="24" y="32" width="7" height="24" rx="1.5" fill="#fff" />
+            <rect x="34" y="22" width="7" height="34" rx="1.5" fill="#fff" />
+            <path d="M88 44 L96 34 L103 38 L112 24" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
 
-        {/* Tailored Suit Shoulders */}
-        <path d="M12 96 C16 70 32 60 50 60 C68 60 84 70 88 96 Z" fill={`url(#${uid}acc-suit)`} />
+          {/* suit, shirt, tie */}
+          <path d="M12 124 C16 98 36 88 60 88 C84 88 104 98 108 124 Z" fill={`url(#${uid}suit)`} />
+          <path d="M49 88 L60 110 L71 88 Z" fill="#F8FAFC" />
+          <path d="M57 92 L63 92 L65 112 L60 118 L55 112 Z" fill="#D9A43D" />
+          <path d="M57 92 L63 92 L62 96 L58 96 Z" fill="#B9862A" />
+          {/* lapels */}
+          <path d="M47 88 L58 112 L50 124 L38 124 C40 108 42 96 47 88 Z" fill="#22304F" />
+          <path d="M73 88 L62 112 L70 124 L82 124 C80 108 78 96 73 88 Z" fill="#1D2944" />
+          {/* pocket square */}
+          <path d="M84 106 L94 106 L90 101 Z" fill="#E9BE5C" />
 
-        {/* Crisp Shirt Front */}
-        <path d="M42 60 L50 82 L58 60 Z" fill="#F8FAFC" />
+          <Neck skin={ACCOUNTANT_SKIN} />
+          <Ears skin={ACCOUNTANT_SKIN} />
+          <Face uid={uid} skin={ACCOUNTANT_SKIN} brow="#2E241D" />
 
-        {/* Refined Gold Tie */}
-        <path d="M48 64 L52 64 L54 84 L50 88 L46 84 Z" fill={`url(#${uid}acc-tie)`} />
-        {/* Tie clip */}
-        <path d="M47 73 L53 73" stroke="#FDE68A" strokeWidth="1" strokeLinecap="round" />
+          {/* short boxed beard (stubble-tone, lighter than the sheikh's) */}
+          <path
+            d="M43 62 C44.5 75 51.5 81 60 81 C68.5 81 75.5 75 77 62 C75 69 71 73 66 74 C63 72.5 57 72.5 54 74 C49 73 45 69 43 62 Z"
+            fill="#4A3A2E"
+            opacity="0.82"
+          />
+          <path d="M54 68.4 C57 67 63 67 66 68.4 C63 69.4 57 69.4 54 68.4 Z" fill="#3A2C22" />
+          <path d="M56 72 Q60 74.6 64 72" stroke="#A4513F" strokeWidth="1.6" strokeLinecap="round" />
 
-        {/* Vest Lapels */}
-        <path d="M32 60 L44 84 L38 96 L20 96 Z" fill="#1E1E22" />
-        <path d="M68 60 L56 84 L62 96 L80 96 Z" fill="#1A1A1E" />
+          {/* side-parted hair with grey temples */}
+          <path
+            d="M41 54 C38 35 47 24 61 24 C75 24 83 34 79 54 C78 47 76 43 72 41.5 C64 40 54 40.5 47 43 C44 45 42 49 41 54 Z"
+            fill="#2E241D"
+          />
+          <path d="M53 26 C51 31 49 36 47 43" stroke="#4A3C32" strokeWidth="1.4" strokeLinecap="round" />
+          <path d="M41.5 52 C41.5 48.5 42 46 43 44" stroke="#9A918A" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M78.5 52 C78.5 48.5 78 46 77 44" stroke="#9A918A" strokeWidth="1.6" strokeLinecap="round" />
 
-        {/* Neck */}
-        <path d="M44 48 C44 56 56 56 56 48 Z" fill={`url(#${uid}acc-skin)`} />
-
-        {/* Head / Face */}
-        <ellipse cx="50" cy="37" rx="13.5" ry="15.5" fill={`url(#${uid}acc-skin)`} />
-
-        {/* Neat Professional Haircut */}
-        <path
-          d="M35 30 C35 17 65 17 65 30 C65 20 58 15 50 15 C42 15 35 20 35 30 Z"
-          fill="#2B241E"
-        />
-        <path d="M35 30 C35 36 36 40 37 42 C35 38 35 32 36 30 Z" fill="#2B241E" />
-
-        {/* Confident Eyes & Smile */}
-        <ellipse cx="44" cy="37" rx="1.8" ry="1.2" fill="#1C140C" />
-        <ellipse cx="56" cy="37" rx="1.8" ry="1.2" fill="#1C140C" />
-        <path d="M46 45 C48 47 52 47 54 45" stroke="#9A3412" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-
-        {/* Sophisticated Architectural Glasses */}
-        <rect x="38" y="32" width="11" height="8.5" rx="2" stroke={`url(#${uid}acc-amber)`} strokeWidth="1.1" fill="none" />
-        <rect x="51" y="32" width="11" height="8.5" rx="2" stroke={`url(#${uid}acc-amber)`} strokeWidth="1.1" fill="none" />
-        <path d="M49 36 L51 36" stroke={`url(#${uid}acc-amber)`} strokeWidth="1.1" />
-      </svg>
-    </div>
+          {/* rectangular glasses */}
+          <g stroke="#2A1F18" strokeWidth="1.3">
+            <rect x="46" y="52" width="12.5" height="8.5" rx="2.4" fill="#fff" fillOpacity="0.14" />
+            <rect x="61.5" y="52" width="12.5" height="8.5" rx="2.4" fill="#fff" fillOpacity="0.14" />
+            <path d="M58.5 55.5 L61.5 55.5" />
+            <path d="M46 55 L42.5 54" />
+            <path d="M74 55 L77.5 54" />
+          </g>
+        </>
+      )}
+    </Portrait>
   );
 }
 
