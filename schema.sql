@@ -1,4 +1,4 @@
-﻿-- ===========================================================================
+-- ===========================================================================
 -- Baraka | بركة — full schema snapshot (generated from migrations/).
 -- Bootstrap:  wrangler d1 execute baraka-db --remote --file=./schema.sql
 -- Normal flow: wrangler d1 migrations apply baraka-db --remote
