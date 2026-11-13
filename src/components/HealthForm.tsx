@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import type { HealthProfile } from '../../shared/types';
 import { Button } from './ui/Button';
-import { Input, Select, Textarea } from './ui/Field';
+import { Input, Textarea } from './ui/Field';
+import { cn } from './ui';
+import { haptic, HAPTIC } from '../lib/haptics';
 import { useFinance } from '../data/finance';
 import { useToast } from '../state/ToastContext';
 
@@ -108,15 +110,49 @@ export function HealthForm({ initial, onSaved }: { initial: HealthProfile; onSav
         />
       </div>
 
-      <Select
-        label={t('health.sex')}
-        value={form.sex ?? ''}
-        onChange={(event) => setForm({ ...form, sex: (event.target.value || undefined) as HealthProfile['sex'] })}
-      >
-        <option value="">—</option>
-        <option value="male">{t('health.male')}</option>
-        <option value="female">{t('health.female')}</option>
-      </Select>
+      {/* 3. Luxury Gender Segmented Control */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-muted tracking-tight block">
+          {t('health.sex')}
+        </label>
+        <div className="grid grid-cols-2 gap-2 p-1 rounded-xl border border-line bg-surface2/60">
+          <button
+            type="button"
+            onClick={() => {
+              const next = form.sex === 'male' ? undefined : 'male';
+              setForm({ ...form, sex: next });
+              haptic(HAPTIC.select);
+            }}
+            className={cn(
+              'flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-bold text-sm transition-all duration-fast cursor-pointer',
+              form.sex === 'male'
+                ? 'bg-accent text-accent-fg shadow-sm'
+                : 'text-muted hover:text-fg hover:bg-surface2/80',
+            )}
+          >
+            <span>{t('health.male')}</span>
+            {form.sex === 'male' ? <Check className="h-4 w-4" strokeWidth={2.5} /> : null}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const next = form.sex === 'female' ? undefined : 'female';
+              setForm({ ...form, sex: next });
+              haptic(HAPTIC.select);
+            }}
+            className={cn(
+              'flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-bold text-sm transition-all duration-fast cursor-pointer',
+              form.sex === 'female'
+                ? 'bg-accent text-accent-fg shadow-sm'
+                : 'text-muted hover:text-fg hover:bg-surface2/80',
+            )}
+          >
+            <span>{t('health.female')}</span>
+            {form.sex === 'female' ? <Check className="h-4 w-4" strokeWidth={2.5} /> : null}
+          </button>
+        </div>
+      </div>
 
       <Textarea
         label={t('health.conditions')}
@@ -138,25 +174,54 @@ export function HealthForm({ initial, onSaved }: { initial: HealthProfile; onSav
       />
 
       {form.sex === 'female' ? (
-        <div className="flex flex-wrap gap-4 text-sm">
-          <label className="flex min-h-[36px] items-center gap-2">
-            <input
-              type="checkbox"
-              checked={Boolean(form.pregnant)}
-              onChange={(event) => setForm({ ...form, pregnant: event.target.checked })}
-              className="h-5 w-5 accent-[var(--accent)]"
-            />
-            {t('health.pregnant')}
-          </label>
-          <label className="flex min-h-[36px] items-center gap-2">
-            <input
-              type="checkbox"
-              checked={Boolean(form.breastfeeding)}
-              onChange={(event) => setForm({ ...form, breastfeeding: event.target.checked })}
-              className="h-5 w-5 accent-[var(--accent)]"
-            />
-            {t('health.breastfeeding')}
-          </label>
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <button
+            type="button"
+            onClick={() => {
+              setForm({ ...form, pregnant: !form.pregnant });
+              haptic(HAPTIC.tap);
+            }}
+            className={cn(
+              'flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg border text-xs font-bold transition-all cursor-pointer',
+              form.pregnant
+                ? 'border-accent bg-accent-soft text-accent shadow-xs'
+                : 'border-line bg-surface text-muted hover:text-fg hover:bg-surface2/60',
+            )}
+          >
+            <span>{t('health.pregnant')}</span>
+            <span
+              className={cn(
+                'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+                form.pregnant ? 'border-accent bg-accent text-accent-fg' : 'border-line',
+              )}
+            >
+              {form.pregnant ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setForm({ ...form, breastfeeding: !form.breastfeeding });
+              haptic(HAPTIC.tap);
+            }}
+            className={cn(
+              'flex items-center justify-between gap-2 py-2.5 px-3 rounded-lg border text-xs font-bold transition-all cursor-pointer',
+              form.breastfeeding
+                ? 'border-accent bg-accent-soft text-accent shadow-xs'
+                : 'border-line bg-surface text-muted hover:text-fg hover:bg-surface2/60',
+            )}
+          >
+            <span>{t('health.breastfeeding')}</span>
+            <span
+              className={cn(
+                'flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors',
+                form.breastfeeding ? 'border-accent bg-accent text-accent-fg' : 'border-line',
+              )}
+            >
+              {form.breastfeeding ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
+            </span>
+          </button>
         </div>
       ) : null}
 
