@@ -173,9 +173,9 @@ function guessTypeFromText(text: string): DoctorScanType {
   const value = text.toLowerCase();
   if (/чек|кассов|квитанц|receipt|ticket|فاتورة|إيصال/.test(value)) return 'receipt';
   if (/баланс|карт[аеу]|сч[её]т|balance|card|بطاق|رصيد/.test(value)) return 'bank';
-  if (/анализ|кровь|lab result|تحليل/.test(value)) return 'lab';
-  if (/таблет|лекарств|препарат|дозировк|medicine|pill|دواء|حبوب/.test(value)) return 'medicine';
-  if (/еда|продукт|блюдо|калори|food|meal|طعام|سعرات/.test(value)) return 'food';
+  if (/анализ|кровь|lab result|تحليل|مخبر/.test(value)) return 'lab';
+  if (/таблет|лекарств|препарат|дозировк|medicine|pill|دواء|حبوب|علاج|مرهم|قطرة|مضاد|شراب/.test(value)) return 'medicine';
+  if (/еда|продукт|блюдо|калори|диета|похуд|вес|рост|food|meal|diet|weight|bmi|طعام|سعرات|أكل|وجبة|حمية|رجيم|وزن|تنحيف|نحف|سمنة|طول|كتلة/.test(value)) return 'food';
   return 'unclear';
 }
 
@@ -262,7 +262,7 @@ export async function doctorAnalyze(ctx: RequestContext): Promise<Response> {
     ],
     schema: doctorOutputSchema,
     shapeHint: DOCTOR_SHAPE,
-    maxTokens: 2800,
+    maxTokens: image ? 2800 : 1200,
   });
   await recordAiUsage(ctx.env.DB, ctx.auth.uid, true, model);
 

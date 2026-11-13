@@ -159,7 +159,10 @@
     "subtitle": "Photo of medicine, food or a lab test — I'll explain",
     "profileGate": "Complete your health profile first so the answer fits your situation.",
     "completeProfile": "Complete health profile",
-    "analyzing": "Reading and analysing the photo…",
+    "analyzing": "Analyzing medical inquiry…",
+    "analyzingImage": "Reading and analyzing medical photo…",
+    "analyzingText": "Analyzing medical inquiry…",
+    "discuss": "Consult Doctor",
     "emergency": "This may be an emergency",
     "emergencyBody": "Call 112 now. This app does not provide emergency care.",
     "call112": "Call 112",
@@ -182,12 +185,12 @@
     "suitability": "Fit for you",
     "openAccountant": "Open the accountant",
     "types": {
-      "medicine": "Medicine",
-      "food": "Food",
+      "medicine": "Medication Analysis",
+      "food": "Nutritional Assessment",
       "receipt": "Receipt",
       "bank": "Bank screenshot",
-      "lab": "Lab test",
-      "unclear": "Unclear"
+      "lab": "Lab Results",
+      "unclear": "General Health Assessment"
     },
     "disclaimer": "Information only — not a diagnosis or a prescription. See a doctor."
   },

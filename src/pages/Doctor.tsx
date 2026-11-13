@@ -72,21 +72,25 @@ export function DoctorPage() {
     if (!result) return;
     const isRu = i18n.language.startsWith('ru');
     const isEn = i18n.language.startsWith('en');
+    const typeLabel =
+      result.medicine?.name ||
+      t(`doctor.types.${result.type}`, isRu ? 'Консультация' : isEn ? 'Health Consultation' : 'استشارة وتقييم صحي');
     const seed = isRu
       ? [
-          `🩺 **Медицинская консультация:** ${result.type}`,
+          `🩺 **Медицинская консультация:** ${typeLabel}`,
           `• **Сводка анализа:** ${result.summary}`,
         ].join('\n\n')
       : isEn
         ? [
-            `🩺 **Health Consultation:** ${result.type}`,
+            `🩺 **Health Consultation:** ${typeLabel}`,
             `• **Clinical Summary:** ${result.summary}`,
           ].join('\n\n')
         : [
-            `🩺 **استشارة طبية وغذائية:** ${result.type}`,
-            `• **ملخص التقييم الأولي:** ${result.summary}`,
+            `🩺 **استشارة طبية وصحية:** ${typeLabel}`,
+            `• **ملخص التقييم:** ${result.summary}`,
           ].join('\n\n');
-    const chat = await createChat({ kind: 'doctor', title: result.medicine?.name ?? result.type, seedText: seed });
+    const chatTitle = result.medicine?.name || typeLabel;
+    const chat = await createChat({ kind: 'doctor', title: chatTitle, seedText: seed });
     if (chat) navigate(`/chats/${chat.id}`);
   };
 
@@ -209,7 +213,9 @@ export function DoctorPage() {
             icon={hasContent ? <CheckCircle2 className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
           >
             {busy
-              ? t('doctor.analyzing')
+              ? image
+                ? t('doctor.analyzingImage')
+                : t('doctor.analyzingText')
               : !profileReady
                 ? 'إكمال الملف الصحي لبدء الفحص'
                 : hasContent
@@ -259,10 +265,12 @@ export function DoctorPage() {
           <div className="flex items-center justify-between border-b border-line/60 pb-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-muted">نتيجة التقييم الصحي</p>
-              <h3 className="font-display text-lg sm:text-xl font-bold text-fg pt-0.5">{result.type}</h3>
+              <h3 className="font-display text-lg sm:text-xl font-bold text-fg pt-0.5">
+                {result.medicine?.name || t(`doctor.types.${result.type}`, 'استشارة وتقييم صحي')}
+              </h3>
             </div>
             <Button size="sm" variant="gold" onClick={() => void discuss()}>
-              {t('halal.discuss')}
+              {t('doctor.discuss')}
             </Button>
           </div>
           <p className="text-sm leading-relaxed text-fg whitespace-pre-wrap font-normal">{result.summary}</p>
