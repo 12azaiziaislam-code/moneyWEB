@@ -13,9 +13,9 @@ export interface PreparedImage {
   mime: string;
 }
 
-const MAX_DIM = 1280;
-const QUALITY = 0.8;
-export const MAX_UPLOAD_BYTES = 1_200_000;
+const MAX_DIM = 1000;
+const QUALITY = 0.74;
+export const MAX_UPLOAD_BYTES = 1_000_000;
 
 export async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', buffer);

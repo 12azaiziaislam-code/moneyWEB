@@ -107,9 +107,14 @@ export default {
           '100%': { opacity: '1', transform: 'scale(1) rotate(-3deg)' },
         },
         bloom: {
-          '0%': { opacity: '0', transform: 'scale(.6)' },
+          '0%': { transform: 'scale(.6)' },
           '55%': { opacity: '1', transform: 'scale(1.06)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        scanBeam: {
+          '0%': { top: '2%', opacity: '0.3' },
+          '50%': { top: '96%', opacity: '1' },
+          '100%': { top: '2%', opacity: '0.3' },
         },
       },
       animation: {
@@ -118,6 +123,7 @@ export default {
         rise: 'riseIn .32s var(--ease-out) both',
         stamp: 'stamp .55s var(--ease-out) both',
         bloom: 'bloom .6s var(--ease-spring) both',
+        scan: 'scanBeam 1.8s ease-in-out infinite',
       },
     },
   },

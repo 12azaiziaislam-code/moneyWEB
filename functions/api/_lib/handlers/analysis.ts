@@ -54,12 +54,12 @@ export async function halalScan(ctx: RequestContext): Promise<Response> {
   const image = await resolveImage(ctx, input);
   const hash = input.hash ?? (image ? await sha256Hex(new TextEncoder().encode(image.dataUrl)) : null);
 
-  // Verdict cache by (uid, image hash) — signed-in users only.
-  if (hash && !guest) {
+  // 1. Instant shared cache by image/text hash across all users and guests (~10ms)
+  if (hash) {
     const cached = await ctx.env.DB.prepare(
-      'SELECT id, verdict, confidence, product, payload_json, created_at FROM halal_scans WHERE uid = ? AND hash = ?',
+      'SELECT id, verdict, confidence, product, payload_json, created_at FROM halal_scans WHERE hash = ? ORDER BY created_at DESC LIMIT 1',
     )
-      .bind(ctx.auth.uid, hash)
+      .bind(hash)
       .first<{
         id: string;
         verdict: string;
@@ -124,7 +124,7 @@ export async function halalScan(ctx: RequestContext): Promise<Response> {
     messages,
     schema: halalOutputSchema,
     shapeHint: HALAL_SHAPE,
-    maxTokens: 2400,
+    maxTokens: 800,
   });
   await recordAiUsage(ctx.env.DB, ctx.auth.uid, true, model);
 
@@ -138,7 +138,7 @@ export async function halalScan(ctx: RequestContext): Promise<Response> {
     evidence: data.evidence ?? null,
   };
 
-  if (hash && !guest) {
+  if (hash) {
     await ctx.env.DB.prepare(
       `INSERT INTO halal_scans (id, uid, hash, verdict, confidence, product, payload_json, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
