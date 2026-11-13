@@ -6,7 +6,7 @@
 import { useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Camera, Phone, X, ShieldAlert, Activity } from 'lucide-react';
+import { Camera, Phone, X, ShieldAlert, Activity, Sparkles, CheckCircle2 } from 'lucide-react';
 import { bmi, isEmergencyText, isHealthProfileComplete } from '../../shared/health';
 import { PageHeader } from '../components/AppShell';
 import { Button, IconButton } from '../components/ui/Button';
@@ -30,6 +30,7 @@ export function DoctorPage() {
   usePageTheme('doctor');
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Persistent global doctor scan state across page transitions
   const {
@@ -43,9 +44,20 @@ export function DoctorPage() {
   } = useDoctorScan();
 
   const profileReady = useMemo(() => isHealthProfileComplete(health), [health]);
+  const hasContent = Boolean(image || text.trim().length >= 3);
   const emergency = Boolean(result?.emergency) || isEmergencyText(text);
 
   const analyze = async () => {
+    if (!profileReady) {
+      show('يرجى إكمال ملفك الصحي أولاً لمطابقة الدواء لحالتك وتفادي أي أخطار', 'warning');
+      navigate('/profile');
+      return;
+    }
+    if (!hasContent) {
+      show('يرجى كتابة اسم الدواء أو التقاط صورة لعلبته أولاً للبدء', 'info');
+      textareaRef.current?.focus();
+      return;
+    }
     const outcome = await runAnalysis(image, text, profileReady);
     if (outcome && outcome.redirect) {
       navigate(outcome.redirect);
@@ -176,6 +188,7 @@ export function DoctorPage() {
         {/* Textarea with Distinct Non-Duplicated Label */}
         <div className="space-y-1.5">
           <Textarea
+            ref={textareaRef}
             label="تفاصيل الاستفسار أو اسم الدواء والمكونات"
             placeholder="اكتب اسم الدواء، الأعراض، أو ألصق النشرة الطبية للتحقق منها..."
             value={text}
@@ -184,23 +197,40 @@ export function DoctorPage() {
           />
         </div>
 
-        {/* Clear Action Button with High Contrast */}
+        {/* Clear Action Button: Always Active, High Contrast & Intelligent Guidance */}
         <div className="pt-2">
           <Button
             fullWidth
             size="lg"
             variant="primary"
             loading={busy}
-            disabled={!profileReady || (!image && text.trim().length < 3)}
+            disabled={busy}
             onClick={() => void analyze()}
+            icon={hasContent ? <CheckCircle2 className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
           >
-            {busy ? t('doctor.analyzing') : 'بدء الفحص الصحي الآن'}
+            {busy
+              ? t('doctor.analyzing')
+              : !profileReady
+                ? 'إكمال الملف الصحي لبدء الفحص'
+                : hasContent
+                  ? 'بدء الفحص الصحي الفوري الآن'
+                  : 'بدء الفحص الصحي'}
           </Button>
+
+          {/* Contextual guidance indicator under the button */}
           {!profileReady ? (
             <p className="mt-2 text-center text-xs text-warn font-semibold">
-              يرجى إكمال الملف الصحي أعلاه لتفعيل زر الفحص
+              يرجى إكمال معلومات الطول والوزن والأدوية في ملفك الصحي أعلاه أولاً
             </p>
-          ) : null}
+          ) : !hasContent ? (
+            <p className="mt-2 text-center text-xs text-muted leading-relaxed">
+              التقط صورة لعلبة الدواء أو اكتب اسمه والأعراض أعلاه لبدء الفحص ومطابقته مع ملفك
+            </p>
+          ) : (
+            <p className="mt-2 text-center text-xs text-accent font-semibold">
+              جاهز للفحص ومطابقة الأعراض مع ملفك الطبي فوراً
+            </p>
+          )}
         </div>
 
         <input

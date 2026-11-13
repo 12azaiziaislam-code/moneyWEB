@@ -8,7 +8,7 @@ type Size = 'sm' | 'md' | 'lg';
 const base =
   'relative inline-flex select-none items-center justify-center gap-2.5 font-bold transition-all duration-fast ease-out ' +
   'active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ' +
-  'disabled:pointer-events-none disabled:bg-surface2 disabled:text-muted-soft disabled:border-border-subtle disabled:shadow-none cursor-pointer';
+  'disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none cursor-pointer';
 
 const sizes: Record<Size, string> = {
   sm: 'min-h-[38px] rounded-sm px-3 text-xs sm:text-sm',

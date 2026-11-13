@@ -1,6 +1,6 @@
 /** Inputs with floating labels, 44px targets, RTL-safe logical padding. */
 
-import { useId, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { forwardRef, useId, useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { cn } from './cn';
 
 const control =
@@ -57,7 +57,10 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   suffix?: ReactNode;
 }
 
-export function Input({ label, hint, error, suffix, className, id, value, onFocus, onBlur, ...rest }: InputProps) {
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  { label, hint, error, suffix, className, id, value, onFocus, onBlur, ...rest },
+  ref,
+) {
   const autoId = useId();
   const fieldId = id ?? autoId;
   const [focused, setFocused] = useState(false);
@@ -66,6 +69,7 @@ export function Input({ label, hint, error, suffix, className, id, value, onFocu
   return (
     <FieldShell id={fieldId} label={label} lifted={lifted} hint={hint} error={error} suffix={suffix}>
       <input
+        ref={ref}
         id={fieldId}
         value={value}
         {...rest}
@@ -81,7 +85,7 @@ export function Input({ label, hint, error, suffix, className, id, value, onFocu
       />
     </FieldShell>
   );
-}
+});
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
@@ -90,7 +94,10 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
   counter?: string;
 }
 
-export function Textarea({ label, hint, error, counter, className, id, value, onFocus, onBlur, ...rest }: TextareaProps) {
+export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
+  { label, hint, error, counter, className, id, value, onFocus, onBlur, ...rest },
+  ref,
+) {
   const autoId = useId();
   const fieldId = id ?? autoId;
   const [focused, setFocused] = useState(false);
@@ -99,6 +106,7 @@ export function Textarea({ label, hint, error, counter, className, id, value, on
   return (
     <FieldShell id={fieldId} label={label} lifted={lifted} hint={hint} error={error} counter={counter}>
       <textarea
+        ref={ref}
         id={fieldId}
         value={value}
         rows={3}
@@ -115,7 +123,7 @@ export function Textarea({ label, hint, error, counter, className, id, value, on
       />
     </FieldShell>
   );
-}
+});
 
 export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
