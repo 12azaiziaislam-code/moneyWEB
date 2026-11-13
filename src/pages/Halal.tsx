@@ -8,7 +8,7 @@
  * 5. High-precision laser-scan visualizer with real-time progressive steps.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -24,18 +24,16 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
-import type { HalalResult } from '../../shared/types';
 import { quickScreenText } from '../../shared/halalRules';
 import { PageHeader } from '../components/AppShell';
 import { VerdictCard } from '../components/VerdictCard';
 import { Button, IconButton } from '../components/ui/Button';
 import { Disclaimer, Badge } from '../components/ui/Feedback';
 import { Textarea } from '../components/ui/Field';
-import { ApiError, apiFetch } from '../lib/api';
-import { prepareImage, type PreparedImage } from '../lib/image';
-import { CacheKeys, idbGet, idbSet } from '../lib/idb';
+import { prepareImage } from '../lib/image';
 import { useAuth } from '../state/AuthContext';
 import { useToast } from '../state/ToastContext';
+import { useScan } from '../state/ScanContext';
 import { usePageTheme } from '../lib/theme';
 import { useChatMutations } from '../data/chats';
 import { haptic, HAPTIC } from '../lib/haptics';
@@ -60,148 +58,33 @@ export function HalalPage() {
   const cameraRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
-  const [image, setImage] = useState<PreparedImage | null>(null);
-  const [text, setText] = useState('');
-  const [typing, setTyping] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<HalalResult | null>(null);
-  const [lastCached, setLastCached] = useState<HalalResult | null>(null);
   const [discussing, setDiscussing] = useState(false);
 
-  // Progressive scan simulation states
-  const [activeStep, setActiveStep] = useState(0);
-  const [progress, setProgress] = useState(15);
-  const [elapsed, setElapsed] = useState(0);
+  // Global scan state & operations preserved across route changes
+  const {
+    image,
+    setImage,
+    text,
+    setText,
+    typing,
+    setTyping,
+    busy,
+    setBusy,
+    result,
+    setResult,
+    lastCached,
+    progress,
+    activeStep,
+    elapsed,
+    runScan,
+    reset,
+  } = useScan();
 
   // Instant local rule pre-screening for manual text
   const quickInsight = useMemo(() => {
     if (!text || text.trim().length < 3) return null;
     return quickScreenText(text);
   }, [text]);
-
-  useEffect(() => {
-    void idbGet<HalalResult>(CacheKeys.halalLast).then((cached) => {
-      if (cached) {
-        setLastCached(cached);
-      }
-    });
-  }, []);
-
-  // Timer and progressive step animation during active scan
-  useEffect(() => {
-    if (!busy) return;
-    setActiveStep(0);
-    setProgress(15);
-    setElapsed(0);
-
-    const start = Date.now();
-    const ticker = window.setInterval(() => {
-      const now = Date.now();
-      const sec = Math.round((now - start) / 100) / 10;
-      setElapsed(sec);
-
-      if (sec > 0.8 && sec <= 1.8) {
-        setActiveStep(1);
-        setProgress(45);
-      } else if (sec > 1.8 && sec <= 2.8) {
-        setActiveStep(2);
-        setProgress(75);
-      } else if (sec > 2.8) {
-        setActiveStep(3);
-        setProgress(92);
-      }
-    }, 100);
-
-    return () => window.clearInterval(ticker);
-  }, [busy]);
-
-  const runScan = async (targetImage: PreparedImage | null, targetText: string) => {
-    const cleanText = targetText.trim();
-    if (!targetImage && cleanText.length < 3) {
-      show(t('halal.empty'), 'warning');
-      return;
-    }
-
-    // 0. Smart Instant Fast-Path for Text (Works for both Guests and Users in 0ms)
-    if (!targetImage && quickInsight && quickInsight.matches.length > 0) {
-      const first = quickInsight.matches[0];
-      const localResult: HalalResult = {
-        id: 'fast_' + Date.now(),
-        product: cleanText.slice(0, 35),
-        verdict: quickInsight.verdict === 'haram' ? 'haram' : 'mashbooh',
-        confidence: 0.95,
-        ingredients: quickInsight.matches.map((m) => ({
-          name: m.name,
-          status: m.category,
-          note: m[('reason' + lang) as 'reasonAr' | 'reasonRu' | 'reasonEn'],
-        })),
-        concerns: quickInsight.matches.map((m) => m[('reason' + lang) as 'reasonAr' | 'reasonRu' | 'reasonEn']),
-        reason: first[('reason' + lang) as 'reasonAr' | 'reasonRu' | 'reasonEn'],
-        needed: quickInsight.verdict === 'mashbooh' ? ['التأكد من مصدر الجيلاتين/المستحلب من الشركة المصنعة'] : [],
-        evidence: quickInsight.verdict === 'haram' ? 'سورة البقرة: 173' : null,
-        createdAt: new Date().toISOString(),
-        cached: true,
-      };
-      setResult(localResult);
-      setLastCached(localResult);
-      void idbSet(CacheKeys.halalLast, localResult);
-      haptic(localResult.verdict === 'halal' ? HAPTIC.success : HAPTIC.danger);
-      show('تم فحص المكونات فورياً بالذكاء السريع المحلي (0ms)', 'info');
-      return;
-    }
-
-    if (isGuest) {
-      show(t('guest.aiRequiresAuth'), 'warning');
-      return;
-    }
-
-    // 1. Instant local device cache check (0ms response)
-    if (targetImage?.hash) {
-      const local = await idbGet<HalalResult>('halal.hash.' + targetImage.hash);
-      if (local) {
-        setResult(local);
-        setLastCached(local);
-        haptic(local.verdict === 'halal' ? HAPTIC.success : HAPTIC.danger);
-        return;
-      }
-    }
-
-    setBusy(true);
-    setResult(null);
-
-    try {
-      // 2. Direct one-hop payload (Bypasses redundant /api/uploads round-trip)
-      const body: Record<string, unknown> = {
-        text: cleanText || undefined,
-        hash: targetImage?.hash,
-        imageDataUrl: targetImage?.dataUrl,
-      };
-
-      const response = await apiFetch<{ result: HalalResult }>('/api/halal/scan', {
-        method: 'POST',
-        body,
-      });
-
-      // Complete progress smoothly
-      setProgress(100);
-      setActiveStep(3);
-      await new Promise((r) => setTimeout(r, 180));
-
-      setResult(response.result);
-      setLastCached(response.result);
-      void idbSet(CacheKeys.halalLast, response.result);
-      if (targetImage?.hash) {
-        void idbSet('halal.hash.' + targetImage.hash, response.result);
-      }
-
-      haptic(response.result.verdict === 'halal' ? HAPTIC.success : HAPTIC.danger);
-    } catch (cause) {
-      const key = cause instanceof ApiError ? `errors.${cause.code}` : 'errors.generic';
-      show(t(key) === key ? t('errors.generic') : t(key), 'danger');
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const pickFile = async (file?: File) => {
     if (!file) return;
@@ -210,19 +93,12 @@ export function HalalPage() {
       setImage(prepared);
       setTyping(false);
       haptic(HAPTIC.tap);
-      // Auto-trigger scan immediately upon capture/selection (Zero button friction)
-      void runScan(prepared, text);
+      // Auto-trigger scan immediately upon capture/selection
+      void runScan(prepared, text, lang);
     } catch (error) {
       const code = (error as Error).message;
       show(code === 'too_large' ? t('errors.payload_too_large') : t('errors.validation_failed'), 'danger');
     }
-  };
-
-  const reset = () => {
-    setImage(null);
-    setText('');
-    setResult(null);
-    setTyping(false);
   };
 
   const discuss = async () => {
@@ -286,7 +162,7 @@ export function HalalPage() {
                   size="lg"
                   variant="primary"
                   loading={busy}
-                  onClick={() => void runScan(image, text)}
+                  onClick={() => void runScan(image, text, lang)}
                   icon={<ScanLine className="h-5 w-5" />}
                 >
                   {t('halal.scan')}
@@ -388,7 +264,7 @@ export function HalalPage() {
                       variant="primary"
                       loading={busy}
                       disabled={text.trim().length < 3}
-                      onClick={() => void runScan(null, text)}
+                      onClick={() => void runScan(null, text, lang)}
                     >
                       {t('halal.scan')}
                     </Button>

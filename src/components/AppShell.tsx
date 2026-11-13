@@ -23,6 +23,7 @@ import { Button } from './ui/Button';
 import { IslamicPattern } from './ui/IslamicPattern';
 import { Logo } from './characters/Logo';
 import { useAuth } from '../state/AuthContext';
+import { useScan } from '../state/ScanContext';
 import { systemPrefersDark } from '../lib/theme';
 import type { LucideIcon } from 'lucide-react';
 
@@ -39,6 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const location = useLocation();
   const isChatDetail = location.pathname.startsWith('/chats/') && location.pathname !== '/chats';
   const { role, signIn, themeMode, setThemeMode } = useAuth();
+  const { busy: halalBusy } = useScan();
   const [online, setOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
   const [updateReady, setUpdateReady] = useState(false);
 
@@ -150,11 +152,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                   >
                     {({ isActive }) => (
                       <>
-                        <Icon
-                          className={cn('h-5 w-5 shrink-0 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
-                          strokeWidth={isActive ? 2.2 : 1.75}
-                          aria-hidden
-                        />
+                        <span className="relative flex shrink-0 items-center justify-center">
+                          <Icon
+                            className={cn('h-5 w-5 shrink-0 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
+                            strokeWidth={isActive ? 2.2 : 1.75}
+                            aria-hidden
+                          />
+                          {halalBusy && key === 'halal' && !isActive ? (
+                            <span className="absolute -top-1 -end-1 flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="truncate flex-1">{t(`nav.${key}`)}</span>
                         {isActive ? (
                           <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
@@ -243,11 +253,19 @@ export function AppShell({ children }: { children: ReactNode }) {
                 >
                   {({ isActive }) => (
                     <>
-                      <Icon
-                        className={cn('h-5 w-5 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
-                        strokeWidth={isActive ? 2.2 : 1.75}
-                        aria-hidden
-                      />
+                      <span className="relative flex shrink-0 items-center justify-center">
+                        <Icon
+                          className={cn('h-5 w-5 transition-transform', isActive ? 'text-accent scale-105' : 'text-muted')}
+                          strokeWidth={isActive ? 2.2 : 1.75}
+                          aria-hidden
+                        />
+                        {halalBusy && key === 'halal' && !isActive ? (
+                          <span className="absolute -top-1 -end-1 flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+                          </span>
+                        ) : null}
+                      </span>
                       <span className="truncate">{t(`nav.${key}`)}</span>
                     </>
                   )}

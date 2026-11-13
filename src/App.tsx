@@ -3,6 +3,8 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './state/AuthContext';
 import { ToastProvider } from './state/ToastContext';
+import { ScanProvider } from './state/ScanContext';
+import { DoctorScanProvider } from './state/DoctorScanContext';
 import { AppShell } from './components/AppShell';
 import { PageTransition } from './components/PageTransition';
 import { Splash } from './components/Splash';
@@ -20,20 +22,49 @@ import { NotFoundPage } from './pages/NotFound';
 
 function Authenticated() {
   const location = useLocation();
+  const path = location.pathname;
+  const isMainTab =
+    path === '/' ||
+    path === '/chats' ||
+    path === '/doctor' ||
+    path === '/accountant' ||
+    path === '/profile';
+
   return (
     <AppShell>
-      <PageTransition key={location.pathname}>
-        <Routes>
-          <Route path="/" element={<HalalPage />} />
-          <Route path="/chats" element={<ChatsPage />} />
-          <Route path="/chats/:id" element={<ChatDetailPage />} />
-          <Route path="/doctor" element={<DoctorPage />} />
-          <Route path="/accountant" element={<AccountantPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/legal/:doc" element={<LegalPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </PageTransition>
+      {/* 
+        KeepAlive Tab Shell:
+        The 5 primary tabs stay mounted in DOM across transitions.
+        This guarantees instant 0ms switching, preserves input states,
+        scroll positions, camera streams, and active scanning progress.
+      */}
+      <div className={path === '/' ? 'flex flex-1 flex-col' : 'hidden'} aria-hidden={path !== '/'}>
+        <HalalPage />
+      </div>
+      <div className={path === '/chats' ? 'flex flex-1 flex-col' : 'hidden'} aria-hidden={path !== '/chats'}>
+        <ChatsPage />
+      </div>
+      <div className={path === '/doctor' ? 'flex flex-1 flex-col' : 'hidden'} aria-hidden={path !== '/doctor'}>
+        <DoctorPage />
+      </div>
+      <div className={path === '/accountant' ? 'flex flex-1 flex-col' : 'hidden'} aria-hidden={path !== '/accountant'}>
+        <AccountantPage />
+      </div>
+      <div className={path === '/profile' ? 'flex flex-1 flex-col' : 'hidden'} aria-hidden={path !== '/profile'}>
+        <ProfilePage />
+      </div>
+
+      {/* Sub-routes (e.g. detailed chat threads, legal docs, 404) */}
+      {!isMainTab && (
+        <PageTransition key={path}>
+          <Routes>
+            <Route path="/chats/:id" element={<ChatDetailPage />} />
+            <Route path="/legal/:doc" element={<LegalPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </PageTransition>
+      )}
+
       <GuestUpgradeSheet />
     </AppShell>
   );
@@ -53,7 +84,11 @@ export default function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Gate />
+        <ScanProvider>
+          <DoctorScanProvider>
+            <Gate />
+          </DoctorScanProvider>
+        </ScanProvider>
       </ToastProvider>
     </AuthProvider>
   );

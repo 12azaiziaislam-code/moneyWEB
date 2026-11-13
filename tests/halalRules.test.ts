@@ -31,3 +31,4 @@ describe('halalRules: fast pre-screening engine', () => {
     expect(quickScreenText('شوفان، ماء، ملح طعام').verdict).toBe(null);
   });
 });
+

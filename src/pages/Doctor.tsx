@@ -3,24 +3,22 @@
  * Health Profile integration, Medication & Dietary Risk Analysis, Emergency 112 Protocol.
  */
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Camera, Phone, X, ShieldAlert, Activity } from 'lucide-react';
-import type { DoctorResult } from '../../shared/types';
 import { bmi, isEmergencyText, isHealthProfileComplete } from '../../shared/health';
 import { PageHeader } from '../components/AppShell';
 import { Button, IconButton } from '../components/ui/Button';
 import { Badge, Disclaimer, Skeleton } from '../components/ui/Feedback';
 import { Textarea } from '../components/ui/Field';
-import { ApiError, apiFetch } from '../lib/api';
-import { prepareImage, type PreparedImage } from '../lib/image';
+import { prepareImage } from '../lib/image';
 import { useAuth } from '../state/AuthContext';
 import { useFinance } from '../data/finance';
 import { useChatMutations } from '../data/chats';
+import { useDoctorScan } from '../state/DoctorScanContext';
 import { useToast } from '../state/ToastContext';
 import { usePageTheme } from '../lib/theme';
-import { haptic, HAPTIC } from '../lib/haptics';
 
 export function DoctorPage() {
   const { t } = useTranslation();
@@ -32,50 +30,25 @@ export function DoctorPage() {
   usePageTheme('doctor');
 
   const fileRef = useRef<HTMLInputElement>(null);
-  const [image, setImage] = useState<PreparedImage | null>(null);
-  const [text, setText] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<DoctorResult | null>(null);
+
+  // Persistent global doctor scan state across page transitions
+  const {
+    image,
+    setImage,
+    text,
+    setText,
+    busy,
+    result,
+    runAnalysis,
+  } = useDoctorScan();
 
   const profileReady = useMemo(() => isHealthProfileComplete(health), [health]);
   const emergency = Boolean(result?.emergency) || isEmergencyText(text);
 
   const analyze = async () => {
-    if (role === 'guest') {
-      show(t('guest.aiRequiresAuth'), 'warning');
-      return;
-    }
-    if (!profileReady) {
-      show(t('doctor.profileGate'), 'warning');
-      return;
-    }
-    if (!image && text.trim().length < 3) {
-      show(t('halal.empty'), 'warning');
-      return;
-    }
-    setBusy(true);
-    setResult(null);
-    try {
-      const body: Record<string, unknown> = { text: text.trim() || undefined, hash: image?.hash };
-      if (image) {
-        const uploaded = await apiFetch<{ id: string }>('/api/uploads', {
-          method: 'POST',
-          body: { dataUrl: image.dataUrl, hash: image.hash },
-        });
-        body.assetId = uploaded.id;
-      }
-      const response = await apiFetch<{ result: DoctorResult; redirect?: string }>('/api/doctor/analyze', {
-        method: 'POST',
-        body,
-      });
-      setResult(response.result);
-      if (response.redirect) navigate(response.redirect);
-      haptic(response.result.emergency ? HAPTIC.danger : HAPTIC.success);
-    } catch (cause) {
-      if (cause instanceof ApiError && cause.code === 'forbidden') show(t('doctor.profileGate'), 'warning');
-      else show(t('errors.ai_unavailable'), 'danger');
-    } finally {
-      setBusy(false);
+    const outcome = await runAnalysis(image, text, profileReady);
+    if (outcome && outcome.redirect) {
+      navigate(outcome.redirect);
     }
   };
 

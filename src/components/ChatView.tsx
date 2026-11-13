@@ -29,8 +29,28 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
   const { appendMessages } = useChatMutations();
   const isGuest = role === 'guest';
 
+  const draftKey = `baraka_draft_${chatId ?? kind}`;
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
-  const [text, setText] = useState('');
+  const [text, setText] = useState(() => {
+    try {
+      return sessionStorage.getItem(draftKey) ?? '';
+    } catch {
+      return '';
+    }
+  });
+
+  const updateText = (newVal: string) => {
+    setText(newVal);
+    try {
+      if (newVal) {
+        sessionStorage.setItem(draftKey, newVal);
+      } else {
+        sessionStorage.removeItem(draftKey);
+      }
+    } catch {
+      // ignore
+    }
+  };
   const [streaming, setStreaming] = useState(false);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -160,7 +180,7 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
         createdAt: new Date().toISOString(),
       },
     ]);
-    setText('');
+    updateText('');
     haptic(HAPTIC.tap);
     await runStream(prompt);
   };
@@ -255,7 +275,7 @@ export function ChatView({ kind, chatId, initialMessages, contextText, disclaime
             value={text}
             rows={1}
             maxLength={4000}
-            onChange={(event) => setText(event.target.value)}
+            onChange={(event) => updateText(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
                 event.preventDefault();
